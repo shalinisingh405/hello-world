@@ -1,0 +1,346 @@
+<?xml version='1.0' ?>
+<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'
+           xmlns='http://www.intel.com/soae/logSchema-2007a.xsd' targetNamespace='http://www.intel.com/soae/logSchema-2007a.xsd'>
+    <xs:include schemaLocation='logCommon.xsd'/>
+
+  <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <xs:complexType name='Alarm'>
+    <xs:annotation>
+      <xs:documentation>Alarm Notification</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name='eventId' type='EventNumber' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='moId' type='MoId' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='erAlarmSeverity' type='AlarmSeverity' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='timeval' type='ErTime' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='erAlarmType' type='ValueString' minOccurs='1' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Alarm Type</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name='erErrorType' type='ErrorType' minOccurs='1' maxOccurs='1'/>
+      <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>Enable developement to add additional nest xml if any special need arise</xs:documentation>
+        </xs:annotation>
+      </xs:any>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='CmdRespLog'>
+    <xs:annotation>
+      <xs:documentation>Threshold Crossing Alert</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name='erEventNumber' type='EventNumber' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='cmdOrig' minOccurs='1' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Command origin</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base='xs:string'>
+            <xs:enumeration value='null'/>
+            <xs:enumeration value='auto'/>
+            <xs:enumeration value='manual'/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name='cmdType' type='xs:string' minOccurs='1' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Command type</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name='cmdRespType' type='xs:string' minOccurs='1' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Command response type</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name='cmdMoids' minOccurs='1' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Command managed objects</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name='termProcess' minOccurs='1' maxOccurs='1'>
+              <xs:annotation>
+                <xs:documentation>terminal process running command</xs:documentation>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:all>
+                  <xs:element name='moId' type='MoId' minOccurs='1'/>
+                </xs:all>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name='moId' type='MoId' minOccurs='1'>
+              <xs:annotation>
+                <xs:documentation>????</xs:documentation>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='runningRecvTbl' type='xs:string' minOccurs='1' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Running receive table</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name='currTblType' type='xs:string' minOccurs='1' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Command table type</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name='currStepTblIndx' type='xs:unsignedShort' minOccurs='1' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Command step table index</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name='cmdRslt' type='xs:string' minOccurs='1' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Command result</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>Enable developement to add additional nest xml if any special need arise</xs:documentation>
+        </xs:annotation>
+      </xs:any>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='DetectEvent'>
+    <xs:annotation>
+      <xs:documentation>Recored that some unusual event has occurred</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name='erEventNumber' type='EventNumber' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='moId' type='MoId' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='erErrorType' type='ErrorType' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='errorDataStr' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='errorDataType' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='errorDataPtr' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='errorDataDump' type='xs:hexBinary' minOccurs='1' maxOccurs='1'/>
+      <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>Enable developement to add additional nest xml if any special need arise</xs:documentation>
+        </xs:annotation>
+      </xs:any>
+   </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='RecoveryErrBuf'>
+    <xs:annotation>
+      <xs:documentation>Recovery Error Buffer</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name='senderMo' minOccurs='1' maxOccurs='1'>
+        <xs:complexType>
+          <xs:sequence>
+                  <xs:element name='moId' type='MoId' minOccurs='1' maxOccurs='1'/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='reporterMo' minOccurs='1' maxOccurs='1'>
+        <xs:complexType>
+          <xs:sequence>
+                  <xs:element name='moId' type='MoId' minOccurs='1' maxOccurs='1'/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='reportMoInfo' minOccurs='1' maxOccurs='1'>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name='moRT' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+            <xs:element name='moState' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+            <xs:element name='inh' minOccurs='1' maxOccurs='1'>
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name='moErrRptState' type='xs:string' minOccurs='1' maxOccurs='1'/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name='cmdType' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+            <xs:element name='cmdOrig' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+            <xs:element name='moOwned' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='rptE' minOccurs='1' maxOccurs='1'>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name='erErrorType' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='rcvyIndex' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='rcvyInfo' minOccurs='1' maxOccurs='1'>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name='moId' type='MoId' minOccurs='1' maxOccurs='1'/>
+            <xs:element name='erErrorType' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='erEventNumber' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='rcvyAct' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='errTimes' minOccurs='1' maxOccurs='1'>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name='sentTime' type='xs:unsignedLong' minOccurs='1' maxOccurs='1'/>
+            <xs:element name='deltaTimes' type='xs:string' minOccurs='1' maxOccurs='1'/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='infoList' minOccurs='1' maxOccurs='1'>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name='cnt' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+            <xs:element name='moErrInfo' minOccurs='1' maxOccurs='1'>
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name='moId' type='MoId' minOccurs='1' maxOccurs='1'/>
+                  <xs:element name='moidErr' minOccurs='1' maxOccurs='1'>
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element name='errErrorType' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+                      </xs:sequence>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name='altMoidErr' minOccurs='1' maxOccurs='1'>
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element name='erErrorType' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+                      </xs:sequence>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name='dup' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+                  <xs:element name='inc' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+                  <xs:element name='ct' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+                  <xs:element name='thresh' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+                  <xs:element name='threshId' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+                  <xs:element name='rcvyAct' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+                  <xs:element name='moInfoDump' minOccurs='1' maxOccurs='1'>
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element name='moRT' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+                        <xs:element name='moState' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+                        <xs:element name='inh' minOccurs='1' maxOccurs='1'>
+                          <xs:complexType>
+                            <xs:sequence>
+                              <xs:element name='moErrRptState' type='xs:string' minOccurs='1' maxOccurs='1'/>
+                            </xs:sequence>
+                          </xs:complexType>
+                        </xs:element>
+                        <xs:element name='cmdType' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+                        <xs:element name='cmdOrig' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+                        <xs:element name='moOwned' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'/>
+                      </xs:sequence>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name='spareMo' type='xs:string' minOccurs='1' maxOccurs='1'/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>Enable developement to add additional nest xml if any special need arise</xs:documentation>
+        </xs:annotation>
+      </xs:any>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='Tca'>
+    <xs:annotation>
+      <xs:documentation>Threshold Crossing Alert</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name='erEventNumber' type='EventNumber' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='moId' type='MoId' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='erAlarmSeverity' type='AlarmSeverity' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='erTime' type='ErTime' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='erTcaType' type='ValueString' minOccurs='1' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Threhold Crossing Alert (TCA) Type</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>Enable developement to add additional nest xml if any special need arise</xs:documentation>
+        </xs:annotation>
+      </xs:any>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <xs:complexType name='ExceptionLogEntryHeader'>
+    <xs:complexContent>
+      <xs:extension base='LogEntryHeader'>
+        <xs:sequence>
+          <xs:annotation>
+            <xs:documentation>this sequence elements are restricted to exception log usage</xs:documentation>
+          </xs:annotation>
+          <!-- In addition to default log entry header, this log type should also include the following additional elements -->
+          <xs:element name='logType' type='LogType' minOccurs='1' maxOccurs='1'/>
+          <xs:element name='logLevel' type='LogLevel' minOccurs='1' maxOccurs='1'/>
+          <xs:element name='process' type='xs:string' minOccurs='1' maxOccurs='1'>
+            <xs:annotation>
+              <xs:documentation>Identifies process generating log entry or who the log entry is about</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name='pid' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'>
+            <xs:annotation>
+              <xs:documentation>Process (parent) identifier</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name='tid' type='xs:unsignedInt' minOccurs='0' maxOccurs='1'>
+            <xs:annotation>
+              <xs:documentation>Thread Identifier. If the pid == tid then this element should not be generate.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name='file' type='xs:string' minOccurs='1' maxOccurs='1'>
+            <xs:annotation>
+              <xs:documentation>File name of code generating the log entry</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name='line' type='xs:unsignedInt' minOccurs='1' maxOccurs='1'>
+            <xs:annotation>
+              <xs:documentation>Line number within file where log entry is generated</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name='transId' type='xs:unsignedLong' minOccurs='0' maxOccurs='1'>
+            <xs:annotation>
+              <xs:documentation>
+                Transaction Identifier.Uniquely identifies every transaction. If log entry is not associated with a specific transaction, 
+                e.g., management plane only entry, this element should not be generate.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <xs:complexType name='ExceptionLogEntry'>
+    <xs:annotation>
+      <xs:documentation>Exception Log entry</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name='header' type='ExceptionLogEntryHeader' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='body' minOccurs='1' maxOccurs='1'>
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name='alarm' type='Alarm' maxOccurs='1'/>
+            <xs:element name='cmdRespLog' type='CmdRespLog' maxOccurs='1'/>
+            <xs:element name='detectEvent' type='DetectEvent' maxOccurs='1'/>
+            <xs:element name='infoMsg' type='xs:string' maxOccurs='1'/>
+            <xs:element name='recoveryErrBuf' type='RecoveryErrBuf' maxOccurs='1'/>
+            <xs:element name='tca' type='Tca' maxOccurs='1'/>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

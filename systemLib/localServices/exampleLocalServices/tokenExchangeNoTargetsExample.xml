@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tkx:tokenExchangePolicy xmlns:tkx="http://www.intel.com/soae/localService/tokenExchange-2010a/" 
+                         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                         xsi:schemaLocation="http://www.intel.com/soae/localService/tokenExchange-2010a/ ../tokenExchange.xsd" 
+                         tokenToDataOnly="false">
+  <tkx:description/>
+  <tkx:domainInstance domainId="domain-id-1" domainInstanceDesc="auto-generated">
+    <tkx:tokenScheme>
+      <tkx:dataDomain type="creditCardNumber"/>
+      <tkx:tokenRules>
+        <tkx:preserveHeaderTrailer headerPreserve="5" trailerPreserve="6"/>
+      </tkx:tokenRules>
+      <tkx:tokenFormat>
+        <tkx:ccnFormat/>
+      </tkx:tokenFormat>
+      <tkx:multiuse enabled="false"/>
+    </tkx:tokenScheme>
+  </tkx:domainInstance>
+  <tkx:tokenTarget>
+    <tkx:xpathExpressions/>
+  </tkx:tokenTarget>
+  <tkx:tokenEncryption>
+    <tkx:rotatingEncryptionSettings>rotating1</tkx:rotatingEncryptionSettings>
+  </tkx:tokenEncryption>
+  <tkx:secureVault>
+    <tkx:jdbcSourceJndiName>jdbcSourceName</tkx:jdbcSourceJndiName>
+  </tkx:secureVault>
+</tkx:tokenExchangePolicy>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema 
+  xmlns="http://www.intel.com/soae/bpelHttpFault-2012a" 
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+  targetNamespace="http://www.intel.com/soae/bpelHttpFault-2012a" 
+  elementFormDefault="qualified" 
+  attributeFormDefault="unqualified">
+  
+  <xs:complexType name="HttpErrorResponseType">
+    <xs:sequence>
+	  <xs:element name="reason" type="xs:string"/>
+	</xs:sequence>
+    <xs:attribute name="code" type="xs:string"/>
+  </xs:complexType>
+  
+  <xs:complexType name="HttpRedirectionResponseType">
+    <xs:complexContent>
+	  <xs:extension base="HttpErrorResponseType">
+        <xs:sequence>
+	      <xs:element name="location" type="xs:string"/>
+		  <xs:element name="date" type="xs:string" minOccurs="0"/>
+	    </xs:sequence>
+	  </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <xs:complexType name="HttpClientErrorResponseType">
+    <xs:complexContent>
+	  <xs:extension base="HttpErrorResponseType">
+        <xs:sequence>
+	      <xs:element name="wwwAuthenticate" type="xs:string" minOccurs="0"/>
+		  <xs:element name="proxyAuthenticate" type="xs:string" minOccurs="0"/>
+		  <xs:element name="allow" type="xs:string" minOccurs="0"/>
+		  <xs:element name="contentRange" type="xs:string" minOccurs="0"/>
+	    </xs:sequence>
+	  </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <xs:complexType name="HttpInternalServerErrorResponseType">
+    <xs:complexContent>
+	  <xs:extension base="HttpErrorResponseType">
+        <xs:sequence>
+	      <xs:element name="retryAfter" type="xs:string" minOccurs="0"/>		  
+	    </xs:sequence>
+	  </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <xs:element name="HttpError" type="HttpErrorResponseType">
+    <xs:annotation>
+	  <xs:documentation>Generic handler for all HTTP errors</xs:documentation>
+	</xs:annotation>
+  </xs:element>
+  <xs:element name="HttpRedirection" type="HttpRedirectionResponseType" substitutionGroup="HttpError">
+    <xs:annotation>
+	  <xs:documentation>HTTP 3xx: Redirection responses</xs:documentation>
+	</xs:annotation>
+  </xs:element>
+  <xs:element name="HttpClientError" type="HttpClientErrorResponseType" substitutionGroup="HttpError">
+    <xs:annotation>
+	  <xs:documentation>HTTP 4xx: Client error responses</xs:documentation>
+	</xs:annotation>
+  </xs:element>
+  <xs:element name="HttpInternalServerError" type="HttpInternalServerErrorResponseType" substitutionGroup="HttpError">
+    <xs:annotation>
+	  <xs:documentation>HTTP 5xx: Internal server error responses</xs:documentation>
+	</xs:annotation>
+  </xs:element>
+
+</xs:schema>

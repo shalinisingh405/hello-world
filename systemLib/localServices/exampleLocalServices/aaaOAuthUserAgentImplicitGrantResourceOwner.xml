@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd"
+               oauthVersion="OAuth2-draft-22">
+  <identityProcessing>
+    <extractIdentity>
+      <nameFromOAuthAuthorizationRequest>
+        <flowType>ImplicitGrant</flowType>
+        <authorizationCodeRequestType>accessTokenRequest</authorizationCodeRequestType>
+        <roleBeingChecked>resource_owner</roleBeingChecked>
+        <scopeChecking>
+          <scopeRequired>false</scopeRequired>
+        </scopeChecking>
+        <resourceOwnerSource>name_only_from_workflow</resourceOwnerSource>
+      </nameFromOAuthAuthorizationRequest>
+    </extractIdentity>
+    <mapIdentity>
+      <createToken>
+        <createOAuthAccessTokenResponse>
+          <accessTokenType>Oauth</accessTokenType>
+          <expirationDelta type="unsignedInt">
+            <staticValue>157680000</staticValue>
+          </expirationDelta>
+          <scope type="string">
+            <useExtractedScope></useExtractedScope>
+          </scope>
+          <webHostClientResourceRedirectUri type="anyURI">
+            <staticValue>www.help.example.com</staticValue>
+          </webHostClientResourceRedirectUri>
+        </createOAuthAccessTokenResponse>
+        <jsonWebToken>
+          <tokenContent>
+            <issuer>www.fun.example.com authorization server</issuer>
+            <subject type="string">
+              <automaticallyGenerated>
+                <distinguishedNamePrefix></distinguishedNamePrefix>
+                <distinguishedNamePostfix></distinguishedNamePostfix>
+                <generatedInternalWorkflowParameter>Authentication-Subject-NameIdentifier-Use-Extracted</generatedInternalWorkflowParameter>
+              </automaticallyGenerated>
+            </subject>
+            <audience type="string">
+              <staticValue>www.fun.example.com authorization server</staticValue>
+            </audience>
+          </tokenContent>
+          <jsonSignInfo>
+            <jsonGenerateSignatureAlgorithm>hmacWithSha256</jsonGenerateSignatureAlgorithm>
+            <jsonSymmetricKey>
+              <security-config-package>www.fun.example.com-internal-shared-secret</security-config-package>
+            </jsonSymmetricKey>
+          </jsonSignInfo>
+        </jsonWebToken>
+      </createToken>
+    </mapIdentity>
+  </identityProcessing>
+</aaa:aaaPolicy>

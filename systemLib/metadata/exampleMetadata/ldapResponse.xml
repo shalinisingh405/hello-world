@@ -1,0 +1,23 @@
+  <message xmlns='http://www.intel.com/soae/protocolMetadata-2007a.xsd'
+           xmlns:addext="http://www.intel.com/soae/ws-addressing/addressing-2008a/" 
+           xmlns:wsa='http://schemas.xmlsoap.org/ws/2004/08/addressing'>
+    <!-- In this example, an Invocation agent is utilizing LDAP -->
+    <!-- This is indicated in the following protocol element -->
+    <protocol>ldap</protocol>
+    <wsa:EndpointReference>
+      <!-- the destination uri identifying ldap server that was utilize -->
+      <wsa:Address>ldap://smg.intel.com</wsa:Address>
+      <!-- A proprietrary extentsion that allows application to restrict the maximum latency of
+           this request is not to exceed 30 seconds. Note: this value can be provision via the
+           associate input server deployment config file and passed through the system with the 
+           request
+      -->
+      <addext:timeout>30</addext:timeout>
+    </wsa:EndpointReference>
+    <ldapMessage>
+      <destination>
+        <!-- application defined invocation agent name that process this request -->
+        <invocationAgentName>xxx</invocationAgentName>
+      </destination>
+    </ldapMessage>
+  </message>

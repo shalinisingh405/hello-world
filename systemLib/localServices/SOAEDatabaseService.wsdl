@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions 
+    targetNamespace="urn:soae.intel.com/sql"
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+    xmlns:apachesoap="http://xml.apache.org/xml-soap"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:sql="urn:soae.intel.com/sql">
+  
+    <wsdl:types>
+      <xsd:schema>
+        <xsd:import namespace="urn:soae.intel.com/sql" schemaLocation="SOAEDatabaseService.xsd"/>
+      </xsd:schema>
+    </wsdl:types>
+  
+  <plnk:partnerLinkType name="SQLPartnerLink">
+    <plnk:role name="SQLServer" portType="sql:SQLPortType" />
+  </plnk:partnerLinkType>
+  
+  <wsdl:message name="StatementMessage">
+    <wsdl:part name="body" element="sql:statement" />
+  </wsdl:message>
+  <wsdl:message name="ResultMessage">
+    <wsdl:part name="body" element="sql:result" />
+  </wsdl:message>
+  <wsdl:message name="StoredProcCallMessage">
+    <wsdl:part name="body" element="sql:storedProcCall" />
+  </wsdl:message>
+  <wsdl:message name="BatchUpdateMessage">
+    <wsdl:part name="body" element="sql:batchUpdate" />
+  </wsdl:message>
+  <wsdl:message name="BatchUpdateResultMessage">
+    <wsdl:part name="body" element="sql:batchUpdateResult" />
+  </wsdl:message>
+  <wsdl:message name="FaultMessage">
+    <wsdl:part name="body" element="sql:fault" />
+  </wsdl:message>
+  <wsdl:portType name="SQLPortType">
+    <wsdl:operation name="executeStatement">
+      <wsdl:input message="sql:StatementMessage" />
+      <wsdl:output message="sql:ResultMessage" />
+      <wsdl:fault name="SQLFault" message="sql:FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="callProcedure">
+      <wsdl:input message="sql:StoredProcCallMessage" />
+      <wsdl:output message="sql:ResultMessage" />
+      <wsdl:fault name="SQLFault" message="sql:FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="batchUpdate">
+      <wsdl:input message="sql:BatchUpdateMessage" />
+      <wsdl:output message="sql:BatchUpdateResultMessage" />
+      <wsdl:fault name="SQLFault" message="sql:FaultMessage" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="SQLBinding" type="sql:SQLPortType">
+    <soap:binding style="document"
+      transport="http://www.intel.com/soae/transport/jdbc" />
+    <wsdl:operation name="executeStatement">
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="SQLFault">
+        <soap:fault name="SQLFault" use="literal" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="callProcedure">
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="SQLFault">
+        <soap:fault name="SQLFault" use="literal" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="batchUpdate">
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="SQLFault">
+        <soap:fault name="SQLFault" use="literal" />
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  
+  <wsdl:service name="SQLService">
+    <wsdl:port name="SQLServicePort" binding="sql:SQLBinding">
+      <soap:address
+        location="soae-local://axis2?service=SOAEDatabaseService&amp;jdbc.dataSource=jdbc/sourceName" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

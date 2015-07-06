@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:tns="http://www.intel.com/soae/localService/xpathRoutingPolicyDefinition-2007a/" 
+           xmlns:wed="http://www.intel.com/soae/localService/wsaddressingEprDefinition-2007a/" 
+           xmlns:xed="http://www.intel.com/soae/localService/xpathExpressionDefinition-2007a/" 
+           targetNamespace="http://www.intel.com/soae/localService/xpathRoutingPolicyDefinition-2007a/">
+  <!--
+    <xs:import namespace="http://schemas.xmlsoap.org/ws/2004/08/addressing"/> 
+    The relative reference is because our firewall denials our validator the ability to access the official schema locations
+  -->
+  <xs:import namespace="http://www.intel.com/soae/localService/wsaddressingEprDefinition-2007a/" schemaLocation="../localServices/wsaddressEprDefinition.xsd"/>
+  <xs:import namespace="http://www.intel.com/soae/localService/xpathExpressionDefinition-2007a/" schemaLocation="../localServices/xpathExpressionDefinition.xsd"/>
+  <!-- ======================================================================================================= -->
+  <!--  WS-Addressing Endpoint Reference (EPR) Definition (WED) Schema                                         -->
+  <!--  This schema defines XML document that developer/administrator uses to resolve XPath expression defined -->
+  <!-- in XED routing document to a target endpoint reference (EPR)                                            -->
+  <!-- ======================================================================================================= -->
+  <xs:element name="XPathRoutingPolicyDefinition" type="tns:XPathRoutingPolicyDefinitionType"/>
+  <xs:complexType name="XPathRoutingPolicyDefinitionType">
+    <xs:annotation>
+      <xs:documentation>
+        Including both content of XED and WED
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element ref="wed:endpointReferences" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>
+            Under this element, it includes all the content from WED
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element ref="xed:xpathExpressions" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>
+            Under this element, it includes all the content from XED
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:NCName" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          name identify specific xpath routing policy
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="inputDataType" type="xs:QName" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          the optional qname of the input data. This is a hint for XPath
+          editor in Service Designer. This field is not supposed to be used
+          in other places. The data type is optional
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+</xs:schema>

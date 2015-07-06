@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:sql="urn:soae.intel.com/sql" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="urn:soae.intel.com/sql" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<!--<xs:import namespace="http://schemas.xmlsoap.org/wsdl/"/>-->
+	<xs:attributeGroup name="valueAttributes">
+		<xs:attribute name="name" type="xs:NMTOKEN" use="optional"/>
+	</xs:attributeGroup>
+	<xs:simpleType name="typeType">
+		<xs:restriction base="xs:QName">
+			<xs:enumeration value="xs:long"/>
+			<xs:enumeration value="xs:string"/>
+			<xs:enumeration value="xs:base64Binary"/>
+			<xs:enumeration value="xs:double"/>
+			<xs:enumeration value="xs:date"/>
+			<xs:enumeration value="xs:dateTime"/>
+			<xs:enumeration value="xs:time"/>
+			<xs:enumeration value="xs:anyType"/>
+			<xs:enumeration value="sql:struct"/>
+			<xs:enumeration value="sql:resultSet"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:group name="values">
+		<xs:annotation>
+			<xs:documentation>This is the group of value types that can be passed to or returned from SQL statements.</xs:documentation>
+		</xs:annotation>
+		<xs:choice>
+			<xs:element name="string" nillable="true">
+				<xs:annotation>
+					<xs:documentation>A string (variable or fixed length).</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attributeGroup ref="sql:valueAttributes"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="long" nillable="true">
+				<xs:annotation>
+					<xs:documentation>A long integer value</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:long">
+							<xs:attributeGroup ref="sql:valueAttributes"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="date" nillable="true">
+				<xs:annotation>
+					<xs:documentation>A date (without time component).</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:date">
+							<xs:attributeGroup ref="sql:valueAttributes"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="timestamp" nillable="true">
+				<xs:annotation>
+					<xs:documentation>A date and time value.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:dateTime">
+							<xs:attributeGroup ref="sql:valueAttributes"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="time" nillable="true">
+				<xs:annotation>
+					<xs:documentation>A time (without date component) value.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:time">
+							<xs:attributeGroup ref="sql:valueAttributes"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="double" nillable="true">
+				<xs:annotation>
+					<xs:documentation>A decimal value.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:double">
+							<xs:attributeGroup ref="sql:valueAttributes"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="boolean" nillable="true">
+				<xs:annotation>
+					<xs:documentation>A boolean value.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:boolean">
+							<xs:attributeGroup ref="sql:valueAttributes"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="binary" nillable="true">
+				<xs:annotation>
+					<xs:documentation>A string of binary bytes encoded using base64.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:base64Binary">
+							<xs:attributeGroup ref="sql:valueAttributes"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="xml" nillable="true">
+				<xs:annotation>
+					<xs:documentation>An XML value (i.e., java.sql.SQLXML).</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="xs:anyType">
+							<xs:attributeGroup ref="sql:valueAttributes"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element ref="sql:struct"/>
+		</xs:choice>
+	</xs:group>
+	<xs:element name="statement">
+		<xs:annotation>
+			<xs:documentation>This is a SQL statement and optionally associated substitution values.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="sql" type="xs:string">
+					<xs:annotation>
+						<xs:documentation>
+              The SQL statement string.  
+              Note that this should follow the Java JDBC conventions for format for SQL statements.  
+              This includes the use of "?" to specify substitution parameter values.  
+              These values are supplied from the ordered list of param values using java.sql.PreparedStatement.
+            </xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="params" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>The ordered list of parameter  values.  See java.sql.PreparedStatement</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:group ref="sql:values" maxOccurs="unbounded"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="maxRows" type="xs:int" use="optional">
+				<xs:annotation>
+					<xs:documentation>
+            The maximum number of rows to return from a result set.  
+            Note: it is recommended to set a reasonable value to prevent excessively large result sets from being returned to the workflow processor.
+          </xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="timeout" type="xs:int" use="optional"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="resultSet">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="row" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence minOccurs="0" maxOccurs="unbounded">
+							<xs:choice>
+								<xs:group ref="sql:values"/>
+								<xs:element ref="sql:resultSet"/>
+							</xs:choice>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="storedProcCall">
+		<xs:annotation>
+			<xs:documentation>
+        A call to a stored procedure.  Like other statements, it must follow the conventions described by JDBC java.sql.CallableStatement.
+      </xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="sql">
+					<xs:annotation>
+						<xs:documentation>The SQL statement.</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="param" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>
+              Parameters.  With Callable statements all parameters must be declared with a direction and a type.
+            </xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:group ref="sql:values" minOccurs="0"/>
+						</xs:sequence>
+						<xs:attribute name="direction" use="required">
+							<xs:annotation>
+								<xs:documentation>Defines the direction of the parameter.</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="IN"/>
+									<xs:enumeration value="OUT"/>
+									<xs:enumeration value="INOUT"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:attribute>
+						<xs:attribute name="type" use="required">
+							<xs:annotation>
+								<xs:documentation>The type of the parameter value.</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="sql:typeType"/>
+							</xs:simpleType>
+						</xs:attribute>
+						<xs:attribute name="sqlTypeName">
+							<xs:annotation>
+								<xs:documentation>Used to declare the type of OUT parameter registration for struct types.  In this case there is no parameter value elements from which to obtain the type information.</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:NMTOKEN">
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:attribute>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="maxRows" type="xs:int" use="optional">
+				<xs:annotation>
+					<xs:documentation>
+            The maximum number of rows to return from a result set.  
+            Note: it is recommended to set a reasonable value to prevent excessively large result sets from being returned to the workflow processor.
+          </xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="timeout" type="xs:int" use="optional"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="result">
+		<xs:annotation>
+			<xs:documentation>The results of executing a SQL statement or stored procedure call.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="sql:resultSet"/>
+				<xs:element name="updateCount" type="xs:long"/>
+				<xs:group ref="sql:values"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="batchUpdate">
+		<xs:annotation>
+			<xs:documentation>This is a set of data manipulation instructions to be applied (in order) to the database.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:annotation>
+					<xs:documentation>
+            This is an ordered set of data manilulation statements that are to be generated.  
+            The updates are applied to the database in the order specified here.  
+            Therefore, one should take care to ensure that these elements are in an order that will not result in foreign key violations etc.
+          </xs:documentation>
+				</xs:annotation>
+				<xs:element name="table" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="row" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:choice>
+											<xs:element name="action">
+												<xs:simpleType>
+													<xs:restriction base="xs:string">
+														<xs:enumeration value="INSERT"/>
+														<xs:enumeration value="UPDATE"/>
+														<xs:enumeration value="DELETE"/>
+													</xs:restriction>
+												</xs:simpleType>
+											</xs:element>
+											<xs:element name="actionScript">
+												<xs:complexType>
+													<xs:attribute name="function" type="xs:NMTOKEN" use="required"/>
+												</xs:complexType>
+											</xs:element>
+										</xs:choice>
+										<xs:element name="col" maxOccurs="unbounded">
+											<xs:complexType>
+												<xs:choice minOccurs="0">
+													<xs:element name="expression"/>
+													<xs:element name="script">
+														<xs:complexType>
+															<xs:sequence minOccurs="0" maxOccurs="unbounded">
+																<xs:group ref="sql:values"/>
+															</xs:sequence>
+															<xs:attribute name="function" type="xs:NMTOKEN" use="required">
+																<xs:annotation>
+																	<xs:documentation>The name of the JavaScript function to execute to resolve this column value.</xs:documentation>
+																</xs:annotation>
+															</xs:attribute>
+														</xs:complexType>
+													</xs:element>
+													<xs:group ref="sql:values"/>
+												</xs:choice>
+												<xs:attribute name="name" type="xs:NMTOKEN" use="required"/>
+												<xs:attribute name="update" type="xs:boolean" default="true"/>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+						<xs:attribute name="schema" type="xs:NMTOKEN">
+							<xs:annotation>
+								<xs:documentation>The database schema in which this table resides.</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+						<xs:attribute name="name" type="xs:NMTOKEN" use="required">
+							<xs:annotation>
+								<xs:documentation>The name of the table relative to the schema.</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="scriptLocation" type="xs:anyURI">
+				<xs:annotation>
+					<xs:documentation>
+            This is the location of scripts used to inject business rules into various factors including: 
+              what action to perform with a given row, how to resolve a computed column value etc.  
+            This is required if script functions are specified in other parts of the request.
+          </xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="fault">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">SQL statement execution or stored procedure invocation failure</xs:documentation>
+          </xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="message" type="xs:string"/>
+				<xs:element name="stackTrace" type="xs:string" minOccurs="0"/>
+			</xs:sequence>
+			<xs:attribute name="sqlState" type="xs:string"/>
+			<xs:attribute name="vendorCode" type="xs:int"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="batchUpdateResult">
+		<xs:annotation>
+			<xs:documentation>
+        This is the return value from the service.  It returns the number of rows affected by the call to the service.
+      </xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="count" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:simpleContent>
+							<xs:extension base="xs:int">
+								<xs:attribute name="table" use="required"/>
+							</xs:extension>
+						</xs:simpleContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="struct">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:group ref="sql:values" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attributeGroup ref="sql:valueAttributes"/>
+			<xs:attribute name="sqlTypeName" type="xs:NMTOKEN"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

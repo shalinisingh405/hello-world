@@ -1,0 +1,40 @@
+<message xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd">
+  <protocol>ibmmq</protocol>
+  <wsa:EndpointReference xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing">
+    <wsa:Address>ibmmq://INPUTQ</wsa:Address>
+  </wsa:EndpointReference>
+  <ibmmq>
+    <source>
+      <inputServerName>ibmmqISTwoWay-Process-Receive-is1</inputServerName>
+      <host>10.230.34.123</host>
+      <port>1414</port>
+      <channel>SYSTEM.DEF.SVRCONN</channel>
+      <queueManager>JMSQM</queueManager>
+      <queue>INPUTQ</queue>
+    </source>
+    <transport>
+      <mqmd>
+        <backoutCount>0</backoutCount>
+        <characterSet>819</characterSet>
+        <encoding>273</encoding>
+        <expiry>-1</expiry>
+        <feedback>0</feedback>
+        <format>MQFMT_STRING</format>
+        <messageFlags>0</messageFlags>
+        <messageId>QU1RIEpNU1FNICAgICAgIKqskE0Cidgg</messageId>
+        <messageSequenceNumber>1</messageSequenceNumber>
+        <messageType>8</messageType>
+        <originalLength>-1</originalLength>
+        <offset>0</offset>
+        <persistence>MQPER_PERSISTENCE_AS_Q_DEF</persistence>
+        <putApplicationName>WebSphere MQ Client for Java</putApplicationName>
+        <putDateTime>2011-04-08T19:34:22.99Z</putDateTime>
+        <replyToQueueManagerName>JMSQM</replyToQueueManagerName>
+        <report>0</report>
+        <userId>mqm</userId>
+      </mqmd>
+      <properties/>
+    </transport>
+  </ibmmq>
+</message>
+

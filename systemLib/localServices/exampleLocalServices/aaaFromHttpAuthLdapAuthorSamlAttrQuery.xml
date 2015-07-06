@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <usernameFromHttpBasicAuthenticationHeader/>
+    </extractIdentity>
+    <authenticateIdentity>
+      <ldapAuthentication>
+        <distinguishedNamePrefix>uid=</distinguishedNamePrefix>
+        <distinguishedNamePostfix>,org=xyz</distinguishedNamePostfix>
+      </ldapAuthentication>
+    </authenticateIdentity>
+  </identityProcessing>
+  <resourceProcessing>
+    <extractResource>
+      <requestUriFromHttpOperation></requestUriFromHttpOperation>
+    </extractResource>
+    <authorizeResource>
+      <samlAttributeQuery>
+        <attributeQueryRequest>
+          <v2dot0>
+            <NameID type="string">
+              <automaticallyGenerated>
+                <distinguishedNamePrefix>uid=</distinguishedNamePrefix>
+                <distinguishedNamePostfix>,OU=SOAE,O=Intel,ST=Illinois,C=US</distinguishedNamePostfix>
+                <generatedInternalWorkflowParameter>Authentication-Subject-NameIdentifier-Use-Extracted</generatedInternalWorkflowParameter>
+              </automaticallyGenerated>
+            </NameID>
+            <Attribute>
+              <Name-attribute type="string">
+                <staticValue>some-name1</staticValue>
+              </Name-attribute>
+            </Attribute>
+            <Attribute>
+              <Name-attribute type="string">
+                <inputFromWorkflow>prompt-attribute-name</inputFromWorkflow>
+              </Name-attribute>
+              <AttributeValue type="anyType">
+                <inputFromWorkflow>prompt-attribute-value</inputFromWorkflow>
+              </AttributeValue>
+            </Attribute>
+          </v2dot0>
+          <signatureInfo>
+            <signatureGenerationMethod>rsaWithSha1</signatureGenerationMethod>
+            <digestGenerationMethod>sha1</digestGenerationMethod>
+            <canonicalGenerationMethod>C14N_exclusive</canonicalGenerationMethod>
+            <keyPair>
+              <security-config-package>demo-public-private-key-pair</security-config-package>
+            </keyPair>
+          </signatureInfo>
+        </attributeQueryRequest>
+        <verifyAttributeQueryResponseAssertion></verifyAttributeQueryResponseAssertion>
+        <checkAttributes></checkAttributes>
+      </samlAttributeQuery>
+    </authorizeResource>
+  </resourceProcessing>
+</aaa:aaaPolicy>

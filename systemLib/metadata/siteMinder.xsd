@@ -1,0 +1,38 @@
+  <xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' blockDefault='#all' elementFormDefault="qualified" attributeFormDefault="unqualified"
+             xmlns:wsa='http://schemas.xmlsoap.org/ws/2004/08/addressing'  
+             xmlns='http://www.intel.com/soae/protocolMetadata-2007a.xsd' targetNamespace='http://www.intel.com/soae/protocolMetadata-2007a.xsd'>
+             
+    <xs:import namespace='http://schemas.xmlsoap.org/ws/2004/08/addressing' schemaLocation='../importedSchemas/wsa-2004-08.xsd'/>
+    <xs:include schemaLocation='metadataCommon.xsd'/>
+
+    <!-- =============================================================================== -->
+    <!--  message element: invocation agent                                              -->
+    <!--  output servers types: SITEMINDER                                                     -->
+    <!-- =============================================================================== -->
+
+    <!--  SITEMINDER protocol header: root element  -->
+    <xs:element name='siteMinderMessage'>
+      <xs:complexType>
+        <xs:sequence>
+          <xs:element name='destination' type='SiteMinderDestination'/>
+          <xs:element name='transport' type='SiteMinderTransport' minOccurs='0' maxOccurs='1'/>  <!-- specific message related data -->
+        </xs:sequence>
+      </xs:complexType>
+    </xs:element>
+
+    <!--  destination element  -->
+    <xs:complexType name='SiteMinderDestination'>
+      <xs:sequence maxOccurs='1'>
+        <xs:element name='invocationAgentName' type='NonEmptyString'/>
+      </xs:sequence>
+    </xs:complexType>
+
+    <!-- transport element  -->
+    <xs:complexType name='SiteMinderTransport'>
+      <xs:sequence>
+        <!-- reserved for future usage -->
+      </xs:sequence>
+    </xs:complexType>
+
+  </xs:schema>
+

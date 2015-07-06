@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+                  xmlns:soae="http://www.intel.com/soae/wsdl/wsdl11-2007a/"
+                  xmlns:tns="http://www.intel.com/soae/localService/kerberosKDC-2009a/"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:xsd1="http://www.intel.com/soae/localService/kerberosKDC-2009a/"
+                  name="invokeKerberosKDC"
+                  targetNamespace="http://www.intel.com/soae/localService/kerberosKDC-2009a/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+  <plnk:partnerLinkType name="KerberosKDCServicePartnerLinkType">
+    <plnk:role name="KerberosKDCServiceProvider" portType="tns:KerberosKDCPortType"/>
+  </plnk:partnerLinkType>
+  <wsdl:types>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                targetNamespace="http://www.intel.com/soae/localService/kerberosKDC-2009a/schema">
+      <xsd:import namespace="http://www.intel.com/soae/localService/kerberosKDC-2009a/" 
+                  schemaLocation="kerberosKDC.xsd"/>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="KerberosKDCRequest">
+    <wsdl:part element="xsd1:kerberosKDCRequest" name="body"/>
+  </wsdl:message>
+  <wsdl:message name="KerberosKDCResponse">
+    <wsdl:part element="xsd1:kerberosKDCResponse" name="body"/>
+  </wsdl:message>
+
+  <wsdl:portType name="KerberosKDCPortType">
+    <wsdl:operation name="kerberosKDCOperation">
+      <wsdl:input message="tns:KerberosKDCRequest"/>
+      <wsdl:output message="tns:KerberosKDCResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  
+  <wsdl:binding name="KerberosKDCBinding" type="tns:KerberosKDCPortType">
+    <soae:binding transport="http://www.intel.com/soae/transport/kerberosKDC"/>
+    <wsdl:operation name="kerberosKDCOperation">
+      <wsdl:input>
+        <soae:content part="body" type="text/xml"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soae:content part="body" type="text/xml"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  
+  <wsdl:service name="KerberosKDCService">
+    <wsdl:port binding="tns:KerberosKDCBinding" name="KerberosKDCPort">
+      <soae:address location="kerberoskdc://soae_kerberoskdc?realm=SOAE.REALM"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

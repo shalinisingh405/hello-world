@@ -1,0 +1,2405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   
+Overview of Run-time Behavior
+=============================
+
+The processing of a qos request goes through the following steps:
+
+  a. The workflow editor computes the soae-xf:qos extension 
+     function arguments and calls the extension function:
+
+         string status = soae-xf:qos("qos-policy",
+                                     $metadata,
+                                     name-1, value-1,
+                                     name-2, value-2,
+                                     ...) 
+
+  b. The policy file (the first argument) is located and loaded 
+     "on demand".  In other words, when the qos activity is first
+     executed in the workflow.
+
+     Previous behavior:
+
+       The policy /name/ was specified in the call to the qos activity.
+       At run-time this policy name was used to search for a match in 
+       a configuration file belonging to the app. When a match was found
+       the associated url was used to fetch the policy definition.
+   
+       This required that the names of all qos policies be enumerated at
+       run-time.
+  
+     Enumerating the names of all the policies was a limitation
+     for some applications which needed to add new policies
+     at run-time without changing the application.
+
+     Current behavior:
+
+       The "policy name" argument in the call to the qos activity
+       is either a true policy name or a rl used to locate the
+       policy definition.
+
+       First, the application configuration file is searched for
+       a matching policy name.  If one is found then the associated
+       url is used to fetch the policy definition.
+
+       If no match is found, then the "policy name" is interpreted
+       as a url and used to fetch a policy definition.  If one is
+       found then it is used.
+
+       If the fetch fails, then a workflow fault is thrown because
+       the policy definition could not be found. 
+
+       Some care must be exercised to make sure that the
+       "policy name" used to fetch the policy definition is not
+       under the control of an untrusted source, such as a client.
+
+  c. If not previously compiled, the qos policy is compiled.
+
+     Normally this takes place during the first use of the
+     policy ("on demand") and is hidden from the workflow.
+
+         string status = soae-xf:qos("qos-policy",
+                                     $metadata,
+                                     name-1, value-1,
+                                     name-2, value-2,
+                                     ...) 
+
+     The first argument specifies the qos policy name or the url
+     of the policy definition.  This is discussed in (b).
+
+     All other arguments (metadata node and name/value pairs) are 
+     used to determine the Service Level and to specify counters which
+     track message activity (e.g. messages/sec, bytes/sec, latency, etc.)
+     according to the qos policy.
+
+     The metadata node is used to find http headers and http query
+     parameters used in expressions based on rest service information.
+     The metadata node should point to an <md:message> element.
+
+     If the value part of a name/value pair is a boolean, then it must
+     have the value false().  This is allowed as a way to indicate that
+     the value is not defined.  It is as though the name/value pair were
+     omitted from the argument list.
+
+     If the value part of a name/value pair is a node-set with zero nodes
+     this indicates that the name/value is not defined. It is as though
+     the name/value pair were omitted from the argument list.
+
+     The name "aaaLdapAuthorizationGroup" is special because an aaa
+     identity may be a member of several groups.  If the value is a string
+     then it is handled like other name/value pairs.  However, if it is 
+     a node or node-set in a specific format (describd later) than the
+     document is traversed to create a list of group names.  A test against
+     a list of group names is true if any member of the list satisfies the 
+     condition.  For more details see below.
+
+     Except for these three special cases, the value part of a name/value pair
+     is always converted to a string before processing.  This applies to
+     extension function arguments which are numbers, strings, or
+     (non-empty) node-sets. If a later use in the policy requires a numeric
+     value (for instance, there is a numeric range), the string is converted 
+     to a number using the normal xpath conversion rules. 
+
+     For the names in the name/value list, there are two kinds of names:
+
+        Pre-defined (built-in) names
+
+          For example, aaaIdentity, xpathUser, restUrl, soapAction, etc.
+          all of which are listed later in this description - see item (e)
+          below.
+
+          These have a special significance in maintaining tracking
+          records and counters.
+
+        User-defined "variables"
+
+          These are used in "variable classification" and "variable
+          expressions" to determine whether a service level should be
+          applied to this message. 
+
+          An example of a user-defined variable is "po-price".  The
+          workflow can compute the po-price using xpath and pass it
+          to the qos extension function.  To use it, a service level
+          might define a variable classification rule (in pseudo-code):
+ 
+              po-price > 10,000 and payment-status = ok
+
+          This classification expression actually has two user-defined
+          variables.
+
+          User-defined variable names are in a separate "symbol space"
+          from qos variables.  For instance, a user-defined variable
+          named "aaaIdentity" has nothing to do with the aaaIdentity
+          defined by an aaa policy in the workflow editor.
+
+  d. The qos Service Level definition contains User expressions, Resource
+     expressions, and Variable classification expressions. 
+
+     There may be multiple user tests and resource tests for a Service
+     Level classification expression.  The rules for combining multiple
+     tests is summarized by the following pseudo-code:
+
+        User-test = user-1-test OR user-2-test OR user-3-test  ...
+
+        Resource-test = resource-1-test OR resource-2-test OR resource-3-test ...
+
+        Variable-test = there is only one variable test, but it may be complex
+
+        Service Level test = User-test AND Resource-test AND variable-test
+
+     If more than one Service Level is matched then the one appearing first
+     in the qos policy is chosen.
+
+     When a value used in a variable classification expression is undefined
+     then the service level containing that variable classification expression
+     will not be matched.  A name/value pair is considered to be "undefined"
+     when the value passed to the extension function is the xpath value false()
+     or contains a node-set with zero nodes.
+
+  e. Based on the name/value pairs, appropriate counters ("tracking records")
+     are updated (within this app):
+
+       1. Counters aggregated across this application regardless of whether
+          there is a qos policy defined (or not).
+
+          "How many messages/sec for this app ?"
+
+       2. Counters for messages with the same Service Level of a qos policy.
+          "How many messages/sec for messages from user Smith for this
+           Service Level ?"
+
+       3. Counters indexed by User information within this qos policy.
+          "How many messages/sec for messages from domain acme.com ?"
+
+       4. Counters indexed by Resource information within this qos policy.
+          "How many messages/sec for messages to uri /stock-quote with operation buy ?"
+
+     This applies only to name/value pairs that have names that are recognized
+     as special.  Variable names from Variable classification rules are not used
+     in rules or tracking record expressions.
+
+     The following names may be used in tracking records:
+
+          User Related Names
+          ==================
+          aaaIdentity
+          aaaLdapAuthorizationGroup
+          ipAddress
+          ipHostName
+          xpathUser
+
+          Resource Related Names
+          ======================
+
+          aaaResource +/- aaaAction
+            (aaaAction is not supported as of June 2011)
+
+          service +/- port +/- operation
+
+            The service name is represented with "Clark" qualified
+            name syntax:
+       
+                {the-wsdl-namespace}the-service-name
+            
+            In the future we may alllow alternate forms.
+
+          soapAction
+
+          backendServicesInvocationUrl
+
+          restUrl +/- restMethod
+
+          xpathResource
+         
+     There is only one tracking record (bucket) associated with an app. This is
+     not like the service-level, user, or resource counters which may have a 
+     separate tracking record  for each distinct user value or resource value.
+
+     There are no tracking records associated with the Variable names or Variable 
+     classification expressions.
+
+  f. A Service Level may contain a number of qos Rules.  
+
+     A qos Rule may refer to an (optional) Schedule.  The Schedule
+     tells which days of the week and which time of the day the Rule is
+     active (should be used).  For instance, a Rule may be enabled only on
+     weekdays from 0900 to 1700 hours.  If there is no Schedule then the
+     rule is active all the time.
+
+     A Condition contains a series of tests. For a Condition to be true 
+     all its tests must be true.  A typical Condition with two tests is
+     (in pseudo-code)
+
+         messages-per-sec > 100 AND latency > 10 msec
+
+     Most tests are based on statistics for sucessful messages.  There are
+     a number of reasons for this, but to give one example, a single 
+     <invoke> which has a time-out would pollute the data used to measure
+     latency. 
+
+     However, there are three statistics which do not follow this rule:
+
+        rawMessageRate
+
+           The number of messages per second received by the application
+           (whether successful or not).
+
+        rawRequestDataRate
+
+           The number of bytes per second in messages received by the 
+           application (whether successful or not).
+
+        failedMessageRate
+
+           The number of failed messages (per second).
+
+     For rawMessageDataRate and rawRequestDataRate, the counters
+     are updated "eagerly" rather than waiting until processing of the
+     message is complete (like it does for other measured values).
+
+     When the scope is "aggregateAcrossAllPolicies", the count is
+     updated /before/ workflow processing begins.  For other scopes the
+     count is updated as soon as the service-level is known - even before
+     message processing is complete.
+
+     All the conditions of all the rules of the service level are evaluated.
+     It is possible that more than one condition may be true. 
+
+     The actions (and their rules) can be divided into two kinds: those with
+     alert actions and those with non-alert actions.
+     
+     At most one alert action is performed and at most one non-alert action 
+     is performed.
+
+     For the set of rules whose condition is true:
+
+        For rules with alert actions:
+
+           If there is more than one alert action, the rule which appears
+           first in the list has its alert action executed. 
+
+           When there are multiple alert Actions that are triggered,
+           only the first such action during an interval is reported.
+           After that report there is a "quiet period" which inhibits 
+           subsequent alert messages.
+
+           If the number of active alerts drops to zero the alert report
+           is /not/ cancelled.  It is only removed when the alert expires
+           after about an hour when the alert is cancelled by the OAM
+           system.
+
+        For rules with non-alert actions:
+
+           The rule with the most severe action has its action executed.
+
+           If there is more than one rule with an action at that level
+           of severity then the rule which appears first in the list
+           has its action performed.
+  
+           The severity of actions (from highest to lowest) is:
+
+              reject > rate-limit > defer > throw workflow exception
+
+           Alerts have no "severity" and can be executed in combination
+           with a non-alert action.
+
+  g. The possible Actions of the qos Rule are:
+
+       - Process the message in the normal fashion.
+         Execution contines with the activity following the qos action.
+
+       - Reject the message.
+         A qosRejectAction workflow fault is thrown.
+
+       - Let the workflow handle the action.
+         A qosUserAction workflow fault is thrown.
+
+       - Rate limit the workflow by accepting messages until the
+         traffic (measured by a counter) exceeds some value and then
+         rejecting subsequent messages.
+
+         This is normally used only with the "ruleEffectiveUntilThreshold"
+         option which can terminate the rate limit. 
+
+         If "ruleEffectiveUntilThreshold" is not specified, then the rate
+         limit remains in effect indefinitely (until the policy is reloaded
+         or the app is restarted).
+   
+       - Defer processing by putting the message on an appropriate qeue and 
+         executing a special form of <wait>.  The <wait> delays execution
+         until the system is less busy.
+
+           When traffic has subsided, messages are pulled from the queue
+           according to their priority and resumed.  Execution resumes 
+           with the instruction following the <wait> activity.  When 
+           messages are resumed they are are not subjected to any additional
+           qos tests: it is as though an ordinary <wait> activity had 
+           completed.  
+
+  h.  If the selected action has the "ruleEffectiveUntilThreshold" option
+      this alters the behavior.  As an example, consider the following
+      rule (paraphrased):
+
+          if raw-messages-per-sec > 100 AND latency > 10 msec then
+            reject messages until threshold of 80%.
+
+      Assume the condition is true and the action is executed.  First, 
+      the current message will be rejected.  Second, the rule enters a new
+      state in which values are reduced to 80% (the threshold value) of
+      their original value (in this case: 80 message-per-second and 
+      latency of 8 msec).  When new messages are received, if
+      the condition is true (using the reduced numeric values) then
+      the action ("reject") is executed.
+
+      These reduced values continue to be used until the values fall
+      below the threshold.  At that point the state is reset and the
+      original values are used for messages.
+
+      A special case is when the action is rate limit and no 
+      "ruleEffectiveUntilThreshold" is specified.  In this case
+      the rate limit remain in effect indefinitely.
+
+      An instability can be created when using messagRate rather than
+      rawMessageRate.  This is because messageRate measure /successful/
+      messages and therefore measures "post-shaped" traffic load.  Generally,
+      one wants to use "pre-shaped" message loaded to measure traffic.
+
+  i.  If the policy option "logDetails" is true then information about
+      the qos processing is passed to the workflow processor and is
+      written to the transaction log.  This information includes 
+      the policy name, the service level name, name/value pairs passed 
+      to the qos routine and the values used in evaluating the 
+      service level conditions.
+
+      When "logDetails" is true, the workflow engine writes additional
+      details about message processing (e.g. request size,response size,
+      and <invoke> operation details) are written to the transaction log.
+
+Dependence on Protocol Type
+===========================
+
+For this discusssion, http and https are considered the same protocol.
+
+A qos policy may be used with messages having different protocols.
+For example, a policy may be used with workflow A receiving ftp
+messages, workflow B receiving http messages, and workflow C receiving
+jms messages.  In this case, it may happen that the classification for
+some Service Levels are inappropriate for some protocols.  For
+instance, http headers do not exist for ftp or jms protocols.  In this
+case the classification expressions for those Service Levels will
+always be false because they depend on values which are not defined.
+
+The workflow editor knows what kind of message is being received by
+the workflow program and can usually check for the case where none of
+the classification expressions can be matched and give an error at
+design time.  For instance, if all the classification expressions
+depend on a http query parameter, then none of them can be matched by
+an ftp message.
+
+The following are defined only for http messages:
+
+  - web service (service, port, operation)
+  - rest (url, method, http header, http query parameter)
+
+The following are defined by multiple protocols:
+
+  - ipAddress is defined for http, ftp, and sftp.
+
+      The host field for ibm-mq refers to the address of the ibm-mq
+      server and is not useful in identifying the client.
+
+      The jms and ibm-mq queue name are not useful in identifying
+      the client and so are not used.
+
+  - ipHostName is defined for http, ftp, and sftp.
+
+      The host field for ibm-mq refers to the address of the ibm-mq
+      server and is not useful in identifying the client.
+
+      The jms and ibm-mq queue name are not useful in identifying
+      the client and so are not used.
+
+  - soapAction is defined for http and jms (as SOAPJMS_soapAction property)
+
+Extension Function Arguments
+============================
+
+The Qos Policy is implemented by a single extension functions and a special
+feature of the soae <wait> activity.
+
+   string status = soae-xf:qos("qos-policy",
+                                $metadata,      
+                                "name-1", value-1,
+                                "name-2", value-2,
+                                 ...) 
+
+The value false() may not be used for metadata since metadata should
+always be well-defined for a message.
+
+The Service Level classification is based on three expressions:
+
+  - A "User" expression.
+  - A "Resource" expression.
+  - A "Variable" expression.
+
+A Service Level is matched if-and-only-if the User classification
+expression AND the Resource classification expression AND the Variable
+classification expression are true.  If more than one Service Level is
+matched then the one defined first in the QoS Policy is chosen.
+
+User Expression
+===============
+
+The User expression consists of tests against one or more of the
+following values:
+
+  - aaaIdentity
+  - aaaLdapAuthorizationGroup
+  - ipAddress (tests are similar to soae-xf:validate-range)
+  - ipHostName (tests are similar to soae-xf:validate-host-domain)
+  - xpathUser (custom xpath expression evaluated in the workflow)
+
+The following forms of aaaIdentity are not supported at this time (June 2011)
+because they are of limited value or do not make sense for qos:
+    
+    X.509 certificate from WS-Security verify (except subjectName)
+    Client Ip Address From Transport Layer (but can use ipAddress directly)
+    Principal name from Kerberos token
+    SAML artifact
+    Single Sign-On from Cookie
+    Single Sign-On from Workflow
+    X.509 certificate from WS-Security header (except subjectName)
+    X.509 certificate from workflow (except subjectName)
+    Certificate attribute from WS-Security header (except subjectName)
+    Certificate from SSL peer (except subjectName)
+
+In the User Classification expression, one may specify "xpathUser" and
+then specify in the workflow editor a custom xpath expression which is
+evaluated by the workflow (not the qos extension function).  In the
+qos policy at run-time the xapthUser value is compared against a list
+of literal values or a regular expression in a manner similar to
+aaaIdentity.
+
+One may specify "anyUser" in the User expression to indicate "don't
+care".  For "anyUser" it is not necessary to pass any User information
+by name/value pair.
+
+A test against any one of these names (excluding "anyUser") in a
+Service Level Classification expression requires that its value be
+defined in the extension function argument list by a name/value pair.
+The names which must appear in the argument list is defined by this
+pseudo-code:
+
+  union
+
+       //qos:userClassification [ not (@name = "anyUser") ]/@name
+
+     + //qos:compoundKey/qos:userPart
+
+  end union
+      
+Except for "anyUser", the User expression consists of a series of
+"terms" each of which can match one User value against a list of
+literals or regular expression.
+
+If the User Classification expression is "anyUser" then no tests are
+made for the User expression.
+
+In some cases, there may be no value for a name because it is not
+defined.  For instance, if there is no aaa action in the workflow then
+the aaaIdentity will be undefined.  In this case the value should be
+"false()" or the name/value pair can be omitted from the argument
+list.
+
+"Extra" User/Resource name/value pairs
+======================================
+
+It is ok to define name/value pairs for User and Resource information
+that do not appear in Service Level Classification expressions.  When
+this happens the corresponding User and Resource counters will be
+updated.
+
+It is ok to specify a Resource via a name/value pair even if a
+Classification rule is "anyResource".
+
+It is ok to specify a User via a name/value pair even if a
+Classification rule is "anyUser". Similarly for "anyResource".
+
+For instance, if both aaaIdentity and ipAddress are defined then two
+User counters will be updated.  If both aaaResource and
+backendServicesInvocation are defined by name/value pairs then two
+Resource counters will be updated.
+
+Although this is allowed, it is not recommended because it can lead to
+inconsistent counting of messages when two or more workflows use
+the same qos Policy.  For instance, suppose Worflow-1 (which has 50%
+of the traffic) passes ipAddress to the qos run-time even though it is
+not used in any Classification or Condition expression.  Meanwhile,
+Workflow-2 (which has 50% of the traffic) does not pass ipAddress
+information.  Thus, Workflow-1 will track which ipAddresses are used,
+while Workflow-2 does not.  As a conseqence, the counters identified
+by ipAddress will not have information for the 50% of the traffic used
+by Workflow-2.
+
+This same reasoning requires consistent handling of ipAddress and
+ipHostName also (see next section).
+
+The Special Case of ipAddress and ipHostName
+============================================
+
+The User information "ipAddress" and "ipHostName" are special because
+they can be found in the metadata or passed as a name/value pair like
+aaaIdentity.
+
+Furthermore, passing the ipHostName is somewhat redundant since it can
+be computed from the ipAddress using reverse dns lookup by the
+extension function soae-xf:get-host-by-address().
+
+In order to have consistent handling of these items, they should obey
+the same rules as other User items.  A name/value pair for ipAddress
+and ipHostName should be provided by workflow only if these items are
+found by the union expression defined in an earlier section.  If one
+(or both) are not found in the union expression then it should
+normally be omitted from the name/value list.
+
+The Special Case of aaaLdapAuthorizationGroup
+=============================================
+
+The value of an aaaLdapAuthorizationGroup may be a node or node-set.
+The subtree identified by each node in the node-set is traversed
+looking for ldap group names to create a set of ldap group names.
+
+The subtree pointed to by the node must have the following format:
+
+    <top>
+      <a ... >group-name-1</a>
+      <b ... >group-name-2</b>
+      <c ... >group-name-3</c>
+
+      (A  zero length group name is not allowed.)
+
+      <bad ... ></bad> 
+   </top>
+
+In brief, the format does not depend on the names of the elements,
+only on their structure and content.  Attributes and namespace
+declarations are ignored. Comments and processing-instruction may not
+be mixed with group names, but may appear elsewhere and are ignored.
+Text nodes which are not group names must be whitespace.
+
+There is some non-obvious logic to decide whether this is an old-style
+ldap group name (which is a simple string) or a node or node-set which
+may contains multiple ldap group names.  It is made non-obvious
+because:
+
+    (a) An element can be automatically coerced to a string value by xpath:
+
+          <foo>alpha</foo>  => automatically converted to "alpha"
+            
+    (b) A node-set may contain text nodes:
+            
+          <groupList>
+            <group>alpha</group>
+          </groupList>
+            
+         In case you didn't notice, there is a text node (all whitespace)
+         between <groupList> and <group>.
+            
+To be considered the new-style format, the expression must (a) be a
+node-set with more than one node or (b) be a node-set with exactly one
+node but that node must not be a text node.  Rule (b) is not perfect.
+For instance it does not address the case of:
+
+     <foo>alpha<!- comment -></foo> => automatically converted to "alpha"
+
+but it is probably good enough.
+            
+Under both the old and new rules, an empty node-set is considered to
+be "no value specified".
+
+Resource Expression
+===================
+
+The Resource expression consists of tests against one or more following
+values:
+
+  - aaaResource
+
+  - service
+
+    This is the service of a wsdl message <receive> activity.
+
+      The service name is represented with "Clark" qualified
+      name syntax:
+       
+         {the-wsdl-namespace}the-service-name
+
+  - port
+    This is the port of a wsdl message <receive> activity.
+
+  - operation
+    This is the operation of a wsdl message <receive> activity.
+
+  - soapAction
+    This is the soapAction of a <receive> activity.
+
+  - restUrl
+    This is the url of a rest message <receive> activity.
+
+  - restMethod
+    This is the http method of a rest message <receive> activity.
+
+  - backendServicesInvocationUrl
+    This is the url of an <invoke> activity.
+
+    When this option is used, the url for the backend service is 
+    supplied by the workflow programmer. At this time, it is not
+    the responsibility of the workflow editor to infer this
+    information from other parts of the workflow or to check the
+    consistentcy of this value with the <invoke> at this time.
+
+  - xpathResource (custom xpath expression evaluated in the workflow)
+
+The tests on restUrl may include tests on the query parameter and http
+headers, but these are not passed by name/value pairs to the extension
+function.  They are found by looking at the metadata argument of the
+extension function.
+
+In the Resource Classification expression, one may specify
+"xpathResource" and then specify in the workflow editor a custom xpath
+expression which is evaluated by the workflow (not the qos extension
+function).  In the qos policy at run-time the xpathResource value is
+compared against a list of literal values or a regular expression in a
+manner similar to aaaIResource.
+
+One may specify "anyResource" in the Resource express1ion to indicate
+"don't care".  For "anyResource" it is not necessary to pass any
+Resource information by name/value pair.
+
+A test against any one of these names (excluding "anyResource) in a
+Service Level Classification expression requires that its value be
+defined in the extension function argument list by a name/value pair.
+The names which must appear in the argument list is defined by this
+pseudo-code:
+
+    union
+
+      //qos:resourceClassification
+                [ not (@name = "anyResource") ]/@name
+
+    + //qos:compoundKey/qos:resourcePart
+  
+    + <receive> service is required when this is a web service message
+         and count(//qos:webService/qos:service) > 0
+      should be omitted when not a web service message
+
+    + <receive> port is required when this is a web service message
+         and count(//qos:webService/qos:port) > 0
+      should be omitted when not a web service message
+
+    + <receive> operation is required when this is a web service message
+         and count(//qos:webService/qos:operation) > 0
+      should be omitted when not a web service message
+
+    + <receive> rest url is required when this is a rest message
+         and count(//qos:webService/qos:restUrl) > 0
+      should be omitted when not a rest message
+
+    + <receive> rest method is required when this is a rest message
+         and count(//qos:webService/qos:restMethod) > 0
+      should be omitted when not a rest message
+
+    end union
+
+Except for "anyResource", the Resource expression consists of a series
+of "terms" each of which can match one value against a list of
+literals or a regular expression.
+
+  - For the case of Rest Services the expressions can be more
+    complex because they may depend on query parameters and http headers.
+
+  - For the case of Web Services, the expressions can be more
+    complex because they may depend on service, port, and operation.
+
+In some cases, there may be no value for a name because it is
+not defined.  For instance, if there is no aaa action in the
+workflow then the aaaResource will be undefined.  Similarly, the
+Rest data will be undefined for a Web Service request.  In these
+cases the value should be "false()" or the name/value pair can be
+omitted from the argument list.
+
+Variable Clasification Expression
+=================================
+
+A Variable expression allows the Service Level to depend
+on a user-defined xpath expression evaluated in the workflow.
+A favorite example is purchase order ("po") value: 
+
+   gold for po value > $100,000,
+   silver for po value > $10,000
+   bronze for po > $1000
+
+The User expression and Resource expression do not capture
+this idea.
+
+The Variable classification expression is defined by the qos policy
+and is evaluated inside the qos extension function, but the values\
+of the Variables are computed in the workflow and passed as the 
+value part of a name/value pair.
+
+Within the Service Level Variable classification expression
+there may be zero or more variable tests:
+
+  A variable test is divided into two parts:
+
+    - A variable name which reference a name/value pair in the
+      extension argumen list.
+
+    - A test on the value. Two examples (in pseudo-code):
+  
+        number(po-value) >= 1000 AND number(po-value) < 10,000
+ 
+        customer-class = "premium" OR customer-class = "platinum" 
+
+One can combine multiple tests using the <and> element:
+
+     <variableClassification>
+       <and>
+         <variable name="customer-class" >
+           <literal>premium</literal
+           <literal>platinum</literal
+         </variable>
+         <variable name="po-value" >
+           <minInclusive>1000</minInclusive>
+           <maxInclusive>1000</maxInclusive>
+         </variable>
+       </and>
+     </variableClassification>
+
+There is no counter associated with a variable value.
+
+Expression Evaluation Errors
+============================
+
+In general, most run-time expression failures are not fatal.  They
+cause the Service Level to be ignored as a match.  For  instance,
+if the string "xyz" is being compared to the number range 1 to 10,
+the string "xyz" will be coerced to a number.  The result with be
+NaN. The expression "NaN >=1 and NaN <= 10" is false and the Service
+Level will not be matched.
+
+Code Model
+==========
+
+The most interesting case is that of "defer".  This causes the workflow
+to wait according to rules specified in the qos policy.  The workflow 
+code resembles the following:
+
+  <scope>
+
+    <variable name="qos-status" type="xs:string" />
+    ...
+
+    <assign>
+       <copy>
+         <from>soae-xf:qos("my-qos-policy",
+                           $metadata,
+                           "name-1", $value-1,
+                           "name-2", $value-2,
+                           ...)
+         </from>
+         <to>$qos-status</to>
+       </copy>
+    </assign>
+
+    <wait>
+       <for>$qos-status</for>
+    </wait>
+
+  </scope>
+
+If the qos policy wants this message to be "deferred" it returns the
+string "qos-wait".  Otherwise, it returns the string "qos-normal".
+
+For Rule Actions "reject" or "handle in workflow" workflow exceptions
+will be thrown and there is no status code.
+
+When "qos-wait" is passed to <wait>, the workflow is suspended
+according to rules specified in the qos policy.  When traffic
+has subsided, messages are pulled from the queue according to their
+priority and resumed.  Execution resumes with the instruction
+following the <wait> activity.  When messages are resumed they 
+are are not subjected to any additional QoS tests.  It is as though 
+an ordinary <wait> activity had completed.  
+
+When "qos-normal" is passed to <wait>, then execution of the workflow 
+ontinues without any pause: there is no wait and there is no "yield" 
+as there is with a "real" <wait> activity.
+
+Dynamic Loading of Policies
+===========================
+
+It is possible to load and reload policies from a remote server.  This
+has the same virtues and limitations of other things that can be loaded
+dynamically (like CAP policies and XPath Routing policies). In particular:
+
+  a. It has the same rules for determining when an item fetched via
+     http expires according to the http headers.
+
+  b. It has the same search list feature and search order as other CP policies.
+
+  c. It has the same Web Interface facilities for managing a server search
+     list and listing/clearing the qos policy cache.
+
+When a remotely loaded policy expires, a new policy is fetched
+using the same url as the original policy. If some rule (say
+rule "ABC") is moved from position #1 to position #3 of the same
+service level the rule number will change, but the state 
+associated with that rule will remain unchanged.  In this way state
+information remains meaningful.
+
+Matching of service levels between old and revised policies is done
+using their names.  If a service level changes position but has the
+same name, it is considered the same service level even if all the
+rules inside it have different names.
+
+Rule names are qualified by their service level name.  In other words,
+a rule named ABC in service level S1 has no relationship to a rule
+named ABC in service level S2.  Moving rule ABC from service level S1
+to S2 creates a new rule (and "obsoletes" the old rule) rather than
+changing the position of the rule
+
+Even if the old and new policies have two rules that have the same
+name, the rule in the revised policy may not be allowed to use the
+state assigned to the rule of the same name in the older policy because
+the actions of the rule may not be compatible.
+
+Two rules have compatible actions if:
+
+  a. They have actions of the same type (e.g. they both have reject
+     actions or both have alert actions).
+
+or 
+
+  b.  Neither of them is "send alert".
+
+Service levels (and rules) are "obsoleted" by loading new policies in
+which those names are not used.  Consider a service level S1 (or rule)
+that is present in policy revision #1, is removed in policy revision
+#2, and then added back in revision #3.  For revision #3, S1 is seen
+as a new service level rather than a reuse of service level S1 from
+revision #1.  In other words, the state information is revision #3 is
+in its initial state and unrelated to the state information in
+revision #1.
+
+Similarly, a rule present in revision #1, removed in revision #2, and
+added back in revision #3 is considered to be a new rule in revision
+#3.
+
+Changes in the Policy when it is dynamically loaded
+===================================================
+
+In general, anything in the qos policy may be changed and the qos
+routines will continue to operate.  However, there are some special
+cases which are discussed below.
+
+  - Changes in Policy Options
+
+    Changes to Policy Options are ignored, except for the "management
+    alert quiet time".  For instance, changing the number of tracking
+    records does not cause an error, but is simply ignored.
+
+  - Changes in Variables
+
+    The policy allows one to specify "variables" that can be used
+    in classification rules.  Normally, Service Designer scans the policy
+    to determine the variables and prompts the user to supply an xpath
+    expression that will be evaluated at run-time and bound to that
+    variable. If a new variable is added to a policy while using an
+    existing workflow then the variable will be undefined and any
+    classifications expression depending on this variable cannot be matched.
+   There will not be any error message since it is expected that a
+    policy might be used with a variety of workflows.
+
+  - Changes in AAA dependency
+
+    Normally, when a workflow includes an AAA action preceding the qos
+    activity, Service Designer will generate code to pass information about 
+    the AAA policy to qos so that it can be used in classification expressions
+    and included in the QoS Details record.  If tests of AAA information are
+    added to a qos policy after the workflow is created then this extra
+    information will not be available to the qos routines.  This will not
+    cause an error, but classification expressions depending on this information
+    cannot be matched.
+
+  - Fallback
+
+    In some cases, the revised policy loaded using CP will be
+    malformed in some way.  In these cases, the qos run-time will continue
+    to run using the "last good" policy and will put a "qos policy
+    compilation" alert on the dashboard.  If this is the first time this
+    policy has been loaded and there is no "last good" policy this will
+    cause a QoS fault.
+
+--><xs:schema  
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+  xmlns:qos="http://www.intel.com/soae/localService/qos-2011a/" 
+  targetNamespace="http://www.intel.com/soae/localService/qos-2011a/" elementFormDefault="qualified">
+
+    <xs:element name="qosPolicy" type="qos:QosPolicy"/>
+
+    <xs:complexType name="QosPolicy">
+        <xs:sequence>
+
+            <xs:element name="description" type="xs:string" minOccurs="0"/>
+
+            <xs:element name="policyOptions" type="qos:PolicyOptions"/>
+
+            <!-- A schedule allow rules to be enabled/disabled during 
+                 certain days of the week, hours of the day, and so on. -->
+
+            <xs:element name="schedules">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" maxOccurs="unbounded" name="schedule" type="qos:Schedule">
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="serviceLevels">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="serviceLevel" type="qos:ServiceLevel" minOccurs="1" maxOccurs="unbounded">
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ServiceLevel">
+        <xs:sequence>
+            <xs:element name="description" type="xs:string" minOccurs="0"/>
+            <xs:element name="serviceLevelClassification">
+                <xs:complexType>
+                    <xs:annotation>
+                        <xs:documentation>
+                            This Service Level is selected when the User classification
+                            rules AND Resource classification rules are satisfied.
+                        </xs:documentation>
+                    </xs:annotation>
+
+                    <!-- A custom xpath expression can be used to compute the
+                         User information.  This is evaluated in the workflow
+                         (not the extension function).  From the point of view
+                         of the extension function, the workflow is just supplying
+                         a different kind of user identity string.
+
+                         Similarly, a custom xpath expression can be used to compute the
+                         Resource information.  This is evaluated in the workflow
+                         (not the extension function).  From the point of view
+                         of the extension function, the workflow is just supplying
+                         a different kind of resource string.
+
+                         The Variable expresssion can be used as an additional
+                         test which must be matched for this Service Level to be
+                         selected.
+
+                         If more than one Service Level is matched the one appearing
+                         first in the qos Policy is selected.
+                    -->
+
+                    <xs:sequence>
+                       <xs:element name="userClassification" type="qos:UserClassification"/>
+                       <xs:element name="resourceClassification" type="qos:ResourceClassification"/>
+                       <xs:element name="variableClassification" type="qos:VariableClassification" minOccurs="0"/>
+                    </xs:sequence>
+
+                </xs:complexType>
+            </xs:element>
+
+            <!-- The qos rules describes tests that should be done
+                 to see if this message can be processed or not. 
+
+                 Depending on activity, the message may be allowed
+                 to proceed, rejected, deferred to a priority queue,
+                 or passed back to the workflow program to make a
+                 decision. 
+
+                 The qos rule also can control warnings and alerts.
+
+                 If multiple qos rules are matched, the one with the
+                 "most severe" action is chosen for execution.  The
+                 severity is defined as:
+
+                   reject > rate-limit > defer > throw workflow exception
+
+                 If more than one qos Rule with the same serverity is 
+                 matched, the one which appears first in the definition
+                 list is chosen.
+            -->
+
+            <xs:element name="qosRules">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="qosRule" type="qos:QosRule" minOccurs="0" maxOccurs="unbounded">
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+
+        <xs:attribute name="name" use="required" type="qos:Name"/>
+ 
+        <xs:attribute name="enabled" type="xs:boolean" use="optional" default="true"/>
+
+    </xs:complexType>
+
+    <xs:complexType name="UserClassification">
+        <xs:choice>
+
+            <!-- The choice of "anyUser" for the classification rule indicates
+                 that the classification rule does not need User information.
+            -->
+
+            <xs:element name="anyUser" type="qos:EmptyType"/>
+
+            <!-- All tests are ORed together. Thus:
+
+                   aaaIdentity="smith"
+                   ipAddress="10.230.0.0/16"
+                   aaaIdentity="jones"
+
+                 Is evaluated as though it were written:
+
+                   aaaIdentity="smith" or aaaIdentity="jones" or ipAddress="10.23.0.0/16"
+            -->
+
+            <xs:choice maxOccurs="unbounded">
+
+                <!-- The aaaIdentity includes any aaa derived identies.  However,
+                     only extracted identity is supported at this time.
+
+                     The classification rule does not need to distinguish these
+                     kinds of identities.
+
+                     The workflow editor chooses an appropriate aaa action to
+                     compute the identity, but the QoS Policy doesn't care which
+                     it is.
+                -->
+
+                <xs:element name="aaaIdentity" type="qos:Classification"/>
+
+                <xs:element name="aaaLdapAuthorizationGroup" type="qos:Classification"/>
+
+                <xs:element name="ipAddress" type="qos:NetMaskClassification"/>
+
+                <xs:element name="ipHostName" type="qos:HostDomainClassification"/>
+
+                <!-- custom xpath: workflow programmer computes User value via xpath
+                     evaluated in workflow.  -->
+
+                <xs:element name="xpathUser" type="qos:Classification"/>
+
+            </xs:choice>
+        </xs:choice>
+    </xs:complexType>
+    
+    <xs:complexType name="ResourceClassification">
+        <xs:choice>
+
+            <!-- The choice of "anyResource" for the classification rule indicates
+                 that the classification rule does not need Resource information.
+            -->
+
+            <xs:element name="anyResource" type="qos:EmptyType"/>
+
+            <!-- All tests are ORed together. Thus the tests:
+
+                   aaaResource="/open"
+                   aaaResource="/close"
+                   soapAction matches "http://acme.com/*"
+
+                 Is evaluated as though it were written:
+
+                   aaaResource="/open" or aaaResource="/close" or soapAction matches "http://acme.com/*"
+            -->
+
+            <xs:choice maxOccurs="unbounded">
+
+                <xs:element name="aaaResource" type="qos:AaaResourceExpression"/>
+
+                <!-- This is based on the web service of the <receive> activity.
+
+                     The service name is represented with "Clark" qualified
+                     name syntax:
+       
+                        {the-wsdl-namespace}the-service-name
+                -->
+
+                <xs:element name="webService" type="qos:WebServiceExpression"/>
+
+                <!-- This is based on the soap action of the <receive> activity. -->
+                <xs:element name="soapAction" type="qos:Classification"/>
+
+                <!-- This is based on the rest information of the <receive> activity. -->
+                <xs:element name="restService" type="qos:RestServiceExpression"/>
+
+                <!-- This is based on the url of the <invoke> activity (if any). -->
+                <xs:element name="backendServicesInvocationUrl" type="qos:Classification"/>
+
+                <!-- custom xpath: workflow programmer computes User value via xpath
+                     evaluated in workflow.  -->
+
+                <xs:element name="xpathResource" type="qos:Classification"/>
+
+            </xs:choice>
+        </xs:choice>
+    </xs:complexType>
+    
+    <xs:complexType name="AaaResourceExpression">
+       <xs:sequence>
+
+          <!-- If "resource" is "any" then it is required at run-time. -->
+
+          <xs:element name="resource" type="qos:Classification"/>
+
+          <!-- If "action" is "any" then it is required at run-time.
+               If "action" is omitted then it is optional at run-time -->
+
+          <xs:sequence minOccurs="0">
+             <xs:element name="action" type="qos:Classification"/>
+          </xs:sequence>
+       </xs:sequence>
+    </xs:complexType>
+
+    <!-- This is based on the web service of the <receiv> activity. -->
+    <xs:complexType name="WebServiceExpression">
+       <xs:sequence>
+
+          <!-- If "service" is "any" then it is required at run-time. -->
+
+          <xs:element name="service" type="qos:Classification"/>
+
+          <!-- If "port" is "any" then it is required at run-time.
+               If "port" is omitted then it is optional at run-time. -->
+
+          <xs:sequence minOccurs="0">
+             <xs:element name="port" type="qos:Classification"/>
+
+               <!-- If "operation" is "any" then it is required at run-time.
+                    If "operation" is omitted then it is optional at run-time. -->
+
+             <xs:sequence minOccurs="0">
+                <xs:element name="operation" type="qos:Classification"/>
+             </xs:sequence>
+          </xs:sequence>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- This is based on the rest information of the <receiv> activity. -->
+    <xs:complexType name="RestServiceExpression">
+       <xs:sequence>
+
+          <!-- If "restUrl" is "any" then it is required at run-time. -->
+
+          <xs:element name="restUrl" type="qos:Classification"/>
+  
+          <!-- If "restMethod" is "any" then it is required at run-time.
+               If "restMethod" is omitted then it is optional at run-time. -->
+
+          <xs:sequence minOccurs="0">
+             <xs:element name="restMethod" type="qos:Classification"/>
+          </xs:sequence>
+
+          <!-- A query parameter is not a Resource and does not
+               participate in counting. It is used only for classification. -->
+
+          <xs:element name="query" minOccurs="0" type="qos:RestServiceQueryExpression"/>
+
+          <!-- A header is not a Resource and does not participate in counting.
+               It is used only for classification. -->
+
+          <xs:element name="headers" minOccurs="0" type="qos:RestServiceHeaderExpression"/>
+
+       </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RestServiceQueryExpression">
+        <xs:sequence>
+            <xs:element name="and">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="parameter" maxOccurs="unbounded">
+                            <xs:complexType>
+                                <xs:complexContent>
+                                    <xs:extension base="qos:Classification">
+
+                                        <xs:attribute name="name" use="required" type="xs:string"/>
+
+                                    </xs:extension>
+                                </xs:complexContent>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RestServiceHeaderExpression">
+        <xs:sequence>
+            <xs:element name="and">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="header" maxOccurs="unbounded">
+                            <xs:complexType>
+                                <xs:complexContent>
+                                    <xs:extension base="qos:Classification">
+
+                                        <xs:attribute name="name" use="required" type="xs:string"/>
+
+                                    </xs:extension>
+                                </xs:complexContent>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="VariableClassification">
+        <xs:sequence>
+            <xs:element name="and">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="variable" maxOccurs="unbounded">
+                            <xs:complexType>
+                                <xs:complexContent>
+                                    <xs:extension base="qos:Classification">
+
+                                        <xs:attribute name="name" use="required" type="xs:string"/>
+
+                                    </xs:extension>
+                                </xs:complexContent>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:group name="Classification">
+       <xs:choice>
+          <xs:element name="any" type="qos:EmptyType"/>
+          <xs:element name="regularExpression" type="qos:RegularExpression"/>
+          <xs:element name="literal" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+
+          <!-- For numeric comparisons, must specific a minimum value,
+               a maximum value, or both. -->
+
+          <xs:element name="number">
+               <xs:complexType>
+                  <xs:choice>
+                     <xs:sequence>
+                        <xs:element name="minInclusive" type="xs:long"/>
+                        <xs:element name="maxInclusive" type="xs:long" minOccurs="0"/>
+                     </xs:sequence>
+                     <xs:element name="maxInclusive" type="xs:long"/>
+                  </xs:choice>
+              </xs:complexType>
+          </xs:element>
+        </xs:choice>
+    </xs:group>
+
+    <xs:group name="literalClassification">
+       <xs:choice>
+          <xs:element name="any" type="qos:EmptyType"/>
+          <xs:element name="literal" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:choice>
+    </xs:group>
+
+    <xs:complexType name="Classification">
+       <xs:group ref="qos:Classification"/>
+    </xs:complexType>
+
+    <!-- For ipAddress, the literals are netmask expressions
+         like those used by extension function
+         soae-xf:validate-address-range.
+
+         They are not tested using string comparison.
+    -->
+
+    <xs:complexType name="NetMaskClassification">
+       <xs:choice>
+          <xs:element name="any" type="qos:EmptyType"/>
+          <xs:element name="netMasks" type="qos:NetMasks"/>
+        </xs:choice>
+
+    </xs:complexType>
+
+    <!-- For ipHostName, the literals are strings like those
+         used by the extension function soae-xf:validate-host-domain.
+
+         They are not tested using string comparison.
+    -->
+
+    <xs:complexType name="HostDomainClassification">
+       <xs:group ref="qos:literalClassification"/>
+    </xs:complexType>
+ 
+    <xs:complexType name="PolicyOptions">
+            <xs:group ref="qos:policyOptions-v2"/>
+   </xs:complexType>
+
+    <xs:complexType name="QosRule">
+        <xs:sequence>
+
+            <xs:element name="description" type="xs:string" minOccurs="0"/>
+
+            <xs:element name="summary" type="xs:string" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     A short summary of the condition. The UI may show
+                     this in place of the full set of expressions.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+
+            <xs:element name="conditions" type="qos:RuleConditions"/>
+
+            <xs:element name="action" type="qos:RuleAction"/>
+
+            <xs:element name="schedule" type="qos:ScheduleRef" minOccurs="0">
+                <xs:annotation>
+                   <xs:documentation>
+                      References the name of one of the Schedule entries defined
+                      in this policy.  If omitted, this implies that the rule is
+                      active all the time.
+                   </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+
+        <xs:attribute name="name" use="required" type="qos:Name"/>
+
+        <xs:attribute name="enabled" use="optional" type="xs:boolean" default="true"/>
+
+    </xs:complexType>
+
+    <xs:complexType name="RuleConditions">
+
+       <xs:annotation>
+          <xs:documentation>
+             The condition for the QoS rule is a series of expressions.
+             ALL of which must be matched for this rule to apply.
+          </xs:documentation>
+       </xs:annotation>
+
+       <xs:sequence>
+          <xs:element name="condition" type="qos:RuleCondition" minOccurs="1" maxOccurs="unbounded"/>
+       </xs:sequence>
+
+    </xs:complexType>
+
+    <!-- A condition expression compares a counter against a literal value.
+
+         The counter is selected by a "scope" and a compound key.
+
+         Counters are usually based on information from successful messages
+         only.  This prevents, for example, a roblem like a timeout during 
+         an <invoke> from polluting measures of latency.  There are three
+         cases where failed messages are included:
+
+              rawMessageRate (compared to messageRate)
+
+              failedMessageRate (compared to messageRate)
+
+              rawRequestDataRate (compared to requestDataRate)
+        
+         The scope indicates which of several possible counter collections
+         should be used.  The collections differ based on the way messages
+         are filtered (e.g. messages only from this service level) and what
+         information that is used as a key to an item in the collection
+         (e.g. the host name).
+   
+         The scopes are described in the enumeration.  The "system" scope
+         is a special case because it is based on system data (e.g. sytem
+         CPU utilization) rather than on message content/metadata.
+
+         The compound key is used to identify which of the counters in the
+         collection is to be used.  There is potential for ambiguity in cases
+         where a Resource has multiple parts.  For instance, a web service
+         may be classified based on the wsdl service, port, and operation.
+         How do we know whether to use the service as the key, the service+port
+         as the key, or the service+port+operation as the key ?
+
+         This is chosen (indirectly) by the user.  It is inferred from the subset of 
+         information that is known to exist because it is referenced in the
+         classification rule.  If it is used in the classification rule then 
+         it is reasonable to assume that it must be defined at run-time -
+         otherwise the classification rule (at least for that Service Level) would 
+         always be false and this Rule Condition would never need to be evaluated.
+
+         Thus it is quite important to be able to distinguish two cases:
+
+           a. The wsdl operation is known, but isn't used in the classification
+              expression, and might be used in some kind of counting.
+
+           b. The wsdl operation is not known, and (obviously) is not used in the
+              classification expression, and (obviously) can't be used in any kind
+              of counting (automatic or manual).
+
+        A compound key can consists of one User or one Resource (but not both.
+        However, a Resource may have multiple parts such as service+port+operation.
+  
+        One can use "anyUser" (or "anyResource") in a compound key.  For these
+        cases, the extension function argument list is searched for the first
+        item which is user (or resource) information and uses this to create
+        the key.  If there is no user (or no resource) information in the argument
+        list then the key cannot be created and the rule will be skipped.  If there
+        is more than one user (or resource) the first one is used.
+ 
+        How do we know what counters are updated "automatically" ?
+
+           - aggregated across policies scope:
+
+             No special information is required for automatic counting since all
+             messages are counted and there is only one counter.
+
+           - service-level scope:
+
+             Any flavor of User information passed to the qos run-time by the
+             workflow will be used to increment the corresponding counter for this
+             service level.
+
+           - user scope:
+
+             Any flavor of User information passed to the qos run-time by the
+             workflow will be used to increment the corresponding counter.  For instance
+             if an aaa group and an ip address are passed to the qos run-time then
+             aaa user scope counter will be updated based on group information and
+             a separate ip address user scope counter will be updated based on the ip
+             address.  Each qos policy has its own user scope.
+          
+           - resource scope:
+
+             This is similar to user scope, but somewhat more complicated because
+             there are several cases where the key can have multiple parts (i.e. 
+             a compound key). Below, we discuss the most complicated case of
+             a compound key using service and port. Other cases with compound key 
+             (e.g. aaaResource + aaaAction or url + method) are handled in a
+             similar manner.
+
+             Consider when the workflow passes a service and port (but not operation)
+             to the qos run-time.
+
+             In this case the compound key is constructed by combining the
+             service name and the port name (with punctuation characters) and
+             updating the corresponding counter.  In addition, a counter based only
+             on the service name will be updated. 
+
+             When the compound key has multiple parts, the key is canonicalized so
+             that the final compound key does not depend on the order that items 
+             are defined or referenced.
+
+             If an operation name is passed by the workflow to the qos run-time
+             then the compound key would be constructed by combining the service name,
+             port name, and operation name.
+
+             It is not possible to use a port name in a compound key without defining 
+             a service.  Similarly, it is not possible to use an operation name in a 
+             compound key without defining a service and port (perhaps using "any").  
+
+             If multiple flavors of Resource information are passed by the workflow
+             to the qos run-time then one counter is updated for each such item.
+
+             Each qos policy has its own Resource scope.
+
+           - system scope:
+
+             Counters at system scope do not depend on information from the messages.
+             They are based on system-wide statistics like CPU utilization and
+             memory utilization.
+
+        Referencing a counter in a Rule Condition (according to scope):
+
+           - aggregated across policies scope:
+
+             No special information is required since there is only one counter.
+
+           - service-level scope:
+
+             Any flavor of User information passed to the qos run-time by the
+             workflow will be used to increment the corresponding counter for this
+             service level.
+
+           - user scope:
+
+             Any flavor of User information which appears in the User classification
+             expression can be used to reference the corresponding counter at user
+             scope.  For instance, if an aaa group is referenced (even if it is via
+             "any") then an aaa group is well-defined and a counter with that key
+             may be referenced in a Rule Condition.
+          
+           - resource scope:
+
+             This is similar to user scope, but somewhat more complicated because
+             there are several cases where the key can have multiple parts (i.e. 
+             a compound key).  Consider a Resource classification expression which
+             uses service and port, but not operation (not even operation="any").
+
+             In this case the compound key is constructed by combining the
+             service name and the port name (with punctuation characters) and
+             using that to find the counter.  The compound key is canonicalized
+             so that they key does not depend on the order that items are defined
+             or referenced.
+
+             If an operation was used in the classification expression 
+             (even if operation="any") then the compound key can be constructed
+             by combining the service name, port name, and operation name.
+
+             It is not possible to use an operation in a compound key without 
+             also using a service and port (perhaps using "any").  Similary, it
+             is not possible to use a port in a compound key without also using
+             a service.
+
+           - system scope:
+
+             Counters at system scope do not depend on the message and are not
+             affected by which users and Resources are defined or undefined.
+    -->
+         
+    <xs:complexType name="RuleCondition">
+        <xs:choice>
+
+            <xs:element name="rawMessageRate" type="qos:RuleConditionMatchLongValue">
+                <xs:annotation>
+                    <xs:documentation>
+                        [Input Server statistic] Rate in messages per second counted at the time the message
+                        is received.  This is the "pre-shaped" receive rate and includes all messages
+                        (both failed and successful).
+
+                        For the current message, this is updated at the end of the transaction.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element name="messageRate" type="qos:RuleConditionMatchLongValue">
+                <xs:annotation>
+                    <xs:documentation>
+                        [Input Server statistic] Rate in messages per second. This includes
+                        only successful messages.  Use "rawMessageRate" to include both 
+                        failed and successful messages. 
+
+                        For the current message, this is updated at the end of the transaction.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element name="failedMessageRate" type="qos:RuleConditionMatchLongValue">
+                <xs:annotation>
+                    <xs:documentation>
+                        [Input Server statistic] Rate in messages per second of messages that have failed
+                        for any reason, including a qos rate shaping actions such
+                        as reject or rate limit.
+
+                        For the current message, this is updated at the end of the transaction.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element name="messageCount" type="qos:RuleConditionMatchLongValue">
+                <xs:annotation>
+                    <xs:documentation>
+                        [Input Server statistic] Cumulative messsage count in this time window
+                        including only successful messages.  
+
+                        For the current message, this is updated at the end of the transaction.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element name="policyMessageCount" type="qos:RuleConditionMatchLongValue">
+                <xs:annotation>
+                    <xs:documentation>
+
+                        [qos policy statistic] Cumulative messsage count in this time window of messages 
+                        processed by a qos activity in a workflow.  A message will be counted only once even 
+                        if there are multiple qos actions in a workflow. A message sent to a workflow with
+                        no qos activity will not be included in the app level count.
+
+                        For the current message, this is updated at the end of the transaction.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element name="rawMessageCount" type="qos:RuleConditionMatchLongValue">
+                <xs:annotation>
+                    <xs:documentation>
+                        [Input Server statistic] Cumulative messsage count in this time window
+                        including both failed and successful messages. 
+
+                        For the current message, this is updated at the start of the transaction.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element name="failedMessageCount" type="qos:RuleConditionMatchLongValue">
+                <xs:annotation>
+                    <xs:documentation>
+                        [Input Server statistic] Cumulative messsage count in this time window
+                        for failed messages only.
+
+                        For the current message, this is updated at the end of the transaction.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element name="requestDataRate" type="qos:RuleConditionMatchLongValue">
+                <xs:annotation>
+                    <xs:documentation>
+                        [Input Server statistic] request data rate in bytes per second.  This includes
+                        only successful messages.  Use "rawRequestDataRate" to include both failed 
+                        and successful messages.
+
+                        For the current message, this is updated at the end of the transaction.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element name="rawRequestDataRate" type="qos:RuleConditionMatchLongValue">
+                <xs:annotation>
+                    <xs:documentation>
+                        [Input Server statistic] Request data rate in bytes per second counted at the
+                        time of receipt. This is the "pre-shaped" receive rate and includes all
+                        messages (both failed and successful). 
+
+                        For the current message, this is updated at the end of the transaction.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element name="responseDataRate" type="qos:RuleConditionMatchLongValue">
+                <xs:annotation>
+                    <xs:documentation>
+                        [Input Server statistic] Response data rate in bytes per second.
+
+                        For the current message, this is updated at the end of the transaction.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element name="requestPlusResponseDataRate" type="qos:RuleConditionMatchLongValue">
+                <xs:annotation>
+                    <xs:documentation>
+                        [Input Server statistic] Sum of request and response data, in bytes per second.
+
+                        For the current message, this is updated at the end of the transaction.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element name="averageBackendInvocationLatency" type="qos:RuleConditionMatchLongValue">
+                <xs:annotation>
+                    <xs:documentation>
+                        [Invocation Agent statistic] Average backend invocation latency, in milliseconds.
+
+                        For the current message, this is updated at the end of the transaction.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element name="averageEndToEndLatency" type="qos:RuleConditionMatchLongValue">
+                <xs:annotation>
+                    <xs:documentation>
+                        [Input Server statistic] Average backend invocation latency, in milliseconds.
+
+                        For the current message, this is updated at the end of the transaction.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <!-- system scope (all based on percentages) -->
+
+            <xs:element name="systemCpuUtilization" type="qos:SystemRuleConditionMatchPercentageValue">
+                <xs:annotation>
+                    <xs:documentation>
+                        System CPU utilization, as a percentage, based
+                        on all processes running on the system (not just
+                        those related to workflow execution or soae).
+
+                        This is updated independently of message processing.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element name="systemMemoryUtilization" type="qos:SystemRuleConditionMatchPercentageValue">
+                <xs:annotation>
+                    <xs:documentation>
+                        System memory utilization, as a percentage.
+
+                        This is updated independently of message processing.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element name="messageBufferUtilization" type="qos:SystemRuleConditionMatchPercentageValue">
+                <xs:annotation>
+                    <xs:documentation>
+                        Messsage buffer utilization, as a percentage.
+
+                        This is based on "Global Buffer configuration".
+                        This is usually set via the Web Interface
+                        "Workflow Runtime Settings" page.
+                       
+                        This is updated independently of message processing.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element name="currentRequestUtilization" type="qos:SystemRuleConditionMatchPercentageValue">
+                <xs:annotation>
+                    <xs:documentation>
+                        Current request utilization, as a percentage.
+
+                        Utilization is measured as the quotient of the
+                        number of active requests (messages) being processed
+                        by this app and the "Application Simultaneous Transactions"
+                        set for this app.  This is usually set via the Web Interface
+                        by the "Advanced Options" tab of the "Application Configuration"
+                        page.
+
+                        This is updated independently of message processing.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="RuleConditionMatchLongValue">
+       <xs:complexContent>
+         <xs:extension base="qos:RuleConditionTerm">
+           <xs:attribute name="value" use="required" type="qos:NaturalLong"/>
+         </xs:extension>
+       </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="RuleConditionMatchPercentageValue">
+       <xs:complexContent>
+          <xs:extension base="qos:RuleConditionTerm">
+             <xs:attribute name="value" use="required">
+                <xs:simpleType>
+                   <xs:restriction base="xs:int">
+                      <xs:minInclusive value="1"/>
+                      <xs:maxInclusive value="99"/>
+                   </xs:restriction>
+                </xs:simpleType>
+             </xs:attribute>
+         </xs:extension>
+       </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="SystemRuleConditionMatchPercentageValue">
+       <xs:attribute name="value" use="required">
+          <xs:simpleType>
+             <xs:restriction base="xs:int">
+                <xs:minInclusive value="1"/>
+                <xs:maxInclusive value="99"/>
+             </xs:restriction>
+          </xs:simpleType>
+       </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="RuleConditionTerm">
+      <xs:sequence>
+        <xs:element name="compoundKey" type="qos:CompoundKey" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute name="scope" type="qos:QualityDataScope" use="required"/>
+    </xs:complexType>
+
+    <xs:simpleType name="QualityDataScope">
+       <xs:restriction base="xs:string">
+
+          <!-- Includes all messages for workflows that have a QoS policy
+               defined. -->
+
+          <xs:enumeration value="aggregatedAcrossPolicies"/>
+
+          <!-- Includes only messages of a policy that have been classified
+               to a specific Service Level. -->
+
+          <xs:enumeration value="serviceLevel"/>
+
+          <!-- Includes all messages for workflows that have a QoS policy
+               and have the same User information key. -->
+
+          <xs:enumeration value="user"/>
+
+          <!-- Includes all messages for workflows that have a QoS policy
+               and have the same Resource information key. -->
+          <xs:enumeration value="resource"/>
+
+       </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="CompoundKey">
+       <xs:sequence>
+         <xs:choice>
+            <xs:group ref="qos:CompoundKeyUserPart"/>
+            <xs:group ref="qos:CompoundKeyResourcePart"/>
+
+             <!-- This only applies to:
+
+                   scope="policy"
+                   scope="serviceLevel"
+                   scope="aggregated across all policies"
+              -->
+
+            <xs:element name="anyMessage" type="qos:EmptyType"/>
+
+         </xs:choice>
+       </xs:sequence>
+     </xs:complexType>
+
+    <xs:group name="CompoundKeyUserPart">
+       <xs:choice>
+
+           <!-- Only available when aaaIdentity appears in service classification. -->
+           <xs:element name="aaaIdentity" type="qos:EmptyType"/>
+    
+           <!-- Only available when aaaLdapAuthorizationGroup appears in service classification. -->
+           <xs:element name="aaaLdapAuthorizationGroup" type="qos:EmptyType"/>
+    
+           <!-- Only available when ipAddress appears in service classification. -->
+           <xs:element name="ipAddress" type="qos:EmptyType"/>
+    
+           <!-- Only available when ipHostName appears in service classification. -->
+           <xs:element name="ipHostName" type="qos:EmptyType"/>
+    
+           <!-- Only available when service classification is xpathUser. -->
+           <xs:element name="xpathUser" type="qos:EmptyType"/>
+
+           <!-- Available when any of the above are used in the service classification. -->
+           <xs:element name="anyUser" type="qos:EmptyType"/>
+  
+       </xs:choice>
+    </xs:group>
+
+    <xs:group name="CompoundKeyResourcePart">
+       <xs:choice>
+
+          <xs:sequence>
+
+             <!-- Only available when service classification contains aaaResource reference. -->
+             <xs:element name="aaaResource" type="qos:EmptyType"/>
+             
+             <!-- Only available when service classification contains aaaResource and aaaAction reference. -->
+
+             <!-- aaaAction is not supported as of June 2011 
+                <xs:element name="aaaAction" minOccurs="0" type="qos:EmptyType" />
+             -->
+
+          </xs:sequence>
+
+          <xs:sequence>
+
+              <!-- Only available when service classification contains service reference. -->
+              <xs:element name="service" type="qos:EmptyType"/>
+
+              <xs:sequence minOccurs="0">
+                 <!-- Only available when service classification contains service and port references. -->
+                 <xs:element name="port" type="qos:EmptyType"/>
+
+                 <!-- Only available when service classification contains service, port, and operation references. -->
+                 <xs:element name="operation" minOccurs="0" type="qos:EmptyType"/>
+              </xs:sequence>
+
+          </xs:sequence>
+
+          <!-- Only available when service classification contains soapAction reference. -->
+          <xs:element name="soapAction" type="qos:EmptyType"/>
+
+          <!-- This is only available when the service classification contains a backendServicesInvocationUrl. -->
+          <xs:element name="backendServicesInvocationUrl" type="qos:EmptyType"/>
+
+          <xs:sequence>
+
+              <!-- Only available when service classification contains restUrl reference. -->
+             <xs:element name="restUrl" type="qos:EmptyType"/>
+
+              <!-- Only available when service classification contains restUrl and restMethod references. -->
+              <xs:element name="restMethod" minOccurs="0" type="qos:EmptyType"/>
+          </xs:sequence>
+
+          <!-- Only available when service classification contains xpathResource. -->
+          <xs:element name="xpathResource" type="qos:EmptyType"/>
+
+          <!-- Available when any of the above are used in service classification. -->
+          <xs:element name="anyResource" type="qos:EmptyType"/>
+         
+       </xs:choice>
+    </xs:group>
+
+    <xs:complexType name="RuleAction">
+        <xs:sequence>
+            <xs:element name="ruleEffectiveUntilThreshold" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        The Action is active until the corresponding quality record value
+                        drops below the specified percentage of its threshold.
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:int">
+                        <xs:minInclusive value="1"/>
+                        <xs:maxInclusive value="100"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:choice>
+                <xs:element name="alert">
+                    <xs:complexType>
+                        <xs:choice>
+
+<!-- The option "suppress alert for cycle counts" is no longer supported.
+     If present in the policy file it is converted to a suppressAlertForEventCount 
+     with an event count of zero.  The effect is to use only the policy quiet time.
+-->
+                            <xs:element name="suppressAlertForCycleCount" type="xs:int"/>
+
+<!-- The option "suppress alert for event counts" causes suppression 
+     for the specified number of "events".  An event is defined as
+     a message that would cause an alert (if it were not otherwise
+     suppressed).
+
+     When suppressAlertForEventCount is specified AND the policy 
+     option limitAlertsQuietTime are both specified, the longer
+     of the two intervals is used.
+
+     If the event count is zero then this is the same as using only
+     the "limit alerts quiet time" specified in the policy options.
+-->
+
+                            <xs:element name="suppressAlertForEventCount" type="xs:int"/>
+                        </xs:choice>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="reject" type="qos:EmptyType">
+                </xs:element>
+                <xs:element name="rateLimit">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="limit" type="xs:int">
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="defer">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="maxQueueMessages" type="xs:int">
+                            </xs:element>
+                            <xs:element name="priority">
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:int">
+                                        <xs:minInclusive value="1"/>
+                                        <xs:maxInclusive value="3"/>
+                                    </xs:restriction>
+                                </xs:simpleType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="throwWorkflowException">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="exceptionText" type="xs:string">
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:choice>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="EmptyType"/>
+
+    <xs:complexType name="Schedule">
+        <xs:sequence>
+            <xs:element name="description" type="xs:string" minOccurs="0">
+            </xs:element>
+            <xs:element name="timePeriod">
+                <xs:complexType>
+                    <xs:annotation>
+                        <xs:documentation>
+                            The time period is specified as a start time and an
+                            end time. The start time is inclusive and the end time is
+                            exclusive. For example, a time period of 09:00:00 to 17:00:00
+                            starts AT 09:00:00 and ends just BEFORE 17:00:00.
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:sequence>
+                        <xs:element name="startTime" type="qos:TimeOfDay">
+                        </xs:element>
+                        <xs:element name="endTime" type="qos:TimeOfDay">
+                        </xs:element>
+                        <xs:element name="daysOfWeek">
+                            <xs:complexType>
+                                <xs:all>
+                                    <xs:element name="monday" minOccurs="0" type="qos:EmptyType">
+                                    </xs:element>
+                                    <xs:element name="tuesday" minOccurs="0" type="qos:EmptyType">
+                                    </xs:element>
+                                    <xs:element name="wednesday" minOccurs="0" type="qos:EmptyType">
+                                    </xs:element>
+                                    <xs:element name="thursday" minOccurs="0" type="qos:EmptyType">
+                                    </xs:element>
+                                    <xs:element name="friday" minOccurs="0" type="qos:EmptyType">
+                                    </xs:element>
+                                    <xs:element name="saturday" minOccurs="0" type="qos:EmptyType">
+                                    </xs:element>
+                                    <xs:element name="sunday" minOccurs="0" type="qos:EmptyType">
+                                    </xs:element>
+                                </xs:all>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:string">
+        </xs:attribute>
+    </xs:complexType>
+
+   <xs:complexType name="NetMasks">
+      <xs:sequence>
+         <xs:element name="netMask" minOccurs="1" maxOccurs="unbounded">
+            <xs:complexType>
+
+               <xs:simpleContent>
+                  <xs:extension base="qos:NumericIpAddress">
+                     <xs:attribute name="negated" type="xs:boolean" use="optional">
+                        <xs:annotation>
+                           <xs:documentation>
+
+  If "negated" is omitted or false:
+
+     The netMask represents a range of addresses that is permitted
+     - unless there is also a match with a netMask item which has the
+     "negated" attribute true.
+
+  If "negated" is true:
+
+     The netMask represents a range of address that is not included
+     even if there is also a match with a netMask item which is not
+     negated.
+
+  If the ip address being tested is in symbolic form, a DNS lookup is
+  performed to determine the numeric address.  If the ip address being
+  testsed is in dots-and-numbers form then no reverse dns lookup is
+  necessary to perform a netmask test and no reverse dns lookup is done.
+
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:attribute>
+
+                     <xs:attribute name="significantBits" use="required">
+                        <xs:simpleType>
+                           <xs:restriction base="xs:nonNegativeInteger">
+                              <xs:minInclusive value="0"/>
+                              <xs:maxInclusive value="128"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:attribute>
+
+                  </xs:extension>
+               </xs:simpleContent>
+
+             </xs:complexType>
+          </xs:element>
+       </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="NumericIpAddress">
+      <xs:annotation>
+        <xs:documentation>
+
+Description for an ipV4 numeric ip address (e.g. 111.22.3.255).
+This does not enforce that each decimal value must be between 0 and 255.
+
+Description for an ipV6 numeric ip address (e.g. f0:e0:d0::10:1.2.3.4)
+
+This is a sanity check only.
+
+        </xs:documentation>
+      </xs:annotation>
+
+      <xs:restriction base="xs:token">
+        <xs:pattern value="(\d){1,3}\.(\d){1,3}\.(\d){1,3}\.(\d){1,3}"/> 
+        <xs:pattern value="[0-9a-fA-F:]*(:((\d){1,3}\.(\d){1,3}\.(\d){1,3}\.(\d){1,3}))?"/>
+      </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="TimeOfDay">
+        <xs:attribute name="hour" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:int">
+                    <xs:minInclusive value="0"/>
+                    <xs:maxInclusive value="24"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="minute" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:int">
+                    <xs:minInclusive value="0"/>
+                    <xs:maxInclusive value="59"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="second" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:int">
+                    <xs:minInclusive value="0"/>
+                    <xs:maxInclusive value="59"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="RegularExpression">
+       <xs:simpleContent>
+          <xs:extension base="xs:string">
+             <xs:attribute name="desc" type="xs:string" use="optional"/>
+          </xs:extension>
+       </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:simpleType name="Name">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Want to use signed long, but restrict to positive values because
+         of the way code binding frameworks map schema types. -->
+
+    <xs:simpleType name="NaturalLong">
+      <xs:restriction base="xs:long">
+        <xs:minInclusive value="0"/>
+      </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="ScheduleRef">
+      <xs:simpleContent>
+         <xs:extension base="xs:string">
+            <xs:attribute name="inverted" type="xs:boolean" use="optional">
+                <xs:annotation>
+                   <xs:documentation>
+
+                        Indicates that the schedule should be interprted as
+                        the reverse of the normal sense.  For example, if 
+                        the schedule is normally active from 0900h to 1700h,
+                        setting "inverted" makes it active from 0000h to 0900h
+                        and 1700h to 2400h.
+
+                   </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+         </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  
+    <xs:complexType name="HourMinuteSecond">
+      <xs:annotation>
+         <xs:documentation>
+
+           If all attributes are omitted this implies 0 seconds.
+
+        </xs:documentation>
+      </xs:annotation>
+    
+      <xs:attribute name="hours" type="xs:nonNegativeInteger" use="optional"/>
+      <xs:attribute name="minutes" type="xs:nonNegativeInteger" use="optional"/>
+      <xs:attribute name="seconds" type="xs:nonNegativeInteger" use="optional"/>
+    </xs:complexType>
+
+  <xs:group name="policyOptions-v2">
+     <xs:sequence>
+        <xs:element ref="qos:requestCount"/>
+        <xs:element ref="qos:trackingWindowMethod"/>
+        <xs:element ref="qos:maxTrackingRecords" minOccurs="0"/>
+        <xs:element ref="qos:trackingRecordLifetimeSeconds" minOccurs="0"/>
+        <xs:element ref="qos:trackingLimitActions"/>
+        <xs:element ref="qos:logDetails" minOccurs="0"/>
+        <xs:element ref="qos:limitAlertsQuietTime" minOccurs="0"/>
+     </xs:sequence>
+  </xs:group>
+     
+  <xs:element name="requestCount">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="requestCountHistory" type="qos:HourMinuteSecond">
+           <xs:annotation>
+              <xs:documentation>
+                 The time over which to maintain request count history.
+                 This should be greather than the requestCountInterval.
+              </xs:documentation>
+           </xs:annotation>
+        </xs:element>
+        <xs:element name="requestCountInterval" type="qos:HourMinuteSecond">
+           <xs:annotation>
+              <xs:documentation>
+                 The requestCountHistory is composed of N requestCountIntervals.
+                 This controls how much time data becomes stale at a time.
+                 This should be between 1% and 100% of requestCountHistory.
+
+                 When requestCountInterval equals requestCountHistory we have,
+                 in effect, a fixed window rather than a sliding window. 
+ 
+              </xs:documentation>
+           </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="trackingWindowMethod" default="slidingWindow">
+       <xs:simpleType>
+           <xs:restriction base="xs:string">
+               <xs:enumeration value="slidingWindow"/>
+               <xs:enumeration value="fixedInterval"/>
+           </xs:restriction>
+       </xs:simpleType>
+   </xs:element>
+
+   <xs:element name="maxTrackingRecords" type="xs:int" default="10000">
+       <xs:annotation>
+           <xs:documentation>
+               Maximum number of quality records tracked.
+           </xs:documentation>
+       </xs:annotation>
+   </xs:element>
+
+   <xs:element name="trackingRecordLifetimeSeconds" default="20">
+       <xs:annotation>
+           <xs:documentation>
+               Remove tracking records after this number of seconds.
+
+               If omitted, the qos run-time will calculate a default value
+               which will be at least as large as requestCountHistory.
+           </xs:documentation>
+       </xs:annotation>
+       <xs:simpleType>
+           <xs:restriction base="xs:int">
+               <xs:maxInclusive value="7200"/>
+               <xs:minInclusive value="10"/>
+           </xs:restriction>
+       </xs:simpleType>
+   </xs:element>
+
+   <xs:element name="trackingLimitActions">
+       <xs:complexType>
+           <xs:sequence>
+               <xs:element name="alertOnWarning" minOccurs="0">
+                   <xs:annotation>
+                       <xs:documentation>
+                           Optionally send a management alert when
+                           the specified threshold is reached.
+
+                           This is obsolete.
+
+                       </xs:documentation>
+                   </xs:annotation>
+                   <xs:complexType>
+                       <xs:attribute name="warningThreshold" use="required">
+                           <xs:annotation>
+                               <xs:documentation>
+                                   The threshold at which an alert is sent,
+                                   as a percentage.  This is obsolete.
+                               </xs:documentation>
+                           </xs:annotation>
+                           <xs:simpleType>
+                               <xs:restriction base="xs:int">
+                                   <xs:minInclusive value="1"/>
+                                   <xs:maxInclusive value="100"/>
+                               </xs:restriction>
+                           </xs:simpleType>
+                       </xs:attribute>
+                   </xs:complexType>
+               </xs:element>
+               <xs:element name="limitAction">
+                   <xs:annotation>
+                       <xs:documentation>
+                           Action to perform when the tracking limit is reached
+                       </xs:documentation>
+                   </xs:annotation>
+                   <xs:simpleType>
+                       <xs:restriction base="xs:string">
+                           <xs:enumeration value="rejectNew">
+                               <xs:annotation>
+                                   <xs:documentation>
+                                       Reject new requests
+                                   </xs:documentation>
+                               </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="deleteLeastRecent">
+                               <xs:annotation>
+                                   <xs:documentation>
+                                       Delete the least recently used records,
+                                       even before they expire
+                                   </xs:documentation>
+                               </xs:annotation>
+                           </xs:enumeration>
+                       </xs:restriction>
+                   </xs:simpleType>
+               </xs:element>
+           </xs:sequence>
+       </xs:complexType>
+   </xs:element>
+
+   <xs:element name="logDetails" type="xs:boolean">
+           <xs:annotation>
+              <xs:documentation>
+
+        Logs detailed information to the transaction log for use in
+        analyzing traffic.  This includes:
+
+                run-time built-in arguments 
+                service level classification variables
+                values used in rule calculations (e.g. messageRate).
+
+        Defaults to false (no detailed logging).
+
+              </xs:documentation>
+           </xs:annotation>
+   </xs:element>
+
+   <xs:element name="limitAlertsQuietTime" type="qos:NaturalLong">
+           <xs:annotation>
+              <xs:documentation>
+
+        Prevents qos related alerts from flooding the console by
+        imposing a "quiet time" following an alert when additional
+        alerts are not reported.  This is used by the action
+        "suppress alerts for event counts".
+
+        When both "suppress alerts for event counts" and
+        "limit alerts quiet time" are specified, alerts are
+        suppressed until both conditions are satisfied.
+ 
+        Units of seconds.
+
+        Defaults to 3600 (seconds).
+
+              </xs:documentation>
+           </xs:annotation>
+    </xs:element>
+
+</xs:schema>

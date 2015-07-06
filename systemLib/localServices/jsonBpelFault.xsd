@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:soae-fault="http://www.intel.com/soae/bpelFault-2009a/" 
+           targetNamespace="http://www.intel.com/soae/bpelFault-2009a/" 
+           elementFormDefault="unqualified">
+
+  <xs:include schemaLocation="soaeBpelFault.xsd" />
+
+  <!-- ========================================================================
+
+    Defines the soae bpel faults that can be thrown  by json and jsonpath
+    related extension functions.
+    
+    ======================================================================== -->
+
+
+  <xs:element name="jsonParseStringFault" type="soae-fault:JsonParseStringFault">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Parsing JSON string failure</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="jsonParseStringExFault" type="soae-fault:JsonParseStringExFault">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Parsing JSON string failure</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="jsonSerializeExFault" type="soae-fault:JsonSerializeExFault">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Converting xml document to a string</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:complexType name="JsonParseStringFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="desc" type="xs:string"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="JsonParseStringExFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+	        <xs:element name="char-encoding" type="xs:string" />
+	        <xs:element name="binary-encoding" type="xs:string" />
+                <xs:element name="json-options" type="xs:string" />
+                <xs:element name="desc" type="xs:string"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="JsonSerializeExFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+	         <xs:element name="char-encoding" type="xs:string" />
+	         <xs:element name="binary-encoding" type="xs:string" />
+	         <xs:element name="json-options" type="xs:string" />
+                 <xs:element name="desc" type="xs:string"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="jsonValidationFault" type="soae-fault:JSONValidationFault">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Schema loading or validating failure</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:complexType name="JSONValidationFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+
+	      <!-- Faults fall into two broad families:
+
+			schema load failure (e.g. file not found, server timeout)
+
+			json validation failure
+
+		   Use "schemaLoadFailure" to discriminate between these two.
+              -->
+
+              <xs:sequence>
+                <xs:element name="schemaLoadFailure" type="xs:boolean"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="jsonSyntaxCheckFault" type="soae-fault:JsonSyntaxCheckFault">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Verify the syntax of a json object or array</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:complexType name="JsonSyntaxCheckFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="desc" type="xs:string"/>
+                <xs:element name="options" type="xs:string"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="jsonpathDeleteFault" type="soae-fault:JsonpathDeleteFault">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Delete selected items from a json string</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:complexType name="JsonpathDeleteFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="desc" type="xs:string"/>
+                <xs:element name="jsonpath" type="xs:string"/>
+                <xs:element name="options" type="xs:string"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="jsonpathInsertFault" type="soae-fault:JsonpathInsertFault">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Insert items into a json string</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:complexType name="JsonpathInsertFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="desc" type="xs:string"/>
+                <xs:element name="jsonpath" type="xs:string"/>
+                <xs:element name="options" type="xs:string"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="jsonpathUpdateFault" type="soae-fault:JsonpathUpdateFault">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Update selected items in a json string</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:complexType name="JsonpathUpdateFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="desc" type="xs:string"/>
+                <xs:element name="jsonpath" type="xs:string"/>
+                <xs:element name="options" type="xs:string"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="jsonpathSelectSingleFault" type="soae-fault:JsonpathSelectSingleFault">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Select a single item from a json string</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:complexType name="JsonpathSelectSingleFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="desc" type="xs:string"/>
+                <xs:element name="jsonpath" type="xs:string"/>
+                <xs:element name="options" type="xs:string"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="jsonpathSelectMultipleFault" type="soae-fault:JsonpathSelectMultipleFault">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Select zero, one, or more than one item from a json string</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:complexType name="JsonpathSelectMultipleFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="desc" type="xs:string"/>
+                <xs:element name="jsonpath" type="xs:string"/>
+                <xs:element name="options" type="xs:string"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="jsonBuildStringFault" type="soae-fault:JsonBuildStringFault">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Create a json template string to json by template expansion.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:complexType name="JsonBuildStringFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+	        <xs:element name="options" type="xs:string" />
+                <xs:element name="desc" type="xs:string"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+</xs:schema>

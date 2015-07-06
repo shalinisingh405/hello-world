@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+           xmlns:soae="http://www.intel.com/soae/wsdl/wsdl11-2007a/" 
+           xmlns:ldap="http://www.intel.com/soae/localService/ldap-2007a/" 
+           targetNamespace="http://www.intel.com/soae/localService/ldap-2007a/" 
+           elementFormDefault="qualified">
+  <!--<xs:import namespace="http://schemas.xmlsoap.org/wsdl/"/>-->
+  <xs:import namespace="http://schemas.xmlsoap.org/wsdl/" schemaLocation="../importedSchemas/wsdl.xsd"/>
+  <xs:import namespace="http://www.intel.com/soae/wsdl/wsdl11-2007a/" schemaLocation="wsdl11-cbr-binding-ext.xsd"/>
+  <!-- =============================================================================== -->
+  <!--  LDAP WSDL Schema related elements                                              -->
+  <!-- =============================================================================== -->
+  <xs:element name="content" type="ldap:Content"/>
+  <xs:complexType name="Content">
+    <xs:complexContent>
+      <xs:extension base="wsdl:tExtensibilityElement">
+        <xs:sequence/>
+        <xs:attribute name="part" type="xs:string" use="optional" default="body"/>
+        <xs:attribute name="contentType" type="ldap:ContentType" use="optional" default="text/xml"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ContentType">
+    <xs:restriction base="soae:ContentType">
+      <xs:enumeration value="text/xml"/>
+      <!-- <xs:enumeration value="application/x-esii"/> -->
+      <!-- support in later release -->
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- =============================================================================== -->
+  <!--  LDAP request                                                                   -->
+  <!-- =============================================================================== -->
+  <xs:element name="ExternLookupRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Access" type="ldap:AccessType" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+                Dynamic overrides of server name, port, admin dn and password.
+                If absent or empty then use provisioned value.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="batchRequest" type="ldap:BatchRequest" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+                Define one or more operation that this request are to perform.
+                Possible operations are: search, authentication and compare.
+                Only one instance of each type of operation. Search must be first operation.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="namespace" type="ldap:NonEmptyString" use="optional">
+        <xs:annotation>
+          <xs:documentation>???</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="noNSschemalocation" type="ldap:NonEmptyString" use="optional">
+        <xs:annotation>
+          <xs:documentation>???</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="AccessType">
+    <xs:sequence>
+      <xs:element name="authRequest" type="ldap:AuthRequest" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+              Authentication Request Information.
+              If this element or child element absent or empty then use provisioned value.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="AuthRequest">
+    <xs:sequence>
+      <xs:element name="SimpleAuthRequest" type="ldap:SimpleAuthRequestType" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="dn" type="ldap:NonEmptyString" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="SimpleAuthRequestType">
+    <xs:sequence>
+      <xs:element name="Password" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="BatchRequest">
+    <xs:sequence>
+      <xs:element name="searchRequest" type="ldap:SearchRequest" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+              Specify search criteria and attributes to be fetched for all matching entries
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="authRequest" type="ldap:AuthRequest" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+              Used for authentication purposes. Only password based authentication is presently supported, i.e.,
+              using dn and password within this element. If dn is absent, then DN from first matching search entry
+              from preceding searchRequest will be used.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="compareRequest" type="ldap:CompareRequest" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+              Uses to validate user using LDAP compare operation. For a given user (DN value), it is verified whether
+              the specified value is really part of that user entry. If DN value is abset, then DN of the first entry
+              from search-result will be used here.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="SearchRequest">
+    <xs:sequence>
+      <xs:choice minOccurs="0">
+        <!-- In a better world, we should always have eihter a filter or rawFilter element defined. However, that would require 
+             us to always popular this in our generated workflow code for AAA. Logically when there is no filter or rawFilter element 
+             defined, the consuming LDAP IA should populate the actual LDAP search request with filter request of (objectClass=*)
+        -->
+        <xs:element name="filter" type="ldap:Filter"/>
+        <xs:element name="rawFilter" type="ldap:NonEmptyString"/>
+      </xs:choice>
+      <xs:element name="attributes" type="ldap:Attributes" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="dn" type="ldap:NonEmptyString" use="required"/>
+    <xs:attribute name="scope" type="ldap:NonEmptyString" use="required"/>
+    <xs:attribute name="derefAliases" type="ldap:NonEmptyString" use="required"/>
+    <xs:attribute name="sizeLimit" type="ldap:MAXINT" use="optional" default="0"/>
+    <xs:attribute name="timeLimit" type="ldap:MAXINT" use="optional" default="0"/>
+    <xs:attribute name="typesOnly" type="xs:boolean" use="optional" default="false"/>
+  </xs:complexType>
+  <xs:complexType name="Attributes">
+    <xs:sequence>
+      <xs:element name="attribute" type="ldap:AttributeType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="AttributeType">
+    <xs:attribute name="name" type="ldap:NonEmptyString" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="Filter">
+    <xs:group ref="ldap:FilterGroup"/>
+  </xs:complexType>
+  <xs:group name="FilterGroup">
+    <xs:sequence>
+      <xs:choice>
+        <xs:element name="and" type="ldap:FilterSet"/>
+        <xs:element name="or" type="ldap:FilterSet"/>
+        <xs:element name="not" type="ldap:Filter"/>
+        <xs:element name="equalityMatch" type="ldap:EqualityMatch"/>
+        <xs:element name="substrings" type="ldap:Substrings"/>
+        <xs:element name="greaterOrEqual" type="ldap:EqualityMatch"/>
+        <xs:element name="lessOrEqual" type="ldap:EqualityMatch"/>
+        <xs:element name="present" type="ldap:AttributeDescription"/>
+        <xs:element name="approxMatch" type="ldap:EqualityMatch"/>
+        <xs:element name="extensibleMatch" type="ldap:MatchingRuleAssertion"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:group>
+  <xs:complexType name="FilterSet">
+    <xs:sequence>
+      <xs:group ref="ldap:FilterGroup" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="AttributeDescription">
+    <xs:attribute name="name" type="ldap:NonEmptyString" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="Substrings">
+    <xs:sequence>
+      <xs:element name="initial" type="ldap:NonEmptyString" minOccurs="0"/>
+      <xs:element name="any" type="ldap:NonEmptyString" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="final" type="ldap:NonEmptyString" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="ldap:NonEmptyString" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="EqualityMatch">
+    <xs:sequence>
+      <xs:element name="value" type="ldap:NonEmptyString" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="ldap:NonEmptyString" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="MatchingRuleAssertion">
+    <xs:sequence>
+      <xs:element name="value" type="ldap:NonEmptyString"/>
+    </xs:sequence>
+    <xs:attribute name="dnAttributes" type="xs:boolean" use="optional" default="false"/>
+    <xs:attribute name="matchingRule" type="xs:string" use="optional"/>
+    <xs:attribute name="name" type="ldap:NonEmptyString" use="optional"/>
+  </xs:complexType>
+  <xs:complexType name="CompareRequest">
+    <xs:sequence>
+      <xs:element name="assertion" type="ldap:Assertion" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="dn" type="ldap:NonEmptyString" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="Assertion">
+    <xs:sequence>
+      <xs:element name="value" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+  <!-- =============================================================================== -->
+  <!--  LDAP response                                                                  -->
+  <!-- =============================================================================== -->
+  <xs:element name="ExternLookupResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="batchResponse" type="ldap:BatchResponse">
+          <xs:annotation>
+            <xs:documentation>
+                Response from search/auth/compare request in the same sequence that these operations 
+                were in input request.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="BatchResponse">
+    <xs:sequence>
+      <xs:element name="searchResponse" type="ldap:SearchResponse" minOccurs="0"/>
+      <xs:element name="authResponse" type="ldap:AuthResponse" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+              Status of authentication operation.
+              On successful bind, it will return success status and continue on to next operation.
+              On bind-failure, map ldap-code to DSML-error code. If no match found then will return
+              invalidCredential status. No futher processing will be performed.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="compareResponse" type="ldap:CompareResponse" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+              Status of compare operation.
+              On successful compare, it will return compareTrue status and continue on to next operation.
+              On unsuccessful compare, it will return compareFalse.
+              On any other error, try to map Ldap-code to DSML error code. If no match then will return
+              operationErr.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="SearchResponse">
+    <xs:sequence>
+      <xs:element name="searchResultEntry" type="ldap:SearchResultEntry" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="searchResultDone" type="ldap:SearchResultDone" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="SearchResultEntry">
+    <xs:sequence>
+      <xs:element name="attr" type="ldap:Attr" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="dn" type="ldap:NonEmptyString" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="Attr">
+    <xs:sequence>
+      <xs:element name="value" type="ldap:ResponseValue" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="ldap:NonEmptyString" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="ResponseValue">
+    <xs:simpleContent>
+      <xs:extension base="ldap:NonEmptyString">
+        <xs:attribute name="tag" type="ldap:Tag" use="optional"/>
+        <xs:attribute name="specialEncoding" type="ldap:ResponseEncoding" use="optional"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:simpleType name="Tag">
+    <xs:annotation>
+      <xs:documentation>
+        Used to indicate what was the original type of BER (ASN.1) tag was on the associated element in the LDAP request.
+        We only plan to populate this attribute when our LDAP invocation agent had to perform some special encoding 
+        conversion upon this element, e.g., boolean, integer, a character string encoding with character requiring base64
+        encoding.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="boolean"/>
+      <xs:enumeration value="integer"/>
+      <xs:enumeration value="bitString"/>
+      <xs:enumeration value="octetString"/>
+      <xs:enumeration value="null"/>
+      <xs:enumeration value="real">
+        <xs:annotation>
+          <xs:documentation>not supported by ldap library</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="enumerated"/>
+      <xs:enumeration value="utf8String"/>
+      <xs:enumeration value="numericString"/>
+      <xs:enumeration value="printableString"/>
+      <xs:enumeration value="t61String"/>
+      <xs:enumeration value="videotexString"/>
+      <xs:enumeration value="ia5String"/>
+      <xs:enumeration value="utcTime"/>
+      <xs:enumeration value="graphicString"/>
+      <xs:enumeration value="visibleString"/>
+      <xs:enumeration value="generalString"/>
+      <xs:enumeration value="universalString"/>
+      <xs:enumeration value="characterString"/>
+      <xs:enumeration value="bmpString"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ResponseEncoding">
+    <xs:annotation>
+      <xs:documentation>
+        Used to indicate what that this element response value requires special processing.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="base64"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="SearchResultDone">
+    <xs:annotation>
+      <xs:documentation>
+        Overall status of the operation. 
+          On successful non-empty search, success status returned.
+          On empty search result, the operationErr status will be returned.
+          Both preceding conditions will not prevent following operations to be processed.
+          For any other errors, it will map Ldap code to DSML error code. If no match is found, then
+          operationErr will be returned. No processing will be perform for futher operations.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="resultCode" type="ldap:LdapResultCode" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="AuthResponse">
+    <xs:sequence>
+      <xs:element name="resultCode" type="ldap:LdapResultCode" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="CompareResponse">
+    <xs:sequence>
+      <xs:element name="resultCode" type="ldap:LdapResultCode" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="LdapResultCode">
+    <xs:sequence/>
+    <xs:attribute name="code" type="ldap:NonEmptyString" use="required"/>
+    <xs:attribute name="descr" type="ldap:NonEmptyString" use="required"/>
+  </xs:complexType>
+  <xs:simpleType name="NonEmptyString">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- ***** MAX Integer ***** -->
+  <xs:simpleType name="MAXINT">
+    <xs:restriction base="xs:unsignedInt">
+      <xs:maxInclusive value="2147483647"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

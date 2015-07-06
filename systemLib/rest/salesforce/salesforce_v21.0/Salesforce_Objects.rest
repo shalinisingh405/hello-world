@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:intel-esg="http://www.intel.com/soae/localServices/REST/" xmlns:md="http://www.intel.com/soae/protocolMetadata-2007a.xsd" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:salesforce="http://www.intel.com/soae/rest/salesforce/objects" xmlns:tns="http://www.intel.com/soae/rest/salesforce/objects" xmlns:salesforce_1="http://www.intel.com/soae/rest/salesforce" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="Salesforce_Objects" targetNamespace="http://www.intel.com/soae/rest/salesforce/objects">
+  <wsdl:message name="Salesforce_ObjectsRequest">
+    <wsdl:part name="sobjects" type="xsd:string"/>
+    <wsdl:part intel-esg:fixed="application/xml" name="accept" type="xsd:anyType" intel-esg:type="md:Header"/>
+  </wsdl:message>
+  <wsdl:message name="Salesforce_ObjectsResponse">
+    <wsdl:part name="body" type="xsd:anyType" intel-esg:type="salesforce_1:DescribeGlobal"/>
+  </wsdl:message>
+  <wsdl:portType name="Salesforce_Objects">
+    <wsdl:operation name="invoke">
+      <wsdl:input message="tns:Salesforce_ObjectsRequest"/>
+      <wsdl:output message="tns:Salesforce_ObjectsResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="Salesforce_ObjectsBinding" type="tns:Salesforce_Objects">
+    <http:binding verb="GET"/>
+    <wsdl:operation name="invoke">
+      <http:operation location="(sobjects)"/>
+      <wsdl:input>
+        <http:urlReplacement/>
+        <intel-esg:httpHeaders>
+          <intel-esg:header name="accept" part="accept"/>
+        </intel-esg:httpHeaders>
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="body" type="application/xml"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Salesforce_ObjectsService">
+    <wsdl:port binding="tns:Salesforce_ObjectsBinding" name="Salesforce_ObjectsPort">
+      <http:address location="https://na1.salesforce.com"/>
+    </wsdl:port>
+  </wsdl:service>
+  <plnk:partnerLinkType name="Salesforce_ObjectsPartnerLinkType">
+    <plnk:role name="service" portType="tns:Salesforce_Objects"/>
+  </plnk:partnerLinkType>
+</wsdl:definitions>

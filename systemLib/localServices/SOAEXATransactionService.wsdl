@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="urn:soae.intel.com/xa/transaction" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xa="urn:soae.intel.com/xa/transaction">
+	<plnk:partnerLinkType name="XATransactionPlinkType">
+		<plnk:role name="XATransactionManager" portType="xa:PortType"/>
+	</plnk:partnerLinkType>
+	<wsdl:types>
+		<xsd:schema>
+			<xsd:import namespace="urn:soae.intel.com/xa/transaction" schemaLocation="SOAEXATransactionService.xsd"/>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="BeginRequestMessage">
+		<wsdl:part name="body" element="xa:beginRequest"/>
+	</wsdl:message>
+	<wsdl:message name="BeginResponseMessage">
+		<wsdl:part name="body" element="xa:beginResponse"/>
+	</wsdl:message>
+	<wsdl:message name="CommitRequestMessage">
+		<wsdl:part name="body" element="xa:commitRequest"/>
+	</wsdl:message>
+	<wsdl:message name="CommitResponseMessage">
+		<wsdl:part name="body" element="xa:commitResponse"/>
+	</wsdl:message>
+	<wsdl:message name="RollbackRequestMessage">
+		<wsdl:part name="body" element="xa:rollbackRequest"/>
+	</wsdl:message>
+	<wsdl:message name="RollbackResponseMessage">
+		<wsdl:part name="body" element="xa:rollbackResponse"/>
+	</wsdl:message>
+	<wsdl:message name="StatusRequestMessage">
+		<wsdl:part name="body" element="xa:statusRequest"/>
+	</wsdl:message>
+	<wsdl:message name="StatusResponseMessage">
+		<wsdl:part name="body" element="xa:statusResponse"/>
+	</wsdl:message>
+	<wsdl:message name="SetRollbackOnlyRequestMessage">
+		<wsdl:part name="body" element="xa:setRollbackOnlyRequest"/>
+	</wsdl:message>
+	<wsdl:message name="SetRollbackOnlyResponseMessage">
+		<wsdl:part name="body" element="xa:setRollbackOnlyResponse"/>
+	</wsdl:message>
+	<wsdl:message name="SuspendRequestMessage">
+		<wsdl:part name="body" element="xa:suspendRequest"/>
+	</wsdl:message>
+	<wsdl:message name="SuspendResponseMessage">
+		<wsdl:part name="body" element="xa:suspendResponse"/>
+	</wsdl:message>
+	<wsdl:message name="ResumeRequestMessage">
+		<wsdl:part name="body" element="xa:resumeRequest"/>
+	</wsdl:message>
+	<wsdl:message name="ResumeResponseMessage">
+		<wsdl:part name="body" element="xa:resumeResponse"/>
+	</wsdl:message>
+	<wsdl:message name="FaultMessage">
+		<wsdl:part name="body" element="xa:fault"/>
+	</wsdl:message>
+	<wsdl:portType name="PortType">
+		<wsdl:operation name="begin">
+			<wsdl:input message="xa:BeginRequestMessage"/>
+			<wsdl:output message="xa:BeginResponseMessage"/>
+			<wsdl:fault name="Fault" message="xa:FaultMessage"/>
+		</wsdl:operation>
+		<wsdl:operation name="commit">
+			<wsdl:input message="xa:CommitRequestMessage"/>
+			<wsdl:output message="xa:CommitResponseMessage"/>
+			<wsdl:fault name="Fault" message="xa:FaultMessage"/>
+		</wsdl:operation>
+		<wsdl:operation name="rollback">
+			<wsdl:input message="xa:RollbackRequestMessage"/>
+			<wsdl:output message="xa:RollbackResponseMessage"/>
+			<wsdl:fault name="Fault" message="xa:FaultMessage"/>
+		</wsdl:operation>
+		<wsdl:operation name="status">
+			<wsdl:input message="xa:StatusRequestMessage"/>
+			<wsdl:output message="xa:StatusResponseMessage"/>
+			<wsdl:fault name="Fault" message="xa:FaultMessage"/>
+		</wsdl:operation>
+		<wsdl:operation name="setRollbackOnly">
+			<wsdl:input message="xa:SetRollbackOnlyRequestMessage"/>
+			<wsdl:output message="xa:SetRollbackOnlyResponseMessage"/>
+			<wsdl:fault name="Fault" message="xa:FaultMessage"/>
+		</wsdl:operation>
+		<wsdl:operation name="suspend">
+			<wsdl:input message="xa:SuspendRequestMessage"/>
+			<wsdl:output message="xa:SuspendResponseMessage"/>
+			<wsdl:fault name="Fault" message="xa:FaultMessage"/>
+		</wsdl:operation>
+		<wsdl:operation name="resume">
+			<wsdl:input message="xa:ResumeRequestMessage"/>
+			<wsdl:output message="xa:ResumeResponseMessage"/>
+			<wsdl:fault name="Fault" message="xa:FaultMessage"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="Binding" type="xa:PortType">
+		<soap:binding style="document" transport="http://www.intel.com/soae/localservice/axis2"/>
+		<wsdl:operation name="begin">
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="Fault">
+				<soap:fault name="Fault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="commit">
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="Fault">
+				<soap:fault name="Fault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="rollback">
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="Fault">
+				<soap:fault name="Fault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="status">
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="Fault">
+				<soap:fault name="Fault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="setRollbackOnly">
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="Fault">
+				<soap:fault name="Fault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="suspend">
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="Fault">
+				<soap:fault name="Fault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="resume">
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="Fault">
+				<soap:fault name="Fault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="Service">
+		<wsdl:port name="ServicePort" binding="xa:Binding">
+			<soap:address location="soae-local://axis2?service=SOAEXATransactionService"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

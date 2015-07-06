@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions
+	name="SSM-SOAP-WebService"
+	targetNamespace="http://security.bea.com/ssmws/ssm-ws-1.0.wsdl"
+	xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:ssm="http://security.bea.com/ssmws/ssm-soap-types-1.0.xsd"
+    xmlns:tns="http://security.bea.com/ssmws/ssm-ws-1.0.wsdl"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:xacml-context="urn:oasis:names:tc:xacml:2.0:context:schema:os">
+    <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Defines SOAP WebService public interface for SSM component.</wsdl:documentation>
+    
+    <!-- ParterLinkType Definition -->
+    <plnk:partnerLinkType name="OracleEntitlementServerAuthenticationPartnerLinkType">
+		<plnk:role name="OracleEntitlementServerAuthentication" portType="tns:AuthenticationPort"/>
+	</plnk:partnerLinkType>
+	
+	<plnk:partnerLinkType name="OracleEntitlementServerXacmlAuthorizationPartnerLinkType">
+		<plnk:role name="OracleEntitlementServerXacmlAuthorization" portType="tns:XACMLPort"/>
+	</plnk:partnerLinkType>
+
+	<!-- WSDL Types Section -->
+	<wsdl:types>
+		<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+            <xsd:import namespace="http://security.bea.com/ssmws/ssm-soap-types-1.0.xsd" schemaLocation="ssm-soap-types.xsd"/>
+            <!-- note this policy schema is not a full one. it is stripped for the XACML runtime only -->
+			<xsd:import namespace="urn:oasis:names:tc:xacml:2.0:policy:schema:os" schemaLocation="access_control-xacml-2.0-policy-schema-os.xsd"/>
+			<xsd:import namespace="urn:oasis:names:tc:xacml:2.0:context:schema:os" schemaLocation="access_control-xacml-2.0-context-schema-os.xsd"/>
+		</xsd:schema>
+	</wsdl:types>
+    
+    <!-- WSDL Messages Section -->
+	<wsdl:message name="serviceFault">
+		<wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Reports a generic server-side error.</wsdl:documentation>
+		<wsdl:part element="ssm:serviceFailure" name="fault">
+			<wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Generic error information</wsdl:documentation>
+		</wsdl:part>
+    </wsdl:message>
+
+    <wsdl:message name="authenticationFault">
+        <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Reports an authentication error.</wsdl:documentation>
+        <wsdl:part element="ssm:authenticationFailure" name="fault">
+            <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Authentication error information.</wsdl:documentation>
+        </wsdl:part>
+    </wsdl:message>
+    
+	<wsdl:message name="authenticateRequest">
+		<wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Request to authenticate a user. Accepts any credential type supported by the authentication provider or a response to an earlier authentication challenge, and, optionally, the type of requested identity assertion that represents the identity and application context of the authenticated user.</wsdl:documentation>
+		<wsdl:part element="ssm:authenticate" name="parameters">
+			<wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Input parameters for authenticate operation</wsdl:documentation>
+		</wsdl:part>
+    </wsdl:message>
+
+	<wsdl:message name="authenticateResponse">
+        <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Response from user's authentication. Returns either the requested identity assertion token, an authentication challenge, or additional context requests, if a challenge is required by the specific authentication provider or the authentication protocol.</wsdl:documentation>
+        <wsdl:part element="ssm:authenticateResponse" name="parameters">
+            <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Identifies authentication response</wsdl:documentation>
+        </wsdl:part>
+	</wsdl:message>
+	
+    <wsdl:message name="XACMLAtzDecisionRequest">
+        <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Request to xacml authorize user access. Accepts a subject including supported type of an identity assertion token, and a runtime resource, actions, and a set of environments.</wsdl:documentation>
+		<wsdl:part name="param" element="xacml-context:Request"/>
+    </wsdl:message>
+
+    <wsdl:message name="XACMLAtzDecisionResponse">
+        <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Response from user's xacml authorization. Returns the authorization decision, and a set of obligations.</wsdl:documentation>
+		<wsdl:part name="param" element="xacml-context:Response"/>
+    </wsdl:message>
+
+    <wsdl:message name="XACMLFault">
+        <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Reports an xacml authorization error.</wsdl:documentation>
+		<wsdl:part name="fault" element="ssm:xacmlFailure"/>
+	</wsdl:message>
+
+    <!-- WSDL PortType Section -->
+    <wsdl:portType name="AuthenticationPort">
+		<wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Defines authentication operations.</wsdl:documentation>
+		<wsdl:operation name="authenticate">
+			<wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Defines the authentication method.</wsdl:documentation>
+            <wsdl:input message="tns:authenticateRequest">
+				<wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Authentication request input.</wsdl:documentation>
+ 			</wsdl:input>
+			<wsdl:output message="tns:authenticateResponse">
+				<wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Authentication response result.</wsdl:documentation>
+			</wsdl:output>
+			<wsdl:fault name="serviceFault" message="tns:serviceFault" /> 
+			<wsdl:fault name="authenticationFault" message="tns:authenticationFault" /> 
+        </wsdl:operation>
+    </wsdl:portType>
+	
+    <wsdl:portType name="XACMLPort">
+        <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Defines xacml authorization operations.</wsdl:documentation>
+        <wsdl:operation name="authorize">
+            <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Defines the xacml authorization method.</wsdl:documentation>
+            <wsdl:input message="tns:XACMLAtzDecisionRequest">
+                <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Xacml authorization request input.</wsdl:documentation>
+            </wsdl:input>
+            <wsdl:output message="tns:XACMLAtzDecisionResponse">
+                <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Xacml authorization response result.</wsdl:documentation>
+            </wsdl:output>
+			<wsdl:fault name="serviceFault" message="tns:serviceFault"/>
+			<wsdl:fault name="xacmlFault" message="tns:XACMLFault"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	
+	<!-- WSDL Bindings Section -->
+	<wsdl:binding name="AuthenticationBinding" type="tns:AuthenticationPort">
+		<wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">SOAP/HTTP binding for Authentication</wsdl:documentation>
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="authenticate">
+			<wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Defines binding for the authentication method</wsdl:documentation>
+            <soap:operation soapAction="security:ssmws:Authentication#authenticate"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="serviceFault">
+				<soap:fault name="serviceFault" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="authenticationFault">
+                <soap:fault name="authenticationFault" use="literal"/>
+            </wsdl:fault>
+		</wsdl:operation>
+	</wsdl:binding>
+	
+    <wsdl:binding name="XACMLBinding" type="tns:XACMLPort">
+        <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">SOAP/HTTP binding for xacml Authorization</wsdl:documentation>
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<!-- Axis has problem support this wrapped style, use document instead. -->
+		<wsdl:operation name="authorize">
+			<soap:operation soapAction="ssmws:xacml:authorization" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="serviceFault">
+				<soap:fault name="serviceFault" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="xacmlFault">
+				<soap:fault name="xacmlFault" use="literal"/>
+			</wsdl:fault>
+ 		</wsdl:operation>
+	</wsdl:binding>
+
+    <!-- WSDL Services Section -->
+    <wsdl:service name="Ssmws">
+ 		<wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Defines an instance of SSM Web Service</wsdl:documentation>
+		<wsdl:port name="Authentication" binding="tns:AuthenticationBinding">
+            <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Exposes the Authentication Web service on the specified HTTP port.</wsdl:documentation>
+            <soap:address location="http://localhost:9000/Authentication"/>
+		</wsdl:port>
+        <wsdl:port name="XACMLAuthorization" binding="tns:XACMLBinding">
+            <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Exposes the xacml Authorization Web service on the specified HTTP port.</wsdl:documentation>
+			<soap:address location="http://localhost:9000/XACMLAuthorization"/>
+		</wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

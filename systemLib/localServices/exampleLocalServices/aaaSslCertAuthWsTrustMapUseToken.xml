@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <certificateFromPeerSsl>fullCertificate</certificateFromPeerSsl>
+    </extractIdentity>
+    <authenticateIdentity>
+      <wsTrustAuthentication>
+        <version>1.3</version>
+        <soapVersion>1.2</soapVersion>
+        <requestType>Issue</requestType>
+        <tokenType>SAML-v1.1</tokenType>
+        <rstFormat>RST</rstFormat>
+        <wsSecurityPolicyGroup>demo-security-group-policy</wsSecurityPolicyGroup>
+        <clientAuthenticationMethod>
+          <mechanism>Use_SSL/TLS</mechanism>
+          <source>
+            <useExtractedIdentity>
+              <usernameInternalName>int:extractedIdentityUsername</usernameInternalName>
+            </useExtractedIdentity>
+          </source>
+        </clientAuthenticationMethod>
+        <proofToken>
+          <proofType>public-key</proofType>
+          <source>
+            <bstFromWorkflow type="string">
+              <inputFromWorkflow>prompt for proof source token information</inputFromWorkflow>
+            </bstFromWorkflow>
+          </source>
+        </proofToken>
+        <toFieldPopulation>true</toFieldPopulation>
+        <authenticationType>urn:ietf:rfc:2945</authenticationType>
+      </wsTrustAuthentication>
+    </authenticateIdentity>
+    <mapIdentity>
+      <useWsTrustAuthenticationToken></useWsTrustAuthenticationToken>
+    </mapIdentity>
+  </identityProcessing>
+</aaa:aaaPolicy>

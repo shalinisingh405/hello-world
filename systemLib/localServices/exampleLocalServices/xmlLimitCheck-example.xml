@@ -1,0 +1,21 @@
+<xlc:xmlLimitCheckRequest
+   xmlns:xlc="http://www.intel.com/soae/localService/xmlLimitCheck-2007a/"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+   xsi:schemaLocation="http://www.intel.com/soae/localService/xmlLimitCheck-2007a/ ../xmlLimitCheck.xsd"
+   shortCircuit="0" >
+  <data>
+    <documentLength limit="1000" />
+    <tagLength limit="2000" />
+    <namespaceUriLength limit="3000" />
+    <namespacePrefixLength limit="4000" />
+    <attributeValueLength limit="5000" />
+    <contentLength limit="6000" />
+    <commentLength limit="1000" />
+    <piLength limit="7000" />
+    <pi limit="9000" />
+    <attributesPerElement limit="9000" />
+    <openElements limit="9001" />
+    <openNamespaces limit="9002" />
+    <childrenPerElement limit="9003" />
+  </data>
+</xlc:xmlLimitCheckRequest>

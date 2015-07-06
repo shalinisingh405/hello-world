@@ -1,0 +1,70 @@
+<ExternLookupResponse 
+    xmlns="http://www.intel.com/soae/localService/ldap-2007a/" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://www.intel.com/soae/localService/ldap-2007a/ ../ldap.xsd">
+
+  <!-- General Comment: Substitute your DN, password, etc. as require. 
+       Remove any element that your actual usage do NOT require.
+
+       For detail description of LDAP request see:
+       1) Directory Services Markup Language v2.0 December 18, 2001
+       2) IETF RFC 2251: Lightweight Directory Access Protocol (v3) December 1997
+  -->
+
+  <batchResponse>
+    <!-- Will have a responses for each search/auth/compare request in the same order as
+         specified in the input request.
+    -->
+    <searchResponse>
+      <!-- zero, 1 or more searchResultEntrys.
+           Each searchResultEntry gives the details of a fetched user entry.
+      -->
+      <searchResultEntry dn="uid=jdole, ou=engineering, o=sarvega, dc=US">
+        <attr name="uid">
+          <value tag="octetString" specialEncoding="base64">amRvbGU=</value>
+        </attr>
+        <attr name="Hobbies">
+          <value tag="generalString">Drawing</value>
+          <value tag="boolean" >true</value>
+        </attr>
+      </searchResultEntry>
+      <searchResultEntry dn="uid=jdole2, ou=engineering, o=intel, dc=US">
+      </searchResultEntry>
+      <searchResultDone>
+        <!-- Overall status of operation.
+             If successful non-empty seacrh, it will return 'success' status.
+
+             On empty search result, it will return 'operationsErr' status. Note: for this 
+             condition processing of any other following operations will be performed.
+
+             On any other error condition, an attempt will be made to map LDAP-codes to DSML 
+             error codes. Additionally, no processing on following operations will be performed.
+        -->
+        <resultCode code="0" descr="success"/>
+      </searchResultDone>
+    </searchResponse>
+    <authResponse>
+      <!-- Status of authentication operation.
+           On successful bind, 'success' status will be returned.
+           
+           On bind failure, the LDAP error codes will be mapped to the DSML error codes. 
+           Additionally, no following operations will be performed.
+           
+           If no match is found, it will be mapped to 'invalidCredential' error status.
+      -->
+      <resultCode code="25" descr="invalidCredentials"/>
+    </authResponse>
+    <compareResponse> 
+      <!-- Gives result of compare operation.
+           On successfully operation completion the following two conditions can be returned:
+           1) If given values are matched then 'compareTrue' status returned.
+           2) If given values are not matched, then 'compareFalse' status returned.
+
+           Any other error will ahve LDAP error codes mapped to DSML error codes.
+           If no error code match is found then 'operationsErr' will be returned.
+           Additionally, no following operations will be performed.
+      -->
+      <resultCode code="6" descr="compareTrue"/>
+    </compareResponse>
+  </batchResponse>
+</ExternLookupResponse>

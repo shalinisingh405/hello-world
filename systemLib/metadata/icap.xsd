@@ -1,0 +1,84 @@
+  <xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' blockDefault='#all' elementFormDefault="qualified" attributeFormDefault="unqualified"
+             xmlns:wsa='http://schemas.xmlsoap.org/ws/2004/08/addressing'  
+             xmlns='http://www.intel.com/soae/protocolMetadata-2007a.xsd' targetNamespace='http://www.intel.com/soae/protocolMetadata-2007a.xsd'>
+             
+    <xs:include schemaLocation='metadataCommon.xsd'/>
+    <xs:include schemaLocation='http.xsd'/>
+
+    <!-- =============================================================================== -->
+    <!--  message element: input & output servers                                        -->
+    <!--  input & output servers types: icap                                             -->
+    <!-- =============================================================================== -->
+    
+    <!--  ICAP protocol header: root element  -->
+    <xs:element name='icapMessage'>
+      <xs:complexType>
+        <xs:sequence>
+          <xs:element name='source' type='IcapSource' minOccurs='0' maxOccurs='1'/> <!-- both source and destinations can not occur in the same message -->
+          <xs:element name='destination' type='IcapDestination' minOccurs='0' maxOccurs='1'/>
+          <xs:element name='transport' type='IcapTransport' maxOccurs='1'/>  <!-- specific message related data -->
+          <xs:element name='encapsulatedReqMessage' type='EncapsulatedReqMessage' minOccurs='0' maxOccurs='1'/>  <!-- specific message related data -->
+          <xs:element name='encapsulatedResMessage' type='EncapsulatedResMessage' minOccurs='0' maxOccurs='1'/>  <!-- specific message related data -->
+        </xs:sequence>
+      </xs:complexType>
+    </xs:element>
+
+    <!--  source element  -->
+    <xs:complexType name='IcapSource'>
+      <xs:sequence>
+        <xs:element name='inputServerName' type='NonEmptyString'/>
+        <xs:element name='ip' type='NonEmptyString' minOccurs='0'/> <!-- Ip address that we receive request on -->
+        <xs:element name='port' type='xs:unsignedShort'/> <!-- Port that we receive request on -->
+      </xs:sequence>
+    </xs:complexType>
+    <!--  destination element  -->
+    <xs:complexType name='IcapDestination'>
+      <xs:sequence maxOccurs='1'>
+        <xs:element name='invocationAgentName' type='NonEmptyString'/>
+      </xs:sequence>
+    </xs:complexType>
+    <!-- transport element  -->
+    <xs:complexType name='IcapTransport'>
+      <xs:choice maxOccurs='1'>
+        <xs:element name='icapRequest' type='IcapRequest'/>
+        <xs:element name='icapResponse' type='IcapResponse'/>
+      </xs:choice>
+    </xs:complexType>
+
+    <!-- request elements  -->
+    <xs:complexType name='IcapRequest'>
+      <xs:sequence maxOccurs='1'>
+        <xs:element name='method' type='NonEmptyString' minOccurs='1' maxOccurs='1'/>
+        <xs:element name='uri' type='xs:anyURI' minOccurs='0' maxOccurs='1'/>
+        <xs:element name='version' type='IcapVersion' minOccurs='1' maxOccurs='1'/>
+        <xs:element name='query' type='Query' minOccurs='0' maxOccurs='1'/>
+        <xs:element name='headers' type='Headers' minOccurs='0' maxOccurs='1'/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name='IcapResponse'>
+      <xs:sequence maxOccurs='1'>
+        <xs:element name='version' type='IcapVersion' minOccurs='1' maxOccurs='1'/>
+        <xs:element name='status' type='NonEmptyString' minOccurs='1' maxOccurs='1'/>
+        <xs:element name='reason' type='NonEmptyString' minOccurs='0' maxOccurs='1'/>
+        <xs:element name='headers' type='Headers' minOccurs='0' maxOccurs='1'/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:simpleType name='IcapVersion'>
+      <xs:restriction base='xs:string'>
+        <xs:enumeration value='ICAP_10'/>
+      </xs:restriction>
+    </xs:simpleType>
+
+	<!-- EncapsulatedMessage -->
+    <xs:complexType name='EncapsulatedReqMessage'>
+      <xs:choice>
+        <xs:element ref='httpMessage' minOccurs='0' maxOccurs='1'/>
+      </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name='EncapsulatedResMessage'>
+      <xs:choice>
+        <xs:element ref='httpMessage' minOccurs='0' maxOccurs='1'/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:schema>

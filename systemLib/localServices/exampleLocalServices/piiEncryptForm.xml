@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pii:piiPolicy xmlns:pii="http://www.intel.com/soae/localService/piiDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/piiDefinition-2007a/ ../pii.xsd"
+               writeTransactionLog="true" logStartOfPii="true" logSuccessfulCompletionOfPii="true"
+               logLevel="TRACE" 
+               maximumLaxCharactersAllowed="4">
+  <encrypt>
+    <reKeyObject>rekey-object-abc</reKeyObject>
+    <tweakInfo>
+      <tweakSource>noTweak</tweakSource>
+    </tweakInfo>
+    <encryptionOutputEncoding>EmbeddedWithinPrefixPostfixStrings</encryptionOutputEncoding>
+    <encryptionTextDelimiters>
+      <prefix>ESTR</prefix>
+      <postfix>EEND</postfix>
+    </encryptionTextDelimiters>
+    <encryptingKeyTweakUsedInfo>embeddedWithEncryptedData</encryptingKeyTweakUsedInfo>
+    <includeClusterIdentifier>false</includeClusterIdentifier>
+    <targets>
+      <targetMechanism>Form</targetMechanism>
+      <target>
+        <dataDomain>name</dataDomain>
+        <match>
+          <formField>Name</formField>
+        </match>
+      </target>
+      <target>
+        <dataDomain>address</dataDomain>
+        <match>
+          <formField>Address</formField>
+        </match>
+      </target>
+      <target>
+        <dataDomain>phoneNumber</dataDomain>
+        <match>
+          <xpathExpression>Home phone</xpathExpression>
+        </match>
+      </target>
+      <target>
+        <dataDomain>phoneNumber</dataDomain>
+        <match>
+          <formField>Cell phone</formField>
+        </match>
+      </target>
+    </targets>
+  </encrypt>
+</pii:piiPolicy>

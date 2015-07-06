@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wssec:webServiceSecurityDefinition bindingType="REST" usage="createSecurityToken" samlVersion="2.0" tokenType="saml" samlTokenVersion="1.1"
+        xmlns:wssec="http://www.intel.com/soae/localService/wssecDefinition-2007a/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.intel.com/soae/localService/wssecDefinition-2007a/ ../wssecDefinition.xsd">
+  <createSamlAssertion>
+    <assertionInfo>
+      <v1dotxInfo>
+        <generalAssertionInfo>
+          <Issuer type="string">
+            <staticValue>some-bogus-issuer</staticValue>
+          </Issuer>
+        </generalAssertionInfo>
+      </v1dotxInfo>
+    </assertionInfo>
+    <signatureInfo>
+      <signatureGenerationMethod>rsaWithSha256</signatureGenerationMethod>
+      <digestGenerationMethod>sha256</digestGenerationMethod>
+      <canonicalGenerationMethod>C14N_exclusive</canonicalGenerationMethod>
+      <keyPair>
+        <security-config-package>demo-keypair</security-config-package>
+      </keyPair>
+    </signatureInfo>
+    <outputBindingInfo>
+      <exportDestination>to-HTTP-Authorization-saml2-bearer</exportDestination>
+      <deflate>true</deflate>
+      <base64Encode>true</base64Encode>
+    </outputBindingInfo>
+  </createSamlAssertion>
+</wssec:webServiceSecurityDefinition>

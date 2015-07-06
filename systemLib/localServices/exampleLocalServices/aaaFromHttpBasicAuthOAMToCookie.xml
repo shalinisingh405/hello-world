@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ..\aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <usernameFromHttpBasicAuthenticationHeader/>
+    </extractIdentity>
+    <authenticateIdentity>
+      <oracleAccessManagerAuthentication>
+        <resource type="anyURI">
+          <use-extracted-resource/>
+        </resource>
+        <method>Get</method>
+        <ssoOptions>
+          <returnSsoToken>true</returnSsoToken>
+        </ssoOptions>
+      </oracleAccessManagerAuthentication>
+    </authenticateIdentity>
+    <mapIdentity>
+      <useSsoToken>
+        <createSsoCookie>
+          <setCookieFormatString>Set-Cookie: ObSSOCookie=%t; path="%r; domain="%d";</setCookieFormatString>
+          <ssoSource>use-retrieved-SSO-token</ssoSource>
+          <path type="string">
+            <use-extracted-resource/>
+          </path>
+          <domain type="string">
+            <staticValue>.acme.com</staticValue>
+          </domain>
+        </createSsoCookie>
+      </useSsoToken>
+    </mapIdentity>
+  </identityProcessing>
+  <resourceProcessing>
+    <extractResource>
+      <urlFromWsAddressingAction>
+        <component>path</component>
+        <index>-1</index>
+      </urlFromWsAddressingAction>
+    </extractResource>
+    <authorizeResource>
+      <oracleAccessManagerAuthorization>
+        <useOracleAccessManagerAuthenticationParametrizations/>
+      </oracleAccessManagerAuthorization>
+    </authorizeResource>
+  </resourceProcessing>
+</aaa:aaaPolicy>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:intel-esg="http://www.intel.com/soae/localServices/REST/" xmlns:md="http://www.intel.com/soae/protocolMetadata-2007a.xsd" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:tns="http://www.intel.com/soae/localService/oauth-revocation/registeraccesstoken" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="RegisterAccessToken" targetNamespace="http://www.intel.com/soae/localService/oauth-revocation/registeraccesstoken">
+  <wsdl:message name="RegisterAccessTokenRequest">
+    <wsdl:part name="body" type="xsd:anyType"/>
+  </wsdl:message>
+  <wsdl:message name="RegisterAccessTokenResponse">
+    <wsdl:part name="body" type="xsd:anyType"/>
+  </wsdl:message>
+  <wsdl:portType name="RegisterAccessToken">
+    <wsdl:operation name="invoke">
+      <wsdl:input message="tns:RegisterAccessTokenRequest"/>
+      <wsdl:output message="tns:RegisterAccessTokenResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="RegisterAccessTokenBinding" type="tns:RegisterAccessToken">
+    <http:binding verb="POST"/>
+    <wsdl:operation name="invoke">
+      <http:operation location="/registerAccessToken"/>
+      <wsdl:input>
+        <mime:content part="body" type="application/json"/>
+        <intel-esg:parameterMapping/>
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="body" type="application/json"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="RegisterAccessTokenService">
+    <wsdl:port binding="tns:RegisterAccessTokenBinding" name="RegisterAccessTokenPort">
+      <http:address location="http://localhost:8080"/>
+    </wsdl:port>
+  </wsdl:service>
+  <plnk:partnerLinkType name="RegisterAccessTokenPartnerLinkType">
+    <plnk:role name="service" portType="tns:RegisterAccessToken"/>
+  </plnk:partnerLinkType>
+</wsdl:definitions>

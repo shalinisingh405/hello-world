@@ -1,0 +1,16 @@
+  <message xmlns='http://www.intel.com/soae/protocolMetadata-2007a.xsd'
+           xmlns:wsa='http://schemas.xmlsoap.org/ws/2004/08/addressing'>
+    <!-- In this example, an Invocation Agent is utilizing HTTP/TCP -->
+    <!-- This is indicated in the following protocol element -->
+    <protocol>http</protocol>
+    <!-- Indicates that the invocation agent failed to response within the maximum
+         specified timeout. This could occur because of the invocation agent dying
+         or hanging without generating any response.
+    -->
+    <errorStatus>
+      <!-- type of error condition encountered -->
+      <status>invokeTimeout</status>
+      <!-- detail error description --> 
+      <details>anything string that the WFL process wants can be put here</details>
+    </errorStatus>
+  </message>

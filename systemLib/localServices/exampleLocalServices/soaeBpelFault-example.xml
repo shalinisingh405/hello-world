@@ -1,0 +1,20 @@
+<soae-fault:contentAttackPreventionFault
+  xmlns:soae-fault="http://www.intel.com/soae/bpelFault-2009a/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:schemaLocation="http://www.intel.com/soae/bpelFault-2009a/ ../soaeBpelFault.xsd" 
+>
+  <faultString>Content Attack Prevention Policy was violated</faultString>
+  <details>
+    <policy>my-content-attack-policy</policy>
+    <writeTransactionLog>true</writeTransactionLog>
+    <reject>true</reject>
+    <type>ForbiddenRegularExpression</type>
+    <traceback>/doc/a1[elem child #3]/a2[elem child #2]/a3[elem child #1]</traceback>
+    <userDefinedTestName>shell escapes</userDefinedTestName>
+    <faultEnum>general-CAP-inspection-failure</faultEnum>
+    <desc>cvc-complex-type.2.4.b: The content of element 'division' is not complete. One of '{employee-status}' is expected.</desc>
+  </details>
+</soae-fault:contentAttackPreventionFault>
+
+
+     

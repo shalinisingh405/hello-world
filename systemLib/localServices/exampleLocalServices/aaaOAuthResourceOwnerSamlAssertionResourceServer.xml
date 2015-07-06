@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd"
+               oauthVersion="OAuth2-draft-22" samlVersion="2.0">
+  <identityProcessing>
+    <extractIdentity>
+      <tokenFromHttpOauthAuthorization>
+        <tokenType>Bearer</tokenType>
+        <samlBearerAssertion>
+          <signatureInfo>
+            <signatureAcceptMethods><rsaWithSha256/></signatureAcceptMethods>
+            <digestAcceptMethod><sha256/></digestAcceptMethod>
+            <canonicalAcceptMethod><C14N_exclusive/></canonicalAcceptMethod>
+            <authenticationPolicy>web-service-authentication-policy-for-ABC</authenticationPolicy>
+          </signatureInfo>
+          <requiredSamlEntitiesAndValues>
+            <Issuer>authorization server ABC</Issuer>
+            <SubjectNameIdentifierFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:unspecified</SubjectNameIdentifierFormat>
+            <SubjectConfirmationMethod>urn:oasis:names:tc:SAML:2.0:cm:bearer</SubjectConfirmationMethod>
+            <NotBeforeAndNotOnOrAfter>checkBothConditionsAndSubjectConfirmationDataElements</NotBeforeAndNotOnOrAfter>
+            <Audience type="anyURI">
+              <staticValue>resource server ABC</staticValue>
+            </Audience>
+          </requiredSamlEntitiesAndValues>
+          <contentLocations>
+            <scopeLocation>approved-scope</scopeLocation>
+            <clientLocation>client</clientLocation>
+          </contentLocations>
+        </samlBearerAssertion>
+        <specialExceptionHandling>
+          <typeFailureResponse></typeFailureResponse>
+        </specialExceptionHandling>
+      </tokenFromHttpOauthAuthorization>
+    </extractIdentity>
+  </identityProcessing>
+  <resourceProcessing>
+    <extractResource>
+      <requestUriFromHttpOperation></requestUriFromHttpOperation>
+    </extractResource>
+    <authorizeResource>
+      <oauthAccessTokenAuthorization>
+        <scopeResourceRule>
+          <scopeMatch>all-photos</scopeMatch>
+          <resourceMatch>get-everything</resourceMatch>
+        </scopeResourceRule>
+        <scopeResourceRule>
+          <scopeMatch>all-photos</scopeMatch>
+          <resourceMatch>photo-*</resourceMatch>
+        </scopeResourceRule>
+        <scopeResourceRule>
+          <scopeMatch>%r</scopeMatch>
+          <resourceMatch>%r</resourceMatch>
+        </scopeResourceRule>
+      </oauthAccessTokenAuthorization>
+    </authorizeResource>
+  </resourceProcessing>
+</aaa:aaaPolicy>

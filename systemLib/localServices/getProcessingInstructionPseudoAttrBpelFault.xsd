@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:soae-fault="http://www.intel.com/soae/bpelFault-2009a/" 
+           targetNamespace="http://www.intel.com/soae/bpelFault-2009a/" 
+           elementFormDefault="unqualified">
+
+  <xs:include schemaLocation="soaeBpelFault.xsd" />
+
+  <!-- ========================================================================
+
+    Defines the soae bpel faults from get-processing-instruction-pseudo-attr
+    extension function.
+    
+    ======================================================================== -->
+
+  <xs:element name="getProcessingInstructionPseudoAttrFault"
+              type="soae-fault:GetProcessingInstructionPseudoAttrFault"/>
+
+  <xs:complexType name="GetProcessingInstructionPseudoAttrFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="details" >
+                  <xs:complexType>
+	            <xs:sequence>
+                      <xs:element name="pseudo-attribute-name" type="xs:string" />
+                      <xs:element name="pi-target" type="xs:string" />
+                      <xs:element name="pi-data" type="xs:string" />
+                      <xs:element name="desc" type="xs:string" />
+                    </xs:sequence>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+</xs:schema>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ..\aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <nameFromSamlAuthentication>
+        <signatureInfo>
+          <signatureAcceptMethods><rsaWithSha512/></signatureAcceptMethods>
+          <digestAcceptMethod><sha1/><sha256/><sha384/><sha512/></digestAcceptMethod>
+          <canonicalAcceptMethod><C14N_exclusive/></canonicalAcceptMethod>
+          <authenticationPolicy>demo-authentication-policy</authenticationPolicy>
+        </signatureInfo>
+        <requiredSamlEntitiesAndValues>
+          <Issuer>www.intel.com</Issuer>
+          <SubjectNameIdentifierFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName</SubjectNameIdentifierFormat>
+          <SubjectNameIdentifier>CN=John Smith, O=Acme, C=NL</SubjectNameIdentifier>
+          <SubjectConfirmationMethod>urn:oasis:names:tc:SAML:1.1:cm:sender-vouches</SubjectConfirmationMethod>
+          <NotBeforeAndNotOnOrAfter>onlyCheckConditionsElement</NotBeforeAndNotOnOrAfter>
+          <checkUniqueness>true</checkUniqueness>
+          <uniquenessCacheImplementation>single_host_non_persistent</uniquenessCacheImplementation>
+        </requiredSamlEntitiesAndValues>
+        <extractMostSpecificPartOfName>true</extractMostSpecificPartOfName>
+      </nameFromSamlAuthentication>
+    </extractIdentity>
+    <authenticateIdentity>
+      <ldapAuthentication>
+        <distinguishedNamePrefix>uid=</distinguishedNamePrefix>
+        <distinguishedNamePostfix>,CN=employee,OU=Sales,DC=Some Company,DC=com,C=US</distinguishedNamePostfix>
+        <resultAttrName>UserPassword</resultAttrName>
+      </ldapAuthentication>
+    </authenticateIdentity>
+    <mapIdentity>
+      <createUsernameToken generateCreationTime="true" generateNonce="true">
+        <keyFormat>
+          <passwordText></passwordText>
+          <usernamePasswordSource>
+            <useExtractedIdentity></useExtractedIdentity>
+          </usernamePasswordSource>
+        </keyFormat>
+      </createUsernameToken>
+    </mapIdentity>
+  </identityProcessing>
+</aaa:aaaPolicy>

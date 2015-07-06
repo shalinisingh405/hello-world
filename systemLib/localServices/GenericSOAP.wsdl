@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions 
+    targetNamespace="http://www.intel.com/soae/localService/genericSOAP-2010a/"
+    xmlns:tns="http://www.intel.com/soae/localService/genericSOAP-2010a/"
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap11="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  
+    <wsdl:types>
+      <xsd:schema targetNamespace="http://www.intel.com/soae/localService/genericSOAP-2010a/">
+        <xsd:element name="Request" type="xsd:anyType"/>
+        <xsd:element name="Response" type="xsd:anyType"/>
+      </xsd:schema>
+    </wsdl:types>
+  
+  <plnk:partnerLinkType name="GenericSOAPServicePartnerLinkType">
+    <plnk:role name="GenericSOAPService" portType="tns:GenericSOAPServicePortType" />
+  </plnk:partnerLinkType>
+  
+  <wsdl:message name="RequestMessage">
+    <wsdl:part name="body" element="tns:Request" />
+  </wsdl:message>
+  <wsdl:message name="ResponseMessage">
+    <wsdl:part name="body" element="tns:Response" />
+  </wsdl:message>
+  <wsdl:portType name="GenericSOAPServicePortType">
+    <wsdl:operation name="invoke">
+      <wsdl:input message="tns:RequestMessage" />
+      <wsdl:output message="tns:ResponseMessage" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="GenericSOAP11ServiceBinding" type="tns:GenericSOAPServicePortType">
+    <soap11:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+      <wsdl:operation name="invoke">
+        <wsdl:input>
+          <soap11:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap11:body use="literal"/>
+        </wsdl:output>
+      </wsdl:operation>
+  </wsdl:binding>  
+  <wsdl:binding name="GenericSOAP12ServiceBinding" type="tns:GenericSOAPServicePortType">
+    <soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+      <wsdl:operation name="invoke">
+        <wsdl:input>
+          <soap12:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap12:body use="literal"/>
+        </wsdl:output>
+      </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="GenericSOAPService">
+    <wsdl:port name="GenericSOAP11ServicePort" binding="tns:GenericSOAP11ServiceBinding">
+      <soap11:address
+        location="http://localhost:8080" />
+    </wsdl:port>
+    <wsdl:port name="GenericSOAP12ServicePort" binding="tns:GenericSOAP12ServiceBinding">
+      <soap12:address
+        location="http://localhost:8080" />
+    </wsdl:port>    
+  </wsdl:service>
+</wsdl:definitions>

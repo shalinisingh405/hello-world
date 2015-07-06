@@ -1,0 +1,20 @@
+<!-- 
+      Specifying http://urlencoded identifies that an encoded url should be generated.
+      
+      This url will be of the form user-defined-name=user-defined-value where an ampersand will separate
+      different name value pairs. 
+      e.g., firstName=firstValue&secondName=SecondValue&xmldata=AnyXmlData
+
+      A user can specify an unbounded number of name/value pairs.
+-->
+<ns4:query xmlns:ns4="http://urlencoded">
+  <!-- first name/value pair in url -->
+  <ns4:param name="firstName">FirstValue</ns4:param>
+  <!-- second name/value pair in url -->
+  <ns4:param name="secondName">SecondValue</ns4:param>
+  <!-- third/last name/value pair in url. 
+       Note: when XML data is passed it must be converted into a string with the data processed 
+       by the externsion function: xml-serialize
+  -->
+  <ns4:param name="xmldata">AnyXmlData</ns4:param>
+</ns4:query>

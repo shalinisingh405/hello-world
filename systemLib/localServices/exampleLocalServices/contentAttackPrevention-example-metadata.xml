@@ -1,0 +1,211 @@
+<contentAttackPreventionPolicy
+  xmlns="http://www.intel.com/soae/localService/contentAttackPreventionDefinition-2007a/" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:schemaLocation="http://www.intel.com/soae/localService/contentAttackPreventionDefinition-2007a/ ../contentAttackPrevention.xsd"
+>
+  <desc>This is an example of the structure of the metadata portion of the Content Attack Prevention Policy</desc>
+
+  <badContentAction>
+    <writeTransactionLog>true</writeTransactionLog>
+    <reject>true</reject>
+  </badContentAction>
+
+  <filter>
+    <checkComments>true</checkComments>
+  </filter>
+
+  <inspection>
+    <sqlCheck>true</sqlCheck>
+    <xpathCheck>true</xpathCheck>
+
+    <messageCheck>
+      <maxMessageLength>100000</maxMessageLength>
+    </messageCheck>
+
+    <httpMetadataCheck enabled="true" >
+
+       <utf8XmlCheck>true</utf8XmlCheck>
+
+       <methods>
+         <method>POST</method>
+         <method>GET</method>
+       </methods>
+
+       <path maxLengthBytes="10" >
+         <regex desc="path-regex-desc">path-regex-pattern</regex>
+       </path>
+
+       <protocolVersions>
+         <protocolVersion>HTTP/1.0</protocolVersion>
+         <protocolVersion>HTTP/1.1</protocolVersion>
+       </protocolVersions>
+
+       <queryParameters
+          maxTotalCount="20"
+          maxNameLengthBytes="22"
+          maxValueLengthBytes="23"
+          rejectQueryParametersWithNoEqualsSign="true"
+          rejectQueryParametersWithNoValue="true"
+          denyOthers="true" >
+
+          <queryParameter
+             name="part"
+             required="true" 
+             maxValueLengthBytes="50">
+             <regex desc="query-parameter-regex-desc-1">query-parameter-regex-pattern-1</regex>
+          </queryParameter>
+
+          <queryParameter
+             name="shipper"
+             required="true" 
+             maxValueLengthBytes="51">
+             <regex desc="query-parameter-regex-desc-2">query-parameter-regex-pattern-2</regex>
+          </queryParameter>
+
+       </queryParameters>
+
+       <headers
+          maxTotalCount="30"
+          maxNameLengthBytes="32"
+          maxValueLengthBytes="33" >
+
+          <header
+             name="x-reply-to"
+             required="true" 
+             maxValueLengthBytes="60">
+             <regex desc="header-regex-desc-1">header-regex-pattern-1</regex>
+          </header>
+
+          <header
+             name="shipper"
+             required="true" 
+             maxValueLengthBytes="61">
+             <regex desc="header-regex-desc-2">header-regex-pattern-2</regex>
+          </header>
+
+       </headers>
+
+       <contentTypes>
+         <contentType>text/xml</contentType>
+         <contentType>text/plain</contentType>
+       </contentTypes>
+
+       <clientAddress>
+         <ipAddressCheck>
+           <desc>Remove malfunctioning lab</desc>
+           <netMasks>
+               <netMask significantBits="16" >10.230.0.0</netMask>
+               <netMask significantBits="8" >10.231.32.0</netMask>
+               <netMask significantBits="32" negated="true">10.230.32.109</netMask>
+            </netMasks>
+            <domainNames>
+               <domainName>intel.com</domainName>
+               <domainName>.edu</domainName>
+               <domainName>research.nist.gov</domainName>
+            </domainNames>
+         </ipAddressCheck>
+       </clientAddress>
+
+    </httpMetadataCheck>
+
+    <attachmentCheck
+      multipartMessages="required"
+      maxAttachmentCount="40"
+      maxAttachmentLength="41" 
+      enabled="true" >
+
+      <requiredAttachmentHeaders>
+        <requiredAttachmentHeader>required-attachment-header-1</requiredAttachmentHeader>
+        <requiredAttachmentHeader>required-attachment-header-2</requiredAttachmentHeader>
+        <requiredAttachmentHeader>required-attachment-header-3</requiredAttachmentHeader>
+      </requiredAttachmentHeaders>
+
+      <attachmentContentTypes>
+        <contentType>attachment-content-type-1</contentType>
+        <contentType>attachment-content-type-2</contentType>
+        <contentType>attachment-content-type-3</contentType>
+      </attachmentContentTypes>
+
+      <rootContentTypes>
+        <contentType>root-content-type-1</contentType>
+        <contentType>root-content-type-2</contentType>
+        <contentType>root-content-type-3</contentType>
+      </rootContentTypes>
+
+    </attachmentCheck>
+
+    <virusChecks enabled="true">
+
+       <icapVirusCheck 
+          icapServer="icap1.acme.com"
+          enabled="true" />
+
+       <icapVirusCheck 
+          icapServer="icap2.acme.com"
+          enabled="false" />
+
+    </virusChecks>
+
+    <soapCheck
+        soapStructureCheck="true" >
+
+       <soapHeaderChildren denyUnspecified="true" enabled="true" >
+
+         <element name="Security" schemaVersion="wsse-2002-07" forbidExtensions="true"/>
+         <element name="Security" schemaVersion="wsse-2002-12" />
+         <element name="Security" schemaVersion="wsse-2003-06" />
+         <element name="Security" schemaVersion="wsse-2004-01" />
+
+         <element name="Transformation" schemaVersion="wsse-2004-01" forbidExtensions="false" />
+
+         <element name="To" schemaVersion="wsa-2003-03" />
+         <element name="ReplyTo" schemaVersion="wsa-2004-03" />
+
+         <element name="To" schemaVersion="wsa-2004-08" />
+         <element name="ReplyTo" schemaVersion="wsa-2005-08" />
+
+       </soapHeaderChildren>
+
+    </soapCheck>
+
+    <wsaCheck
+       enabled="true" 
+       wsaVersion="2005-08" >
+
+       <wsaElements>
+
+         <wsaElement name="wsa:To"
+                     required="true">
+         <ipAddressCheck>
+            <domainNames>
+               <domainName>powells.com</domainName>
+               <domainName>slashdot.org</domainName>
+               <domainName>*.gov</domainName>
+            </domainNames>
+         </ipAddressCheck>
+
+         </wsaElement>
+
+         <wsaElement name="wsa:From"
+                     required="false" >
+         </wsaElement>
+
+         <wsaElement name="wsa:ReplyTo"
+                     required="true" >
+           <ipAddressCheck>
+             <desc>Restrict to our subnet</desc>
+             <netMasks>
+               <netMask significantBits="16" >10.230.0.0</netMask>
+             </netMasks>
+           </ipAddressCheck>
+         </wsaElement>
+
+         <wsaElement name="wsa:MessageID"
+                     required="true" />
+
+       </wsaElements>
+    </wsaCheck>
+
+  </inspection>
+
+</contentAttackPreventionPolicy>

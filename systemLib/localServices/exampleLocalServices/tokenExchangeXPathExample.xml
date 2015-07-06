@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tkx:tokenExchangePolicy xmlns:tkx="http://www.intel.com/soae/localService/tokenExchange-2010a/" 
+                         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                         xsi:schemaLocation="http://www.intel.com/soae/localService/tokenExchange-2010a/ ../tokenExchange.xsd" tokenToDataOnly="false">
+  <tkx:description>This is an example token exchange file.</tkx:description>
+  <tkx:domainInstance domainId="simplePAN">
+    <tkx:tokenScheme>
+      <tkx:dataDomain type="creditCardNumber"/>
+      <tkx:tokenRules>
+        <tkx:preserveHeaderTrailer headerPreserve="4" trailerPreserve="4" headerSubstitute="99"/>
+        <tkx:clusterId startOffset="4" width="2" from="left"/>
+      </tkx:tokenRules>
+      <tkx:tokenFormat>
+        <tkx:ccnFormat validLuhnDigit="true"/>
+      </tkx:tokenFormat>
+      <tkx:multiuse enabled="true" timeToLive="3600"/>
+    </tkx:tokenScheme>
+  </tkx:domainInstance>
+  <tkx:domainInstance domainId="userEmailAddress">
+    <tkx:tokenScheme>
+      <tkx:dataDomain type="emailAddress"/>
+      <tkx:tokenRules/>
+      <tkx:tokenFormat>
+        <tkx:variableLengthToken maximumTokenLength="256"/>
+      </tkx:tokenFormat>
+      <tkx:multiuse enabled="true" timeToLive="3600"/>
+    </tkx:tokenScheme>
+  </tkx:domainInstance>
+  <tkx:tokenTarget inputDataType="tkx:hexBinary">
+    <tkx:xpathExpressions>
+      <tkx:xpathExpression domainId="simplePAN">order/payment/@creditCardNumber</tkx:xpathExpression>
+      <tkx:xpathExpression domainId="simplePAN" desc="something useful information">order/authorization/@creditCardNumber</tkx:xpathExpression>
+      <tkx:xpathExpression domainId="userEmailAddress">order/payment/@emailAddress</tkx:xpathExpression>
+    </tkx:xpathExpressions>
+  </tkx:tokenTarget>
+  <tkx:tokenEncryption>
+    <tkx:rotatingEncryptionSettings>my-rotating-encryption-settings</tkx:rotatingEncryptionSettings>
+  </tkx:tokenEncryption>
+  <tkx:secureVault>
+    <tkx:jdbcSourceJndiName>xxx</tkx:jdbcSourceJndiName>
+  </tkx:secureVault>
+</tkx:tokenExchangePolicy>

@@ -1,0 +1,165 @@
+<xs:schema 
+  targetNamespace="http://www.intel.com/soae/localService/messageMediationPolicy-2009a/" 
+  elementFormDefault="qualified"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+  xmlns:mmp="http://www.intel.com/soae/localService/messageMediationPolicy-2009a/"  >
+
+  <!-- ======================================================================== -->
+
+  <!--
+     This schema defines documents those specify the message mediation policies
+     for use by SD.  This is not a policy file such as that used by the metadata
+     attack prevention policy (which is loaded at deployment or run-time).
+
+     These policies define the transformation of message metadata. That is
+     the received message metadata are being converted into the metadata of the
+     message to send as backend request or response. The following message paths
+     are assumed:
+
+     Receive -> Invoke
+     Invoke -> Reply
+
+     The path Receive -> Reply is prohibited.
+
+     The single file may contain policies for different protocols and message 
+     types (requests and responses). However in the workflow action only the
+     relevant sections are applied.
+
+     The regular expressions used in the policy are PCRE (Perl Compatibile Regular
+     Expressions).  This is not the w3c schema based regular expression language
+     used for xs:pattern.
+  -->
+
+  <!-- ======================================================================== -->
+
+  <xs:element name="messageMediationPolicy" type="mmp:MessageMediationPolicy"/>
+
+  <xs:complexType name="MessageMediationPolicy">
+    <xs:sequence>
+      <xs:element name="httpRequestMetadataMediationPolicy" type="mmp:HttpRequestMetadataMediationPolicy" minOccurs="0"/>
+      <xs:element name="httpResponseMetadataMediationPolicy" type="mmp:HttpResponseMetadataMediationPolicy" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="HttpRequestMetadataMediationPolicy">
+    <xs:sequence>
+      <xs:element name="method" type="mmp:HttpRequestMethod" minOccurs="0"/>
+      <xs:element name="version" type="mmp:HttpVersion" minOccurs="0"/>
+      <xs:element name="uri" type="mmp:HttpRequestURI" minOccurs="0" />
+      <xs:element name="headers" type="mmp:HttpHeaders" />
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name="HttpResponseMetadataMediationPolicy">
+    <xs:sequence>
+      <xs:element name="responseCode" type="mmp:StaticOrDynamicHttpResponseCode" minOccurs="0"/>
+      <xs:element name="reason" type="mmp:StaticOrDynamicValue" minOccurs="0"/>
+      <xs:element name="headers" type="mmp:HttpHeaders"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="HttpRequestMethod">
+    <xs:restriction base="xs:string">
+    <!-- 
+      <xs:enumeration value="POST"/>
+      <xs:enumeration value="GET"/>
+      <xs:enumeration value="PUT"/>
+      <xs:enumeration value="DELETE"/> 
+      <xs:enumeration value="HEAD"/> 
+      <xs:enumeration value="TRACE"/> 
+      <xs:enumeration value="OPTIONS"/> 
+      <xs:enumeration value="CONNECT"/> --> 
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="HttpVersion">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="HTTP/1.0"/>
+      <xs:enumeration value="HTTP/1.1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="HttpRequestURI">
+    <xs:sequence>
+      <xs:element name="path" type="mmp:StaticOrDynamicValue" minOccurs="0"/>
+      <xs:element name="query" type="mmp:HttpRequestURIQuery" minOccurs="0" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="HttpHeaders">
+    <xs:sequence>
+      <xs:element name="headersToDelete" type="mmp:RegexpList"/>
+      <xs:element name="headersToAdd" type="mmp:ListOfItemsWithValues"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- For "static" the value is a literal.
+       For "inputFromWorkflow" the value is an xpath expression.
+  -->
+
+  <xs:complexType name="EmptyType">
+  	<xs:sequence/>
+  </xs:complexType>
+  
+  <xs:group name="StaticOrDynamicValueGroup" >
+    <xs:choice>
+      <xs:element name="static" type="xs:string"/>
+      <xs:element name="inputFromWorkflow" type="xs:string"/>
+      <xs:element name="empty" type="mmp:EmptyType"/>
+    </xs:choice>
+  </xs:group>
+
+  <xs:complexType name="StaticOrDynamicValue">
+    <xs:group ref="mmp:StaticOrDynamicValueGroup" />
+  </xs:complexType>
+
+  <xs:complexType name="HttpRequestURIQuery">
+    <xs:sequence>
+      <xs:element name="queryParametersToDelete" type="mmp:RegexpList"/>
+      <xs:element name="queryParametersToAdd" type="mmp:ListOfItemsWithValues"/>
+    </xs:sequence>
+    <xs:attribute name="active" type="xs:boolean"/>
+  </xs:complexType>
+
+  <!-- Any three digit value between 100 and 999. -->
+
+  <xs:simpleType name="HttpResponseCode">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[1-9][0-9][0-9]" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:complexType name="StaticOrDynamicHttpResponseCode">
+    <xs:group ref="mmp:StaticOrDynamicHttpResponseCodeGroup"/>
+  </xs:complexType>
+  
+  <xs:group name="StaticOrDynamicHttpResponseCodeGroup">
+    <xs:choice>
+      <xs:element name="static" type="mmp:HttpResponseCode"/>
+      <xs:element name="inputFromWorkflow" type="xs:string"/>
+    </xs:choice>
+  </xs:group>
+  
+  <xs:simpleType name="HttpResponseReason">
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>  
+
+  <xs:complexType name="RegexpList">
+    <xs:sequence>
+      <xs:element name="item" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ListOfItemsWithValues">
+    <xs:sequence minOccurs="0" maxOccurs="unbounded" >
+      <xs:element name="item">
+        <xs:complexType>
+  	  <xs:group ref="mmp:StaticOrDynamicValueGroup" />
+          <xs:attribute name="name" type="xs:string"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

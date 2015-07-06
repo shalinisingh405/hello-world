@@ -1,0 +1,911 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema  
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+  xmlns:pii="http://www.intel.com/soae/localService/piiDefinition-2007a/" 
+  targetNamespace="http://www.intel.com/soae/localService/piiDefinition-2007a/">
+  <!-- ======================================================================================================= -->
+  <!--   Personal Identity Information (PII) Schema                                                            -->
+  <!-- ======================================================================================================= -->
+  <xs:element name="piiPolicy" type="pii:piiDefinition"/>
+  <xs:complexType name="piiDefinition">
+    <xs:annotation>
+      <xs:documentation>
+        Defines application developer level Personal Identity Information (PII) Information.
+        Actual security token, e.g., private key, trusted CA group, etc., and associate critical Cryptographic 
+        Security Parameters (CSPs), e.g., verification depth, CRL checking, etc., are defined in associated 
+        security config file.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:choice>
+      <xs:element name="encrypt" type="pii:Encrypt"/>
+      <xs:element name="decrypt" type="pii:Decrypt"/>
+      <xs:element name="redaction" type="pii:Redaction"/>
+    </xs:choice>
+    <xs:attribute name="writeTransactionLog" type="xs:boolean" use="optional" default="true"/>
+    <xs:attribute name="logSuccessfulCompletionOfPii" type="xs:boolean" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation>Controls logging of successful PII actions to the transaction log.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="logStartOfPii" type="xs:boolean" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation>Controls logging of the PII actions starting to the transaction log.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="logLevel" use="optional" default="ERROR">
+      <xs:annotation>
+        <xs:documentation>Control at what level success completion and starting PII status will be logged.</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="FATAL">
+            <xs:annotation>
+              <xs:documentation>
+                Very severe error that will probably lead to process abort and restart. Written to exception log. 
+                May also show up as internal-processing-failure wihtin a transaction log entry.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="ERROR">
+            <xs:annotation>
+              <xs:documentation>
+                Transactional failure, but should not affect underlying process. Written to exception log.
+                Should also show up as internal-processing-failure or failure in transaction log entry. 
+              </xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="WARNING">
+            <xs:annotation>
+              <xs:documentation>Indicates a potentially harmful situation. Written to exception log.</xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="INFO">
+            <xs:annotation>
+              <xs:documentation>
+                Highlight progress at a coarse-grain level. For operational code such as input servers or invocation agents, 
+                INFO would map to summary reports to the transaction log. For non-operational code such as OAM, INFO would  
+                map to log entries being written to the exception log.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="VERBOSE">
+            <xs:annotation>
+              <xs:documentation> 
+                Highlight progress at a finer-grain then INFO. 
+                Currently, the only components using this logtype is operational code that is mapping start and enhanced
+                transaction log entries.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="DEBUG">
+            <xs:annotation>
+              <xs:documentation>
+                Fine-grain information that is must appropriate to debugging an application. Written to exception log.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="TRACE">
+            <xs:annotation>
+              <xs:documentation>
+                Detail bulk data, e.g., entire received message, internal ESII representation of document, etc. 
+                Written to the trace log.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="maximumLaxCharactersAllowed" use="optional" default="4">
+      <xs:annotation>
+        <xs:documentation>
+          The maximum number of unknown characters that can be encountered when processing a data domain
+          that support lax character processing. Potential data domain of this type are: laxDecimalNumber,
+          phoneNumber, socialSecurityNumber, string, name, address or emailAddress.
+          
+          Lax character processing (allowing unknown characters/sequences to be mapped between clear and
+          encrypted text) will leak information! Therefore, an application should restrict the number of 
+          potential unknown character instances within a specific encrypted text.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:unsignedInt">
+          <xs:minInclusive value="1"/>
+          <xs:maxInclusive value="64"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="Encrypt">
+    <xs:sequence>
+      <xs:element name="reKeyObject" type="pii:SecurityConfigHandle">
+        <xs:annotation>
+          <xs:documentation>
+            Name of a re-key security object in associated security config package.
+            The current symmetric key will be utilized for encrypting all new encryptions.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="encryptedKeyTweakSource" default="generate" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Indicates if encrypted Key and tweak information are generate with these encryptions or
+            if an earlier generated set of key/tweak information is to be utilized.
+          </xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="generate">
+              <xs:annotation>
+                <xs:documentation>Indicates that an encrypted key/tweak info is generate for these encryptions</xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="use_existing">
+              <xs:annotation>
+                <xs:documentation>
+                  Indicates that an earlier generate set of encrypted key/tweak information is to be used.
+                </xs:documentation>
+              </xs:annotation>
+              <!-- constraint: SD Action Builder MUST prompt for string containing encrypted key/tweak information -->
+            </xs:enumeration>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="tweakInfo" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Information for identifying/generating tweak to be utilized.</xs:documentation>
+        </xs:annotation>
+        <!-- constraint: ONLY PRESENT if (encryptedKeyTweakSource == generate) -->
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="tweakSource" default="generateRandomTweak">
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="generateRandomTweak">
+                    <xs:annotation>
+                      <xs:documentation>
+                        Indicated that unique tweak value should be automatically generated and used for all encryptions.
+                        The generated value will be a random value.
+                      </xs:documentation>
+                    </xs:annotation>
+                  </xs:enumeration>
+                  <xs:enumeration value="extractFromInputDocument">
+                    <xs:annotation>
+                      <xs:documentation>
+                        Indicates that a primitive value from the incoming document will be extracted and utilized as the tweak for all encryptions.
+                        For example, the transaction ID or invoice number that uniquely identify the request.
+                      </xs:documentation>
+                    </xs:annotation>
+                    <!-- defer to future because it can be handled by application using fromWorkflow option -->
+                  </xs:enumeration>
+                  <xs:enumeration value="fromWorkflow">
+                    <xs:annotation>
+                      <xs:documentation>
+                        Indicates that a primitive value from the application will be utilized as the tweak for all encryptions.
+                      </xs:documentation>
+                    </xs:annotation>
+                    <!-- constraint: Service Designer Action Builder MUST resolve base64 tweak value from application workflow -->
+                  </xs:enumeration>
+                  <xs:enumeration value="noTweak">
+                    <xs:annotation>
+                      <xs:documentation>
+                        Indicates that tweak value is to be utilized when encrypting information. Depending upon the data, there could be
+                        information leakage. This is a problem if the same value could be encrypted in multiple requests.
+                      </xs:documentation>
+                    </xs:annotation>
+                  </xs:enumeration>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+            <xs:choice minOccurs="0">
+              <!-- constraint: NOT PRESENT if ((tweakSource == fromWorkflow) OR (tweakSource == noTweak)) -->
+              <xs:element name="tweakLength" default="8">
+                <xs:annotation>
+                  <xs:documentation>Number of bytes. A good random tweak length is between 8 thru 32.</xs:documentation>
+                </xs:annotation>
+                <!-- constraint: ONLY PRESENT if (tweakSource == generateRandomTweak) -->
+                <xs:simpleType>
+                  <xs:restriction base="xs:unsignedInt">
+                    <xs:minInclusive value="8"/>
+                    <xs:maxInclusive value="512"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="primitiveValueSource" type="pii:IdentifySingleSource">
+                <xs:annotation>
+                  <xs:documentation>Expression that can be utilized by operational code to exract a tweak value from incoming document</xs:documentation>
+                  <xs:appinfo>
+                    In theory, XPath, JSON, regular expression or form field name could be used to identify nad extract tweak value.
+                  </xs:appinfo>
+                </xs:annotation>
+                <!-- constraint: ONLY PRESENT if (tweakSource == extractFromInputDocument) -->
+              </xs:element>
+            </xs:choice>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="encryptionOutputEncoding" type="pii:EncryptionEncodingType">
+        <xs:annotation>
+          <xs:documentation>Identify how the encrypted data will be encoded.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="encryptionTextDelimiters" type="pii:TextDelimiters" minOccurs="0">
+        <!-- constraint: ONLY PRESENT if (encryptionOutputEncoding == EmbeddedWithinPrefixPostfixStrings) -->
+      </xs:element>
+      <xs:element name="encryptingKeyTweakUsedInfo" minOccurs="0">
+        <!-- contraint: ONLY PRESENT if (encryptedKeyTweakSource == generate) -->
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="toWorkflow">
+              <xs:annotation>
+                <xs:documentation>
+                  Indicates the information identifying symmetric value and tweak value will be returned to application to be saved.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="embeddedWithEncryptedData">
+              <xs:annotation>
+                <xs:documentation>
+                  Indicated that information identifying the symmetric key value used and tweak value is package with the encrypted text.
+                  When this is done, the resulting encrypted information will not be format-preserving because the encrypted key information is
+                  not format preserving.
+                  May be possible to overcome this limitation.
+                </xs:documentation>
+                <xs:appinfo>May be possible to overcome this limitation by encoding with clear text alphabet.</xs:appinfo>
+              </xs:annotation>
+              <!-- constraint: ONLY ALLOWED if (encryptionOutputEncoding == EmbedWithinPrefixPostfixStrings) -->
+            </xs:enumeration>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="includeClusterIdentifier" type="xs:boolean" default="false" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            A decimal value identifying the encrypting cluster should be package into the encrypting 
+            key/tweak used information
+          </xs:documentation>
+        </xs:annotation>
+        <!-- Defer the display of this field to a future release of the PII policy editor -->
+      </xs:element>
+      <xs:element name="targets" type="pii:TargetType"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Decrypt">
+    <xs:sequence>
+      <xs:element name="reKeyObject" type="pii:SecurityConfigHandle">
+        <xs:annotation>
+          <xs:documentation>
+            Name of a re-key security object in associated security config package.
+            The current symmetric key will be utilized for encrypting all new encryptions.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="encryptionInputEncoding" type="pii:EncryptionEncodingType">
+        <xs:annotation>
+          <xs:documentation>Identify how the encrypted data is encoded.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="encryptionTextDelimiters" type="pii:TextDelimiters" minOccurs="0">
+        <!-- constraint: ONLY PRESENT if (encryptionInputEncoding == EmbeddedWithinPrefixPostfixStrings) -->
+      </xs:element>
+      <xs:element name="encryptedKeyTweakInfoSource" default="fromWorkflow">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="extractFromIndividualEncryption">
+              <xs:annotation>
+                <xs:documentation>
+                  Indicates that information identifying the symmetric key value and tweak value used to encrypt this data is assocaited with
+                  each individual encrypted entity in the incoming document, i.e., something similar to an XML EncryptedKey element is being 
+                  utilized.
+                </xs:documentation>
+              </xs:annotation>
+              <!-- constraint: ONLY PRESENT if (encryptionInputEncoding == EmbeddedWithinPrefixPostfixStrings) -->
+            </xs:enumeration>
+            <xs:enumeration value="fromWorkflow">
+              <xs:annotation>
+                <xs:documentation>
+                  Indicates that information identifying the symmetric key value and tweak value used to encrypt all encryptions will be supplied 
+                  by the application workflow.
+                </xs:documentation>
+              </xs:annotation>
+              <!-- constraint: Service Designer Action Builder MUST resolve encrypted key/tweak value from application workflow -->
+            </xs:enumeration>
+            <xs:enumeration value="extractFromInputDocument">
+              <xs:annotation>
+                <xs:documentation>
+                  Indicates that information identifying the symmetric key value and tweak value used to encrypt all encryptions
+                  will be supplied from the incoming document, i.e., something similar to an XML EncryptedKey element is being utilized. 
+                </xs:documentation>
+              </xs:annotation>
+              <!-- Defer to future release enhancement. When we add this enumeration, some mechanism to identify the 
+                   information will need to be added.
+              -->
+            </xs:enumeration>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="clusterIdentifierIncluded" type="xs:boolean" default="false" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            A decimal value identifying the encrypting cluster is package in the encrypting 
+            key/tweak used information
+          </xs:documentation>
+        </xs:annotation>
+        <!-- Defer the display of this field to a future release of the PII policy editor -->
+      </xs:element>
+      <xs:element name="targets" type="pii:TargetType" minOccurs="0">
+        <!-- constraints: ONLY PRESENT if (encryptionInputEncoding == FormatPreserving) -->
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Redaction">
+    <xs:annotation>
+      <xs:documentation>Supports an application ability to identity one or more targets within their input document and to either:
+        1) replace the value with an application defined value, or 
+        2) remove all appearance of the target entity.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="targets" type="pii:RedactionTargets"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="TargetType">
+    <xs:sequence>
+      <xs:element name="targetMechanism" type="pii:TargetMechanism"/>
+      <xs:element name="target" type="pii:Target" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>One or more expressions identifying data to be encrypted.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:choice minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Match information that is common to one or more target matches</xs:documentation>
+        </xs:annotation>
+        <xs:element name="xpathPrefix" type="pii:Namespaces">
+          <!-- constraint: ONLY PRESENT if (targetMechanism == XPath) -->
+        </xs:element>
+      </xs:choice>
+    </xs:sequence>
+    <xs:attributeGroup ref="pii:InputSchemaOrExample"/>
+  </xs:complexType>
+  <xs:complexType name="Target">
+    <xs:annotation>
+      <xs:documentation>
+        Identifies a single search expression. This expression could amtch multiple entities within an input document to be encrypted.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="dataDomain" type="pii:DataDomainType"/>
+      <xs:element name="match" type="pii:TargetMatch"/>
+      <xs:element name="description" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Optional developer defined description of what the associate match is intended to do.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="IdentifySingleSource">
+    <xs:sequence>
+      <xs:element name="targetMechanism" type="pii:TargetMechanism" default="XPath"/>
+      <xs:element name="match" type="pii:TargetMatch"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Namespaces">
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="namespace">
+        <xs:complexType>
+          <xs:attribute name="prefix" type="xs:NCName"/>
+          <xs:attribute name="uri" type="xs:anyURI"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="TargetMatch">
+    <xs:choice>
+      <xs:element name="xpathExpression">
+        <!-- constraint: ONLY ALLOWED if (targetMechanism == XPath) -->
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="formField">
+        <xs:annotation>
+          <xs:appinfo>The intention is that the form field name does not start or end with spaces or consists entriely of spaces.</xs:appinfo>
+        </xs:annotation>
+        <!-- constraint: ONLY ALLOWED if (targetMechanism == Form) -->
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+            <xs:pattern value="[ A-Za-z0-9\.-:=]*"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="jsonSearchExpression">
+        <!-- constraint: ONLY ALLOWED if (targetMechanism == Json) -->
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="regularExpression">
+        <!-- constraint: ONLY ALLOWED if (targetMechanism == RegularExpression) -->
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+  <xs:complexType name="TextDelimiters">
+    <xs:sequence>
+      <xs:element name="prefix" default="ESTR">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+            <xs:pattern value="[A-Za-z0-9\.-:=]*"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="postfix" default="EEND">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+            <xs:pattern value="[A-Za-z0-9\.-:=]*"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+    <!-- constraint: ERROR "Prefix and Postfix strings can not be the same" if (strcmp(Prefix, Postfix) == 0) -->
+  </xs:complexType>
+  <xs:simpleType name="TargetMechanism">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="XPath">
+        <xs:annotation>
+          <xs:documentation>
+            Indicates that some form XPath expression over XML will be used to identify what data in the incoming document 
+            should be encrypted. Either an simple XML value or XML fragment could be encrypted. It is the application responsibility
+            to ensure that the resulting encrypted text will not cause XML schema validation issues, i.e., still a valided XML document.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Form">
+        <xs:annotation>
+          <xs:documentation>Indicates which individual HTTP form fields are to be encrypted.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Json">
+        <xs:annotation>
+          <xs:documentation>
+            Indicates that some form of JSON search mechanism will be utilized to identify either a simple JSON primitive value or
+            a JSON structure with some JSON input document is encrypted.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="RegularExpression">
+        <xs:annotation>
+          <xs:documentation>
+            Indicates that some form of regular expression mechanism will be utilized to identify some arbitrary text within 
+            an input document is encrypted.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="EncryptionEncodingType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="FormatPreserving">
+        <xs:annotation>
+          <xs:documentation>
+            The encrypted text will be utilized to directly replace the clear text. 
+            The encrypted text will utilized the same alphabet that the original clear text utilized, i.e., same characters and value range.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="EmbeddedWithinPrefixPostfixStrings">
+        <xs:annotation>
+          <xs:documentation>
+            The encrypted text will be package with application defined prefix and postfix strings along with an indication of what type of
+            data is encrypted, e.g., data, arbitrary string, SSN, etc.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="SecurityConfigHandle">
+    <xs:annotation>
+      <xs:documentation>Administrator defined name used to reference security configuration object</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="64"/>
+      <xs:pattern value="[-a-zA-Z0-9_\.]*"/>
+      <!-- dash A-Z a-z 0-9 underscore period -->
+    </xs:restriction>
+    <!-- constraint: name specified must match abstract handle defined in associated security package.
+        Also the type of the security object in the security package and within the PII policy must match
+      -->
+  </xs:simpleType>
+  <xs:complexType name="EmptyType"/>
+  <xs:element name="piiEncryptResult">
+    <xs:annotation>
+      <xs:documentation>The structure of information returned from a PII encryption.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="revisedDoc" type="xs:anyType">
+          <xs:annotation>
+            <xs:documentation>
+              The revised input document in which all of the targeted entities have been encrypted.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="encryptedKeyTweakInfo" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>
+              Information required to decrypt PII encrypted text. 
+              All of the encrpytion for a single PII policy/action utilize the same encryptedKeyTweak Information.
+            </xs:documentation>
+            <xs:appinfo>
+              Key/tweak Information:
+              1) Which ESG cluster performed the encryption operation, i.e., has the security config symmetricKeySequence object containing the 
+                 symmetric keys use to perform the encryptions reside. The specific symmetricKeySequence object is identified in the PII encryption
+                 and decryption policy.
+              2) The index into the summetricKeySequence security object identifying the specific symmetric key that was utilized for thse encryptions.
+              3) The based64 encoded tweak that was utilized for these encryptions.
+              Colon character used to separate/delimit the preceding fields.
+            </xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="RedactionTargets">
+    <xs:sequence>
+      <xs:element name="targetMechanism" type="pii:TargetMechanism"/>
+      <xs:element name="target" type="pii:RedactionTarget" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>One or more expressions identifying data to be redacted, e.g. masked or removed.</xs:documentation>
+        </xs:annotation>
+        <!-- constrainst: WARNING "It is unusual to have both different targets specifying actions of"
+                                  "remove and fill/replace."
+                          if (different action = (remove AND (fill_with OR replace_with))
+        -->
+      </xs:element>
+      <xs:choice minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Match information that is common to one or more target matches</xs:documentation>
+        </xs:annotation>
+        <xs:element name="xpathPrefix" type="pii:Namespaces">
+          <!-- constraint: ONLY PRESENT if (targetMechanism == XPath) -->
+        </xs:element>
+      </xs:choice>
+    </xs:sequence>
+    <xs:attributeGroup ref="pii:InputSchemaOrExample"/>
+  </xs:complexType>
+  <xs:complexType name="RedactionTarget">
+    <xs:sequence>
+      <xs:element name="action" default="replace_with">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="fill_with">
+              <xs:annotation>
+                <xs:documentation>
+                  Indicates that the target entity value is to be replaced with the application supplied replacement
+                  character.
+                  The number of fill characters will be equal to the number of target characters matched.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="replace_with">
+              <xs:annotation>
+                <xs:documentation>
+                  Indicates that the target entity value is to be replaced with the application supplied 
+                  replacement string.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="remove">
+              <xs:annotation>
+                <xs:documentation>
+                  Indicates that the target entity value is to be completely removed/deleted.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="match" type="pii:TargetMatch"/>
+      <xs:element name="replacementValue" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            The value to be substituted for matching targets.
+            
+            At this time we will make NO attempt to restrict the replacement value to be 
+            domain specific, e.g., decimal digits in a social security number. The reason is
+            that we believe that a redaction policy will be utilized when the information 
+            is being outputted in a report or the cloud where strict domain constraints enforcements
+            is not critical. An application may want to make the redacted data to stand out, e.g.,
+            using askerisk in a number field. Therefore, we are attempting to allow the application to 
+            utilize most of the printable characters. We are not including these that cause application
+            interoperability issues, i.e., &amp;, &gt;, etc.
+          </xs:documentation>
+        </xs:annotation>
+        <!-- constraint: 1) ONLY ALLOWED if (action == (fill_with OR replace_with))
+                         2) ONLY a single character ALLOWED if (action == fill_with)
+        -->
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+            <xs:pattern value="[A-Za-z0-9 '&#34;*#$\.\-\^\?]*"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="description" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Optional developer defined description of what the associate match is intended to do.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="DataDomainType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="decimalNumber">
+        <xs:annotation>
+          <xs:documentation>Ten based number: 0 - 9. Value must be at least two digits long to be encrypted.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="laxDecimalNumber">
+        <xs:annotation>
+          <xs:documentation>
+            Ten based number: 0 - 9. Any characters not in range of 0 - 9 will be mapped in their current position into the 
+            encrypted text. Value must be at least two digits long to be encrypted.
+            For example, 
+            1) a phone with "(", ")", "-" and spaces, e.g., (666) 666-9999
+            2) a date where the application does not have any special restriction upon the month or day value, e.g., 10/3/2023
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="phoneNumber">
+        <xs:annotation>
+          <xs:documentation>
+            Special case of a lax decimal number. Any non-decimal character will be mapped to its same position in the 
+            encrypted text as it had within the original clear text.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="socialSecurityNumber">
+        <xs:annotation>
+          <xs:documentation>
+            Nine digit decimal number of the form AAA-GG-SSSS, where AAA is the area code, GG is the group identifier, and SSSS is 
+            the serial number. Will be treated as a lax decimal number so that any embedded delimiter characters such as "-" or space
+            will be preserverd. Additionally, restriction on legal values for the AAA, GG and SSSS portions will be enforced:
+            1) Area number is between 001 - 665, 667 - 749, 772 - 899 allowed. 
+               Area numbers == "000", "750" thru "772", "900" thru "999" not allowed. 
+            2) Group number == "00" not allowed. 
+            3) Serial number == "0000" not allowed.
+          </xs:documentation>
+          <xs:appinfo>
+            Will perform a cycle walking approach where we will perform encryption/decryption until the specified restrictions are met.
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="creditCardNumber">
+        <xs:annotation>
+          <xs:documentation>
+            A 12 thru 19 digit decimal number. Normally most CCNs are 16 digit, but their length can vary.
+            The last digit will be a Luhn checksum digit over the preceding "n" digits.
+            
+            Some CCNs, i.e., China UnionPay, do not utilize a Luhn checksum in the last digit, these CCNs
+            should be mapped to a strict decimal type of data domain.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="string">
+        <xs:annotation>
+          <xs:documentation>
+            Arbitrary string composed of Latin characters and printable ASCII (UTF-8) characters: 
+              " A-Za-z0-9`-=[]";',./?\:{}|~!@#$%^*()_&gt;&lt;".
+            Not supporting multiple character escape sequences, i.e., accent/diacritical marks, or 
+            ASCII control/formatting characters, i.e., tab, new line, etc.
+            Any unknown characters will be mapped in their current position into the encrypted/decrypted text.
+            For example, a new line character would not be encrypted but would be reinserted into the encrypted text at 
+            the same offset.
+            Decryption would also support identifical lax character processing.
+            String must be at least two characters long.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="name">
+        <xs:annotation>
+          <xs:documentation>
+            Latin characters with numbers 0 thru 9, space, period, hyphen and accent/diacritical marks.  
+            Any unknown characters will be mapped in their current position into the encrypted/decrypted text.
+            For example, a pound/number sign character would not be encrypted but would be reinserted into the encrypted 
+            text at the same offset.
+            Decryption would also support identifical lax character processing.
+            String must be at least two characters long.
+            Note: because multi-characters are being supported as part of the allowed radix alphabet, the clear text and 
+            encrypted text could be different lengths because they could have different numbers of allowed multi-character 
+            escape sequences in them. 
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="address">
+        <xs:annotation>
+          <xs:documentation>
+            Latin characters with numbers 0 thru 9, space, period, hyphen, number/pound and accent/diacritical marks.  
+            Any unknown characters will be mapped in their current position into the encrypted/decrypted text.
+            For example, an accent Y character would not be encrypted but would be reinserted into the encrypted text at the same offset.
+            Decryption would also support identifical lax character processing.
+            String must be at least two characters long.
+            Note: because multi-characters are being supported as part of the allowed radix alphabet, the clear text and 
+                  encrypted text could be different lengths because they could have different numbers of allowed 
+                  multi-character escape sequences in them. 
+          </xs:documentation>
+          <xs:appinfo>At this time really equivalent to name alphabet with the addition of number/pound character.</xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="laxAlphanumeric">
+        <xs:annotation>
+          <xs:documentation>
+            Alphanumeric alphabet with lax character processing. 
+            The intention of this option is to various country, state and Canadian province driver licenses, IDs, etc.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="laxLowerCase">
+        <xs:annotation>
+          <xs:documentation>Lower case alphabet Latin characters with lax character processing</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="laxUpperCase">
+        <xs:annotation>
+          <xs:documentation>Upper case alphabet Latin characters with lax character processing</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="laxUpperCaseLowerCaseDecimalPreserving">
+        <xs:annotation>
+          <xs:documentation>
+            Upper case Latin characters will be encrypted to only upper case characters.
+            Lower case Latin characters will be encrypted to only lower case characters.
+            Decimal digits will be encrypted to only decimal digits.
+            Lax processing with be performed upon any characters that are not upper or lower case Latin 
+            characters and decimal digits.
+          </xs:documentation>
+          <xs:appinfo>
+            We will perform this by performing three lax AES-FFX[radix] encrytpions handling upper case, lower case
+            and then decimal digits. If any one of these potential encryptions has no characters the nnot encryption 
+            with be performed. If one of these encryptions only have a single character then we will perform:
+            1) radixChar = Convert single character into radix alphabet.
+            2) radixDigest = (SHA256(tweak) % radix)
+            3) value = radixDigest XOR radixChar
+            Note: a) Decryption is the same processing.
+                  b) We can not use AES-FFX[radix] encryption because we require at least two radix characters for 
+                     radix alphabets &gt;= 10.
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="date-MDY">
+        <xs:annotation>
+          <xs:documentation>
+            Some form of month, day and year date encoding is being utilized.
+            The month can be represented as either a number or string encoding.
+            Any unknown characters will be treated via lax character processing, 
+              e.g., 05/02/1949, May 2, 1949, 5-2-1949.
+             
+            This format is used in the United States, Belize, etc.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="date-YMD">
+        <xs:annotation>
+          <xs:documentation>
+            Some form of year, month and day date encoding is being utilized.
+            The month can be represented as either a number or string encoding.
+            Any unknown characters will be treated via lax character processing, 
+              e.g., 1949/05/02, 1949 May 2, 1949-5-2.
+            
+            This format is used in the China, Mongolia, Korea, Iran, Japan, Hungary, Lithuania, etc.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="date-DMY">
+        <xs:annotation>
+          <xs:documentation>
+            Some form of day, month and year date encoding is being utilized.
+            The month can be represented as either a number or string encoding.
+            Any unknown characters will be treated via lax character processing, 
+              e.g., 02/05/1949, 2 May 1949, 2-5-1949.
+            
+              This format is used in the India, Latin America, Asia (Central, SE, West), 
+              most of Europa, North Africa, Australia. , etc.
+            </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="emailAddress">
+        <xs:annotation>
+          <xs:appinfo>
+            1) Break email address into two separate parts: ''local-part'' and ''domain''. Find the at-character not 
+               after immediately preceded by a backslash or within a double quoted string. 
+            2) For ''domain'', define the alphabet as "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-". 
+               I am not including the following characters: "(", ")", "[", "]", or ":". These characters will be treated as 
+               unknown/lax characters whose value and position will be remembered and reinserted into the resulting text at 
+               the same offset. By treating them as lax characters, these characters should always remain balanced. Ignoring 
+               colon character means that colons only appear at valid locations within the IP address. May need to also ignore 
+               special IP version prefix, e.g., [IPv6:2001:db8:1ff::a0b:db:d0]. 
+            3) For ''local-part'' define alphabet as "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-!#$%$'*+-/=?^_`{|}~". 
+               Note: I am not including the following characters: ".", "\", "(", ")", double quote or space characters. Not 
+               including the period character means that we do not have to check for leading, trailing, multiple periods, or double 
+               quoted string embedded within local part. Not including the parentheses means that we do not have to be concern about 
+               ensuring they remain balanced. Not including double quote characters means that we do not have to deal with balance 
+               quoted strings. Not including spaces means that we do not have to deal with spaces showing up outside of a quote 
+               string or not after a backslash. Not including backslash character because that eliminates having to deal with the 
+               generation of invalid backslash escape sequences, e.g., "\1", "\c", etc. Additionally, not including backslashes 
+               means that we do not have to deal with the growth of the local-part passed 64 character length restrictions. I know 
+               that having all of these lax characters will leak some information, I believe that this is better then the 
+               complexity/inefficiency that will be avoided. 
+            4) Because of the different radix alphabets being used by the ''local-part'' and the ''domain'', we will have to encrypt 
+               each section independently using lax character processing: 
+               a) Save unknown character and offset into string. 
+               b) Generate the radix string without the saved lax character. 
+               c) Perform the encryption. 
+               d) When converting back into physical encoding reinsert save character into original character offset. 
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="base64PlusEqual">
+        <xs:annotation>
+          <xs:documentation>
+            Alphabet includes the following characters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/="
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="binaryNumber">
+        <xs:annotation>
+          <xs:documentation>Two (binary) based number: 0 - 1. Value must be at least 8 digits long to be encrypted.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="octalNumber">
+        <xs:annotation>
+          <xs:documentation>Octal (8) based number: 0 - 7. Value must be at least 8 digits long to be encrypted.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="hexadecimalNumber">
+        <xs:annotation>
+          <xs:documentation>Hexadecimal (16) based number: 0 - 9a-f. Value must be at least two digits long to be encrypted.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:attributeGroup name="InputSchemaOrExample">
+    <xs:attribute name="inputDataType" type="xs:QName" use="optional">
+      <xs:annotation>
+        <xs:documentation>Identifies the XML schema describing the input document to be processed.</xs:documentation>
+        <xs:appinfo>
+          This information is only utilized by the Service Designer policy editor XPath wizard.
+          By having the schema, this wizard can give the application developer symbolic access to generate
+          XPath expression to identify specific entities to be encrypted or decrypted.
+        </xs:appinfo>
+      </xs:annotation>
+      <!-- constraint: ONLY PRESENT if (targetMechanism == XPath) -->
+    </xs:attribute>
+    <xs:attribute name="inputExampleDocument" type="xs:anyURI" use="optional">
+      <xs:annotation>
+        <xs:documentation>Identify a application supplied sample document describing what will be processed.</xs:documentation>
+        <xs:appinfo>
+          This infomration is only utilized by the Service Designer policy editor regular expression[, form] wizard.
+          By having this example document, this wizard can give the application developer a mechanism to generate and validate
+          that their PCRE regex does what they expect.
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:attributeGroup>
+</xs:schema>

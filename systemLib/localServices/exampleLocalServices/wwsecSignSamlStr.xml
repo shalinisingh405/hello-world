@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wssec:webServiceSecurityDefinition usage="sign" samlTokenVersion="1.1" samlVersion="1.1" tokenType="x509" 
+                                    wssecVersion="2004-01" soapVersion="1.2"
+    xmlns:wssec="http://www.intel.com/soae/localService/wssecDefinition-2007a/" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://www.intel.com/soae/localService/wssecDefinition-2007a/ ../wssecDefinition.xsd">
+  <signatureGenerationMethod method="rsaWithSha512"/>
+  <digestGenerationMethod method="sha256"/>
+  <canonicalGenerationMethod method="C14N_exclusive"/>
+  <keyInfo format="SamlAssertionReference"/>
+  <holderOfKeyKeyInfoExpectedType>SubjectName</holderOfKeyKeyInfoExpectedType>
+  <processingInstructions signTimestamp="true" signSecurityToken="true"/>
+  <securityTokens>
+    <token type="x509KeyPair" use="static" name="demo-public-private-key-pair"/>
+  </securityTokens>
+</wssec:webServiceSecurityDefinition>

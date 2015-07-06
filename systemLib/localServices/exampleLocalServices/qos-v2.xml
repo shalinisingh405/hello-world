@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<qosPolicy 
+   xmlns="http://www.intel.com/soae/localService/qos-2011a/" 
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+   xsi:schemaLocation="http://www.intel.com/soae/localService/qos-2011a/ qos.xsd " >
+  <description>description</description>
+
+  <policyOptions>
+    <requestCount>
+       <requestCountHistory hours="0" minutes="1" seconds="30" />
+       <requestCountInterval seconds="10" />
+    </requestCount>
+    <trackingWindowMethod>slidingWindow</trackingWindowMethod>
+    <maxTrackingRecords>10000</maxTrackingRecords>
+    <trackingRecordLifetimeSeconds>10</trackingRecordLifetimeSeconds>
+    <trackingLimitActions>
+      <limitAction>rejectNew</limitAction>
+    </trackingLimitActions>
+    <logDetails>true</logDetails>
+    <limitAlertsQuietTime>1000</limitAlertsQuietTime>
+  </policyOptions>
+
+  <schedules>
+    <schedule name="OfficeHours">
+      <description>description</description>
+      <timePeriod>
+        <startTime hour="9" minute="0" second="0"/>
+        <endTime hour="17" minute="0" second="0"/>
+        <daysOfWeek>
+          <monday/>
+          <tuesday/>
+          <wednesday/>
+          <thursday/>
+          <friday/>
+        </daysOfWeek>
+      </timePeriod>
+    </schedule>
+    <schedule name="WeeklyMaintenance">
+      <description>System maintenance</description>
+      <timePeriod>
+        <startTime hour="2" minute="0" second="0"/>
+        <endTime hour="4" minute="0" second="0"/>
+        <daysOfWeek>
+            <sunday/>
+        </daysOfWeek>
+      </timePeriod>
+    </schedule>
+  </schedules>
+  <serviceLevels>
+    <serviceLevel enabled="true" name="Gold">
+      <description>This is our top level of membership.</description>
+      <serviceLevelClassification>
+        <userClassification>
+          <aaaLdapAuthorizationGroup>
+              <literal>level1</literal>
+          </aaaLdapAuthorizationGroup>
+          <aaaLdapAuthorizationGroup>
+              <literal>level2</literal>
+          </aaaLdapAuthorizationGroup>
+        </userClassification>
+        <resourceClassification>
+            <aaaResource>
+                  <resource><literal>resource1</literal></resource>
+                  <action><literal>validate</literal></action>
+            </aaaResource>
+            <aaaResource>
+                <resource>
+                  <regularExpression>resource.*</regularExpression>
+                </resource>
+            </aaaResource>
+        </resourceClassification>
+      </serviceLevelClassification>
+      <qosRules>
+        <qosRule name="blockExcessiveRequestsDuringMaintenance">
+          <description>Throttle requests during maintenance</description>
+          <summary>Excessive message rate</summary>
+          <conditions>
+            <condition>
+              <messageRate value="100" scope="aggregatedAcrossPolicies" >
+                <compoundKey>
+                  <aaaIdentity/>
+                </compoundKey>
+              </messageRate>
+            </condition>
+            <condition>
+            <messageCount value="100" scope="serviceLevel" >
+               <compoundKey>
+                 <ipAddress/>
+               </compoundKey>
+            </messageCount>
+            </condition>
+          </conditions>
+          <action>
+            <ruleEffectiveUntilThreshold>80</ruleEffectiveUntilThreshold>
+            <reject/>
+          </action>
+          <schedule>WeeklyMaintenance</schedule>
+        </qosRule>
+      </qosRules>
+    </serviceLevel>
+    <serviceLevel enabled="true" name="Standard">
+      <description>This is for everyone else.</description>
+      <serviceLevelClassification>
+        <userClassification>
+            <anyUser/>
+        </userClassification>
+        <resourceClassification>
+           <restService>
+              <restUrl>
+                  <literal>/calculator</literal>
+                  <literal>/stockQuotes</literal>
+              </restUrl>
+              <restMethod><literal>POST</literal></restMethod>
+              <query>
+                 <and>
+                    <parameter name="symbol"><literal>INTC</literal><literal>GOOG</literal></parameter>
+                    <parameter name="exchange"><regularExpression>N.*</regularExpression></parameter>
+                 </and>
+              </query>
+           </restService>
+        </resourceClassification>
+      </serviceLevelClassification>
+      <qosRules>
+        <qosRule name="throttleRequests">
+          <description>By default throttle all requests to 50 messages per second</description>
+          <summary>When message rate is greater than 50</summary>
+          <conditions>
+            <condition>
+              <messageRate scope="user" value="50" >
+                 <compoundKey>
+                   <ipHostName/>
+                 </compoundKey>
+              </messageRate>
+            </condition>
+          </conditions>
+          <action>
+            <ruleEffectiveUntilThreshold>75</ruleEffectiveUntilThreshold>
+            <alert>
+              <suppressAlertForCycleCount>10</suppressAlertForCycleCount>
+            </alert>
+          </action>
+          <schedule>OfficeHours</schedule>
+        </qosRule>
+        <qosRule name="throttleRest">
+          <description>By default throttle all requests to 50 messages per second</description>
+          <summary>When message rate is greater than 50</summary>
+          <conditions>
+            <condition>
+              <messageRate scope="resource" value="200" >
+                <compoundKey>
+                  <service/>
+                  <port/>
+                  <operation/>
+                </compoundKey>
+              </messageRate>
+            </condition>
+          </conditions>
+          <action>
+            <ruleEffectiveUntilThreshold>75</ruleEffectiveUntilThreshold>
+            <alert>
+              <suppressAlertForCycleCount>10</suppressAlertForCycleCount>
+            </alert>
+          </action>
+        </qosRule>
+      </qosRules>
+    </serviceLevel>
+
+    <serviceLevel enabled="false" name="show-service-and-operation">
+      <description>Match some service/operation combinations.</description>
+      <serviceLevelClassification>
+        <userClassification>
+            <anyUser/>
+        </userClassification>
+        <resourceClassification>
+
+             <webService>
+               <service>
+                 <literal>/stock-quote</literal>
+                 <literal>/transfer</literal>
+               </service>
+               <port>
+                 <regularExpression>(.)*</regularExpression>
+               </port>
+               <operation>
+                  <literal>buy</literal>
+                  <literal>sell</literal>
+               </operation>
+             </webService>
+
+             <webService>
+               <service>
+                 <literal>/admin</literal>
+               </service>
+               <port>
+                 <regularExpression>my-port</regularExpression>
+               </port>
+               <operation>
+                  <literal>open</literal>
+                  <literal>change-address</literal>
+                  <literal>close</literal>
+               </operation>
+             </webService>
+
+        </resourceClassification>
+      </serviceLevelClassification>
+
+      <qosRules>
+        <qosRule name="throttleRest" enabled="false" >
+          <description>By default throttle all requests to 50 messages per second</description>
+          <summary>When message rate is greater than 50</summary>
+          <conditions>
+            <condition>
+              <messageRate scope="resource" value="300" >
+                <compoundKey>
+                  <restUrl/>
+                  <restMethod/>
+                </compoundKey>
+              </messageRate>
+            </condition>
+          </conditions>
+          <action>
+            <ruleEffectiveUntilThreshold>75</ruleEffectiveUntilThreshold>
+            <alert>
+              <suppressAlertForCycleCount>10</suppressAlertForCycleCount>
+            </alert>
+          </action>
+        </qosRule>
+      </qosRules>
+
+    </serviceLevel>
+
+
+    <serviceLevel enabled="false" name="show-resource-and-action">
+      <description>Match some service/operation combinations.</description>
+      <serviceLevelClassification>
+        <userClassification>
+            <anyUser/>
+        </userClassification>
+        <resourceClassification>
+
+           <aaaResource>
+               <resource>
+                 <literal>/stock-quote</literal>
+                 <literal>/transfer</literal>
+               </resource>
+               <action>
+                  <literal>buy</literal>
+                  <literal>sell</literal>
+               </action>
+           </aaaResource>
+
+           <aaaResource>
+               <resource>
+                 <literal>/admin</literal>
+               </resource>
+               <action>
+                  <literal>open</literal>
+                  <literal>change-address</literal>
+                  <literal>close</literal>
+               </action>
+           </aaaResource>
+
+        </resourceClassification>
+      </serviceLevelClassification>
+
+      <qosRules>
+        <qosRule name="throttleRest" enabled="false" >
+          <description>By default throttle all requests to 50 messages per second</description>
+          <summary>When message rate is greater than 50</summary>
+          <conditions>
+            <condition>
+              <messageRate scope="user" value="100" >
+                <compoundKey>
+                  <xpathUser/>
+                </compoundKey>
+              </messageRate>
+            </condition>
+          </conditions>
+          <action>
+            <ruleEffectiveUntilThreshold>75</ruleEffectiveUntilThreshold>
+            <alert>
+              <suppressAlertForCycleCount>10</suppressAlertForCycleCount>
+            </alert>
+          </action>
+        </qosRule>
+      </qosRules>
+
+    </serviceLevel>
+
+  </serviceLevels>
+</qosPolicy>

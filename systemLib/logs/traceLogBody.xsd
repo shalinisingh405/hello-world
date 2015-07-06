@@ -1,0 +1,78 @@
+<?xml version='1.0' ?> 
+<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' 
+           xmlns='http://www.intel.com/soae/logSchema-2007a.xsd' targetNamespace='http://www.intel.com/soae/logSchema-2007a.xsd'>
+    <xs:include schemaLocation='logCommon.xsd'/>
+
+  <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <xs:complexType name='TraceLogEntryHeader'>
+    <xs:complexContent>
+      <xs:extension base='LogEntryHeader'>
+        <xs:sequence>
+          <xs:annotation>
+            <xs:documentation>this sequence elements are restricted to trace log usage</xs:documentation>
+          </xs:annotation>
+          <!-- In addition to default log entry header, this log type should also include the following additional elements -->
+          <xs:element name='transId' type='xs:unsignedLong' minOccurs='1' maxOccurs='1' default='0'>
+            <xs:annotation>
+              <xs:documentation>Transaction Identifier. Link entry to associated transaction.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name='logType' type='LogType' minOccurs='1' maxOccurs='1'/>
+          <xs:element name='source' type='xs:string' minOccurs='0' maxOccurs='1' default='0'>
+            <xs:annotation>
+              <xs:documentation>Component generating log entry</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name='desc' type='xs:string' minOccurs='0' maxOccurs='1'>
+            <xs:annotation>
+              <xs:documentation>
+                Whatever additional information that the component generating the entry thinks will help, 
+                e.g., what the attached data is, at what point in its processing this data was generated, etc,
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <xs:complexType name='TraceLogEntry'>
+    <xs:annotation>
+      <xs:documentation>Trace Log entry</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name='header' type='TraceLogEntryHeader' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='body' minOccurs='1' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Bulk Data Dump</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:choice minOccurs='1' maxOccurs='unbounded'>
+            <xs:element name='base64' type='xs:base64Binary'/>
+            <xs:element name='hexBinary' type='xs:hexBinary'/>
+            <xs:element name='infoMsg' type='xs:string'>
+              <xs:annotation>
+                <xs:documentation>
+                  Developers should be very careful with what they put out here because some character strings could break filtering, etc. 
+                  in downstream processing.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="xml">
+              <xs:annotation>
+                <xs:documentation>Hook that allows any XML document or fragment to be logged. Only well-formed fragments valid.</xs:documentation>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+                <xs:anyAttribute namespace="##any" processContents="lax"/>
+              </xs:complexType>
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

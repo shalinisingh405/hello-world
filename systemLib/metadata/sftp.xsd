@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd" targetNamespace="http://www.intel.com/soae/protocolMetadata-2007a.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified" blockDefault="#all">
+	<xs:include schemaLocation="metadataCommon.xsd"/>
+	<!-- =============================================================================== -->
+	<!--  Metadata for SFTP Input server and invocation agent          -->
+	<!-- =============================================================================== -->
+	<!--  SFTP protocol header: root element  -->
+	<xs:element name="sftpMessage">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:choice minOccurs="0">
+					<xs:element name="source" type="sftpSource"/>
+					<xs:element name="destination" type="sftpDestination"/>
+				</xs:choice>
+				<xs:element name="transport" type="sftpTransport" minOccurs="0"/>
+				<!-- specific message related data -->
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<!--  source element  -->
+	<xs:complexType name="sftpSource">
+		<xs:sequence>
+			<xs:element name="inputServerName" type="NonEmptyString"/>
+			<xs:element name="ip" type="NonEmptyString"/>
+			<!-- Ip address that we receive request on -->
+			<xs:element name="port" type="xs:unsignedShort"/>
+			<!-- Port that we receive request on -->
+			<!-- only supported when protocol=ftps -->
+		</xs:sequence>
+	</xs:complexType>
+	<!--  destination element  -->
+	<xs:complexType name="sftpDestination">
+		<xs:sequence>
+			<xs:element name="invocationAgentName" type="NonEmptyString"/>
+			<!-- only supported when protocol=ftps -->
+		</xs:sequence>
+	</xs:complexType>
+	<!-- transport element  -->
+	<xs:complexType name="sftpTransport">
+		<xs:choice>
+			<!-- We suppose that metadata may contain only a few parameters. Others will be taken from the standard config -->
+			<xs:sequence>
+				<xs:annotation>
+					<xs:documentation>This sequence is used for SFTP "file put" mode.</xs:documentation>
+				</xs:annotation>
+				<xs:element name="user" type="NonEmptyString" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>User id for dynamic invocation agent file mode.</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:choice minOccurs="0">
+					<xs:element name="password" type="NonEmptyString">
+						<xs:annotation>
+							<xs:documentation>Password for dynamic invocation agent file mode.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="keyName" type="NonEmptyString"/>
+				</xs:choice>
+				<xs:element name="file">
+					<xs:annotation>
+						<xs:documentation>Used in "put mode" Invocation Agent to place a file on the SFTP server.</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="path" type="NonEmptyString" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>If present facilitates an implicit cd to this location.  This way a file may be put into a directory with one request.  On input this specifes the path to the named file.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="name">
+								<xs:annotation>
+									<xs:documentation>The name of the file.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="ownerId" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>The owning user id, if known and provided by the server.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="groupId" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>The owning user's group id if known and provided by the server.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="size" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>The size of the file if reported by the server.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:element name="command">
+				<xs:annotation>
+					<xs:documentation>Used in "command passthru" mode to execute a command on an SFTP server.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:choice>
+						<xs:element name="login">
+							<xs:complexType>
+								<xs:sequence minOccurs="0">
+									<xs:annotation>
+										<xs:documentation>If absent, configured values for back end server will be used.  That is those configured in the management console.</xs:documentation>
+									</xs:annotation>
+									<xs:element name="user" type="NonEmptyString">
+										<xs:annotation>
+											<xs:documentation>The userid.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:choice>
+										<xs:element name="password" type="NonEmptyString">
+											<xs:annotation>
+												<xs:documentation>The user's password when doing password authentication.</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="keyName" type="NonEmptyString">
+											<xs:annotation>
+												<xs:documentation>This is the name of a key as defined in the security configuration SSH section.</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="encodedPublicKey">
+											<xs:annotation>
+												<xs:documentation>The user's public key that is NOT predefined in the security configuration.  Note that this key cannot be "proxied" to the backend because it lacks the private key.  That is, this is only useful to authenticate the Input Server client and not suitable to be the idenity to a backend server.</xs:documentation>
+											</xs:annotation>
+											<xs:simpleType>
+												<xs:restriction base="xs:base64Binary">
+													<xs:minLength value="1"/>
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:element>
+									</xs:choice>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="quit" fixed=""/>
+						<xs:element name="pwd" fixed=""/>
+						<xs:element name="cd">
+							<xs:complexType>
+								<xs:attribute name="path" type="NonEmptyString" use="required"/>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="ls">
+							<xs:complexType>
+								<xs:attribute name="path" type="NonEmptyString"/>
+								<xs:attribute name="xml" type="xs:boolean">
+									<xs:annotation>
+										<xs:documentation>True indicates that the output will be formatted in XML format.</xs:documentation>
+									</xs:annotation>
+								</xs:attribute>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="get">
+							<xs:complexType>
+								<xs:attribute name="path" type="NonEmptyString" use="required"/>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="put">
+							<xs:complexType>
+								<xs:attribute name="path" type="NonEmptyString" use="required"/>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="stat">
+							<xs:complexType>
+								<xs:attribute name="path" type="NonEmptyString" use="required"/>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="chown">
+							<xs:complexType>
+								<xs:attribute name="ownerid" type="xs:unsignedShort" use="required"/>
+								<xs:attribute name="path" type="NonEmptyString" use="required"/>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="chgrp">
+							<xs:complexType>
+								<xs:attribute name="grpid" type="xs:unsignedShort" use="required"/>
+								<xs:attribute name="path" type="NonEmptyString" use="required"/>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="realpath">
+							<xs:complexType>
+								<xs:attribute name="path" type="NonEmptyString" use="required"/>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="chmod">
+							<xs:complexType>
+								<xs:attribute name="permissions" type="xs:unsignedShort" use="required"/>
+								<xs:attribute name="path" type="NonEmptyString" use="required"/>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="rm">
+							<xs:complexType>
+								<xs:attribute name="path" type="NonEmptyString" use="required"/>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="rename">
+							<xs:complexType>
+								<xs:attribute name="path" type="NonEmptyString" use="required"/>
+								<xs:attribute name="newPath" type="NonEmptyString" use="required"/>
+							</xs:complexType>
+						</xs:element>
+					</xs:choice>
+					<xs:attribute name="sessionid" type="NonEmptyString" use="required"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="reply">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="attributes" type="FileAttributesType" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Attrbutes of a resource (returned by stat command).</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="sessionid" type="NonEmptyString" use="required"/>
+					<xs:attribute name="status" type="xs:unsignedByte" use="required"/>
+					<xs:attribute name="message">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:maxLength value="255"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="path" type="NonEmptyString">
+						<xs:annotation>
+							<xs:documentation>path returned in requests such as pwd.</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+				</xs:complexType>
+			</xs:element>
+		</xs:choice>
+	</xs:complexType>
+</xs:schema>

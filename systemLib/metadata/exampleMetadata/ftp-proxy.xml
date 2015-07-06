@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<message xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xsi:schemaLocation="http://www.intel.com/soae/protocolMetadata-2007a.xsd M:\home\wlpoziom\workspace\cbrsrc\cbrcore\schema\metadata\metadata.xsd">
+	<wsa:EndpointReference>
+		<wsa:Address>ftp://localhost:21/la/la/la.xml</wsa:Address>
+	</wsa:EndpointReference>
+	<protocol>ftp</protocol>
+	<ftpMessage>
+		<destination>
+			<invocationAgentName>a</invocationAgentName>
+		</destination>
+		<transport>
+			<command>
+				<name>RETR</name>
+				<arg>FILE</arg>
+				<sessionId>123132</sessionId>
+			</command>
+		</transport>
+	</ftpMessage>
+</message>

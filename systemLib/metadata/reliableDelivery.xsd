@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2007 sp2 (http://www.altova.com) by WADE L POZIOMBKA (INTEL CORPORATION) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd" targetNamespace="http://www.intel.com/soae/protocolMetadata-2007a.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified" blockDefault="#all">
+	<xs:include schemaLocation="metadataCommon.xsd"/>
+	<xs:element name="reliableDelivery">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:choice>
+					<xs:element name="source">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="inputServerName" type="NonEmptyString"/>
+								<xs:element name="appName" type="xs:NMTOKEN"/>
+								<xs:element name="messageType" type="xs:NMTOKEN"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="destination">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="invocationAgentName" type="NonEmptyString"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

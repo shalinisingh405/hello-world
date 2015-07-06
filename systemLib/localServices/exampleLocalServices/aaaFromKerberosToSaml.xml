@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ..\aaa.xsd"
+               samlVersion="2.0" soapVersion="1.1" wssecVersion="2004-01" wsAddressingVersion="2005-08" writeTransactionLog="true">
+  <identityProcessing>
+    <extractIdentity>
+      <principalNameFromKerberosToken extractPrimary="true" actor="foobar"></principalNameFromKerberosToken>
+    </extractIdentity>
+    <authenticateIdentity>
+      <validateKerberosToken>
+        <kerberosServerKeytab>serverXyzKeytab</kerberosServerKeytab>
+        <authenticationPolicy>demo-kerberous-authentication-policy</authenticationPolicy>
+        <acceptableTokenTypes>
+          <kerberosv5_AP_REQ-1.0>false</kerberosv5_AP_REQ-1.0>
+          <kerberosv5_AP_REQ-1.1>false</kerberosv5_AP_REQ-1.1>
+          <gss_Kerberosv5_AP_REQ-1.1>true</gss_Kerberosv5_AP_REQ-1.1>
+          <kerberosv5_AP_REQ1510-1.1>false</kerberosv5_AP_REQ1510-1.1>
+          <gss_Kerberosv5_AP_REQ1510-1.1>true</gss_Kerberosv5_AP_REQ1510-1.1>
+          <kerberosv5_AP_REQ4120-1.1>false</kerberosv5_AP_REQ4120-1.1>
+          <gss_Kerberosv5_AP_REQ4120-1.1>true</gss_Kerberosv5_AP_REQ4120-1.1>
+        </acceptableTokenTypes>
+      </validateKerberosToken>
+    </authenticateIdentity>
+    <mapIdentity>
+      <createSamlAssertion>
+        <assertionInfo>
+          <v2dot0Info>
+            <generalAssertionInfo>
+              <Issuer type="string">
+                <staticValue>soae-issuer</staticValue>
+              </Issuer>
+              <IssuerFormatAttribute>urn:oasis:names:tc:SAML:2.0:nameid-format:unspecified</IssuerFormatAttribute>
+            </generalAssertionInfo>
+            <Subject>
+              <NameID-Format-Attribute type="string">
+                <staticValue>urn:oasis:names:tc:SAML:2.0:nameid-format:kerberos</staticValue>
+              </NameID-Format-Attribute>
+              <NameID type="string">
+                <automaticallyGenerated>
+                  <distinguishedNamePrefix></distinguishedNamePrefix>
+                  <distinguishedNamePostfix>@INTEL_IT</distinguishedNamePostfix>
+                  <generatedInternalWorkflowParameter>Authentication-Subject-NameIdentifier-Use-Extracted</generatedInternalWorkflowParameter>
+                </automaticallyGenerated>
+              </NameID>
+              <SubjectConfirmation>
+                <Method>urn:oasis:names:tc:SAML:2.0:cm:sender-vouches</Method>
+              </SubjectConfirmation>
+            </Subject>
+            <AuthnStatement>
+              <SubjectLocality-Address-Attribute type="string">
+                <use-incoming-client-ip-address></use-incoming-client-ip-address>
+              </SubjectLocality-Address-Attribute>
+              <AuthnContext-AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos</AuthnContext-AuthnContextClassRef>
+            </AuthnStatement>
+          </v2dot0Info>
+        </assertionInfo>
+      </createSamlAssertion>
+    </mapIdentity>
+  </identityProcessing>
+</aaa:aaaPolicy>

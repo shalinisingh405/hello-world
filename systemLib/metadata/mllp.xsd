@@ -1,0 +1,120 @@
+<!-- edited with XMLSpy v2007 sp2 (http://www.altova.com) by WADE L POZIOMBKA (INTEL CORPORATION) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd" targetNamespace="http://www.intel.com/soae/protocolMetadata-2007a.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified" blockDefault="#all">
+	<xs:import namespace="http://schemas.xmlsoap.org/ws/2004/08/addressing" schemaLocation="../importedSchemas/wsa-2004-08.xsd"/>
+	<xs:include schemaLocation="metadataCommon.xsd"/>
+	<!-- =============================================================================== -->
+	<!--  input & output servers types: Minimal Lower Level Prptocol (MLLP)              -->
+	<!-- =============================================================================== -->
+	<!--  MLLP protocol header: root element  -->
+	<xs:element name="mllpMessage">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:choice minOccurs="0">
+					<xs:element name="source" type="MllpSource"/>
+					<xs:element name="destination" type="MllpDestination"/>
+				</xs:choice>
+				<xs:element name="transport" type="MllpTransport" minOccurs="0"/>
+				<!-- specific message related data -->
+				<!-- the following fields are potential MLLP configuration related parameters. -->
+				<!-- todo: these elements come from MS MLLP inplementations. Do not know if our implementation will require/support them -->
+				<xs:element name="carriageReturn" default="13" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>byte value used for the carriage return (second byte wrapper after the end byte); default CR (0x0D)</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:unsignedByte">
+							<xs:minInclusive value="1"/>
+							<xs:maxInclusive value="255"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="endBlock" default="28" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>byte value used for the end (message trailer wrapper); default: FS (0x1C)</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:unsignedByte">
+							<xs:minInclusive value="1"/>
+							<xs:maxInclusive value="255"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="startBlock" default="11" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>byte value used for the start (message header wrapper); default: VT (0x0B)</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:unsignedByte">
+							<xs:minInclusive value="1"/>
+							<xs:maxInclusive value="255"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="sendTimeout" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>maximum time the sender will wait while sending a message</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:unsignedShort">
+							<xs:minInclusive value="0"/>
+							<xs:maxInclusive value="65535"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="receiveTimeout" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>maximum time that receiver will wait while receiving a message</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:unsignedShort">
+							<xs:minInclusive value="0"/>
+							<xs:maxInclusive value="65535"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="solicitResponseEnables" type="xs:boolean" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Enables receiving ACKs on the same TCP connection</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="submitReceiveAckLocation" type="xs:anyURI" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>URI of the receive location under which the ACKs received on the same TCP connection will be delivered to the message box database</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<!-- lower layers of the protocol stack, Current plans only support MLLP over TCP/IP -->
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<!--  source element  -->
+	<xs:complexType name="MllpSource">
+		<xs:sequence>
+			<xs:element name="inputServerName" type="NonEmptyString"/>
+			<xs:element name="release" type="MllpRelease"/>
+			<xs:element name="sslReceived" type="SslReceived" minOccurs="0"/>
+			<!-- only supported when protocol=mllps -->
+		</xs:sequence>
+	</xs:complexType>
+	<!--  destination element  -->
+	<xs:complexType name="MllpDestination">
+		<xs:sequence>
+			<xs:element name="invocationAgentName" type="NonEmptyString"/>
+			<xs:element name="release" type="MllpRelease"/>
+			<xs:element name="sslSend" type="SslSend" minOccurs="0"/>
+			<!-- only supported when protocol=mllps -->
+		</xs:sequence>
+	</xs:complexType>
+	<!-- transport element  -->
+	<xs:complexType name="MllpTransport">
+		<xs:sequence>
+			<xs:element name="localPort" type="xs:unsignedShort" minOccurs="0"/>
+			<!-- Local port that we receive MLLP messages on -->
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="MllpRelease">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="MLLP_R1"/>
+			<xs:enumeration value="MLLP_R2"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd"
+               oauthVersion="OAuth2-draft-22" samlVersion="2.0">
+  <identityProcessing>
+    <extractIdentity>
+      <nameFromOAuthAuthorizationRequest>
+        <flowType>ResourceOwnerSamlAssertionCredential</flowType>
+        <authorizationCodeRequestType>accessTokenRequest</authorizationCodeRequestType>
+        <roleBeingChecked>client</roleBeingChecked>
+        <scopeChecking>
+          <scopeRequired>false</scopeRequired>
+        </scopeChecking>
+        <clientCredentialSource>SamlAssertion</clientCredentialSource>
+        <clientAssertion>
+          <signatureInfo>
+            <signatureAcceptMethods><rsaWithSha256/></signatureAcceptMethods>
+            <digestAcceptMethod><sha256/></digestAcceptMethod>
+            <canonicalAcceptMethod><C14N_exclusive/></canonicalAcceptMethod>
+            <authenticationPolicy>security-config-name-to-verify-SAML-embedded-signature</authenticationPolicy>
+          </signatureInfo>
+          <requiredSamlEntitiesAndValues>
+            <Issuer>authorization server ABC</Issuer>
+            <SubjectConfirmationMethod>urn:oasis:names:tc:SAML:2.0:cm:bearer</SubjectConfirmationMethod>
+            <NotBeforeAndNotOnOrAfter>checkBothConditionsAndSubjectConfirmationDataElements</NotBeforeAndNotOnOrAfter>
+            <Audience type="anyURI">
+              <staticValue>client registration</staticValue>
+            </Audience>
+            <Recipient type="anyURI">
+              <staticValue>authorization server ABC</staticValue>
+            </Recipient>
+          </requiredSamlEntitiesAndValues>
+        </clientAssertion>
+        <specialExceptionHandling>
+          <typeFailureResponse>400-Bad Request</typeFailureResponse>
+        </specialExceptionHandling>
+      </nameFromOAuthAuthorizationRequest>
+    </extractIdentity>
+  </identityProcessing>
+</aaa:aaaPolicy>

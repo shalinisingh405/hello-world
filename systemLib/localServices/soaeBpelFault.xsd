@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:soae-fault="http://www.intel.com/soae/bpelFault-2009a/" 
+           targetNamespace="http://www.intel.com/soae/bpelFault-2009a/" 
+           elementFormDefault="unqualified">
+
+  <!-- ========================================================================
+
+    Defines the base class for extension function bpel faults and some extension
+    of this base class 
+
+    More specific bpel faults can be created by extending this class.  See below. 
+
+    Extensions should be created by adding a <detail> element at the end of the
+    base class.
+
+    An inner fault is a fault which is reported by a sub-component and caught
+    by another fault handler to create a different fault report.
+
+    The fault enum is used by faults which have more than one cause. It should
+    be the first element in the <details> element. It should have only a 
+    restricted set of values which should be enumerated using schema code 
+    like the following:
+
+       <xs:element name="faultEnum" >
+         <xs:simpleType>
+	   <xs:restriction base="fault:FaultEnum" >
+             <xs:enumeration value="document-load-failure" />
+             <xs:enumeration value="schema-compilation-failure" />
+             <xs:enumeration value="schema-validation-failure" />
+           </xs:restriction>
+         </xs:simpleType>
+       </xs:element>
+
+    ======================================================================== -->
+
+  <!-- Please keep in alphabetical order -->
+
+  <xs:include schemaLocation="contentAttackPrevBpelFault.xsd" />
+  <xs:include schemaLocation="dnsBpelFault.xsd" />
+  <xs:include schemaLocation="documentFunctionBpelFault.xsd" />
+  <xs:include schemaLocation="getProcessingInstructionPseudoAttrBpelFault.xsd" />
+  <xs:include schemaLocation="miscBpelFault.xsd" />
+  <xs:include schemaLocation="resourceBpelFault.xsd" />
+  <xs:include schemaLocation="schemaValidateBpelFault.xsd" />
+  <xs:include schemaLocation="tokenExchangeBpelFault.xsd" />
+  <xs:include schemaLocation="qosBpelFault.xsd" />
+  <xs:include schemaLocation="wssecBpelFault.xsd" />
+  <xs:include schemaLocation="XPathRoutingBpelFault.xsd" />
+  <xs:include schemaLocation="cdeInvocationBpelFault.xsd" />
+  <xs:include schemaLocation="aaaBpelFault.xsd"/>
+  <xs:include schemaLocation="wordDocumentOperationBpelFault.xsd" />
+  <xs:include schemaLocation="invocationAgentFault.xsd" />
+  <xs:include schemaLocation="icapServiceFault.xsd" />
+  <xs:include schemaLocation="jsonBpelFault.xsd" />
+
+  <xs:element name="fault" type="soae-fault:Fault"/>
+
+  <xs:complexType name="Fault">
+    <xs:sequence>
+      <xs:group ref="soae-fault:foundation"/>
+      <xs:element name="details" type="xs:anyType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:group name="foundation">
+    <xs:sequence>
+      <xs:element name="faultString" type="xs:string"/>
+      <xs:element ref="soae-fault:innerFault" minOccurs="0"/>
+    </xs:sequence>
+  </xs:group>
+
+  <xs:element name="innerFault">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="fault" type="soae-fault:Fault"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:simpleType name="FaultEnum" >
+    <xs:restriction base="xs:token" />
+  </xs:simpleType>
+
+<!--
+
+  ====================================================
+  BEGIN EXAMPLE - See misc.xsd for a complete example.
+  ====================================================
+
+  <xs:element name="myFault" type="soae-fault:MyFault"/>
+
+  <xs:complexType name="MyFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+
+                << Your fault specific data >>
+            
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  ====================================================
+  END EXAMPLE
+  ====================================================
+
+-->
+
+</xs:schema>

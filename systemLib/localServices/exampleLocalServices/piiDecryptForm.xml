@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pii:piiPolicy xmlns:pii="http://www.intel.com/soae/localService/piiDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/piiDefinition-2007a/ ../pii.xsd"
+               maximumLaxCharactersAllowed="4">
+  <decrypt>
+    <reKeyObject>rekey-object-abc</reKeyObject>
+    <encryptionInputEncoding>EmbeddedWithinPrefixPostfixStrings</encryptionInputEncoding>
+    <encryptionTextDelimiters>
+      <prefix>ESTR</prefix>
+      <postfix>EEND</postfix>
+    </encryptionTextDelimiters>
+    <encryptedKeyTweakInfoSource>extractFromIndividualEncryption</encryptedKeyTweakInfoSource>
+    <clusterIdentifierIncluded>false</clusterIdentifierIncluded>
+  </decrypt>
+</pii:piiPolicy>

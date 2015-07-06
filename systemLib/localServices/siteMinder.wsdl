@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+                  xmlns:soae="http://www.intel.com/soae/wsdl/wsdl11-2007a/"
+                  xmlns:tns="http://www.intel.com/soae/localService/siteminder-2009a/"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:xsd1="http://www.intel.com/soae/localService/siteminder-2009a/"
+                  name="SiteMinderService"
+                  targetNamespace="http://www.intel.com/soae/localService/siteminder-2009a/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+  <plnk:partnerLinkType name="SiteMinderServicePartnerLinkType">
+    <plnk:role name="SiteMinderServiceProvider" portType="tns:SiteMinderPortType"/>
+  </plnk:partnerLinkType>
+  <wsdl:types>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.intel.com/soae/localService/siteminder-2009a/schemas">
+      <xsd:import namespace="http://www.intel.com/soae/localService/siteminder-2009a/" schemaLocation="siteMinder.xsd"/>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="SiteMinderRequest">
+    <wsdl:part element="xsd1:siteMinderRequest" name="body"/>
+  </wsdl:message>
+  <wsdl:message name="SiteMinderResponse">
+    <wsdl:part element="xsd1:siteMinderResponse" name="body"/>
+  </wsdl:message>
+
+  <wsdl:portType name="SiteMinderPortType">
+    <wsdl:operation name="siteMinderOperation">
+      <wsdl:input message="tns:SiteMinderRequest"/>
+      <wsdl:output message="tns:SiteMinderResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  
+  <wsdl:binding name="SiteMinderBinding" type="tns:SiteMinderPortType">
+    <soae:binding transport="http://www.intel.com/soae/transport/siteMinder"/>
+    <wsdl:operation name="siteMinderOperation">
+      <wsdl:input>
+        <soae:content part="body" type="text/xml"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soae:content part="body" type="text/xml"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+    
+  <wsdl:service name="SiteMinderService">
+    <wsdl:port binding="tns:SiteMinderBinding" name="SiteMinderPort">
+      <soae:address location="siteminder://soae_siteminder?authPort=44442&amp;azPort=44443&amp;acctPort=44441&amp;agent=soaeagent&amp;sharedSecret=secret"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

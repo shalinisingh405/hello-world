@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd"
+               oauthVersion="OAuth2-draft-22" samlVersion="2.0">
+  <identityProcessing>
+    <extractIdentity>
+      <ssoFromCookie>
+        <cookieName>SMSESSION</cookieName>
+      </ssoFromCookie>
+    </extractIdentity>
+    <authenticateIdentity>
+      <siteMinderAuthentication>
+        <resource type="anyURI">
+          <staticValue>communication-resources</staticValue>
+        </resource>
+        <action>Get</action>
+      </siteMinderAuthentication>
+    </authenticateIdentity>
+  </identityProcessing>
+</aaa:aaaPolicy>

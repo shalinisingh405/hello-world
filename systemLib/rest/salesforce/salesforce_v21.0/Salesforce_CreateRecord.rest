@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:intel-esg="http://www.intel.com/soae/localServices/REST/" xmlns:md="http://www.intel.com/soae/protocolMetadata-2007a.xsd" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:salesforce="http://www.intel.com/soae/rest/salesforce/createRecord" xmlns:tns="http://www.intel.com/soae/rest/salesforce/createRecord" xmlns:salesforce_1="http://www.intel.com/soae/rest/salesforce" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="Salesforce_CreateRecord" targetNamespace="http://www.intel.com/soae/rest/salesforce/createRecord">
+  <wsdl:message name="Salesforce_CreateRecordRequest">
+    <wsdl:part name="record" type="xsd:anyType" intel-esg:type="xsd:anyType"/>
+    <wsdl:part name="object" type="xsd:string"/>
+    <wsdl:part intel-esg:fixed="application/xml" name="accept" type="xsd:anyType" intel-esg:type="md:Header"/>
+  </wsdl:message>
+  <wsdl:message name="Salesforce_CreateRecordResponse">
+    <wsdl:part name="result" type="xsd:anyType" intel-esg:type="salesforce_1:CreateRecordResult"/>
+    <wsdl:part name="uri" type="xsd:anyType" intel-esg:type="md:Header"/>
+  </wsdl:message>
+  <wsdl:portType name="Salesforce_CreateRecord">
+    <wsdl:operation name="invoke">
+      <wsdl:input message="tns:Salesforce_CreateRecordRequest"/>
+      <wsdl:output message="tns:Salesforce_CreateRecordResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="Salesforce_CreateRecordBinding" type="tns:Salesforce_CreateRecord">
+    <http:binding verb="POST"/>
+    <wsdl:operation name="invoke">
+      <http:operation location="(object)"/>
+      <wsdl:input>
+        <http:urlReplacement/>
+        <intel-esg:httpHeaders>
+          <intel-esg:header name="accept" part="accept"/>
+        </intel-esg:httpHeaders>
+        <mime:content part="record" type="application/xml"/>
+      </wsdl:input>
+      <wsdl:output>
+        <intel-esg:httpHeaders>
+          <intel-esg:header name="location" part="uri"/>
+        </intel-esg:httpHeaders>
+        <mime:content part="result" type="application/xml"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Salesforce_CreateRecordService">
+    <wsdl:port binding="tns:Salesforce_CreateRecordBinding" name="Salesforce_CreateRecordPort">
+      <http:address location="https://na1.salesforce.com"/>
+    </wsdl:port>
+  </wsdl:service>
+  <plnk:partnerLinkType name="Salesforce_CreateRecordPartnerLinkType">
+    <plnk:role name="service" portType="tns:Salesforce_CreateRecord"/>
+  </plnk:partnerLinkType>
+</wsdl:definitions>

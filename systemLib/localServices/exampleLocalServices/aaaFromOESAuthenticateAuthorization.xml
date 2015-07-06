@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ..\aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <usernameFromHttpBasicAuthenticationHeader/>
+    </extractIdentity>
+    <authenticateIdentity>
+      <oracleEntitlementServerAuthentication/>
+    </authenticateIdentity>
+  </identityProcessing>
+  <resourceProcessing>
+    <extractResource>
+      <actionFromHttpHeader>
+        <component>path</component>
+        <index>-1</index>
+      </actionFromHttpHeader>
+    </extractResource>
+    <authorizeResource>
+      <oracleEntitlementServerXacmlAuthorization writeTransactionLog="true">
+        <resource type="anyURI">
+          <use-extracted-resource>internal-name:AuthorizationResource</use-extracted-resource>
+        </resource>
+        <action>
+          <staticValue>some-action-source</staticValue>
+        </action>
+        <environmentSetting>
+          <environment id="23" type="date"/>
+          <environment id="24" type="integer"/>
+          <environment id="1234" type="date"/>
+          <environment id="546" type="time"/>
+          <environment id="666" type="ip"/>
+        </environmentSetting>
+      </oracleEntitlementServerXacmlAuthorization>
+    </authorizeResource>
+  </resourceProcessing>
+</aaa:aaaPolicy>

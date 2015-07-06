@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://www.intel.com/soae/localService/oracleAccessManager-2009a/" 
+           xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           targetNamespace="http://www.intel.com/soae/localService/oracleAccessManager-2009a/" 
+           elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:element name="status">
+    <xs:complexType/>
+  </xs:element>
+  <xs:simpleType name="methodType">
+    <xs:restriction base="xs:string">
+      <xs:annotation>
+        <xs:documentation>Method to be applied to the url resource.</xs:documentation>
+      </xs:annotation>
+      <xs:enumeration value="GET"/>
+      <xs:enumeration value="PUT"/>
+      <xs:enumeration value="POST"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="token">
+    <xs:annotation>
+      <xs:documentation>The token used for validation of a session.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="username">
+    <xs:annotation>
+      <xs:documentation>The username or user id for the authentication.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="sessionRequestType">
+    <xs:sequence>
+      <xs:element name="url">
+        <xs:simpleType>
+          <xs:restriction base="xs:anyURI">
+            <xs:minLength value="1"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="method" type="methodType"/>
+      <xs:element name="location" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="7"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="authorization" type="xs:boolean" default="false"/>
+    <xs:attribute name="terminate" type="xs:boolean" default="false"/>
+  </xs:complexType>
+  <xs:element name="createSessionRequest">
+    <xs:annotation>
+      <xs:documentation>Comment describing your root element</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="sessionRequestType">
+          <xs:sequence>
+            <xs:element name="credentials">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="usernamePassword" minOccurs="0">
+                    <xs:annotation>
+                      <xs:documentation>A user name Password authentication credential.  Note the body of this element is the password.</xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                      <xs:simpleContent>
+                        <xs:extension base="xs:string">
+                          <xs:attribute name="username" type="username" use="required"/>
+                        </xs:extension>
+                      </xs:simpleContent>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name="x509certificate" type="xs:base64Binary" minOccurs="0">
+                    <xs:annotation>
+                      <xs:documentation>A X.509 Certificate credential.  This should be the raw data of the certificate.</xs:documentation>
+                    </xs:annotation>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="verifySessionRequest">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="sessionRequestType">
+          <xs:sequence>
+            <xs:element name="token" type="token"/>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="terminateSessionRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="token" type="token"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="oracleAccessManagerRequest">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="createSessionRequest"/>
+        <xs:element ref="verifySessionRequest"/>
+        <xs:element ref="terminateSessionRequest"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="oracleAccessManagerResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="token" type="token" minOccurs="0"/>
+        <xs:element name="location" minOccurs="0"/>
+        <xs:element name="userIdentity" minOccurs="0"/>
+        <xs:element name="authenticationLevel" minOccurs="0"/>
+        <xs:element name="startTime" minOccurs="0"/>
+        <xs:element name="lastUseTime" minOccurs="0"/>
+        <xs:element name="actions" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="action" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute name="phase" use="required"/>
+                      <xs:attribute name="type" use="required">
+                        <xs:simpleType>
+                          <xs:restriction base="xs:string">
+                            <xs:minLength value="1"/>
+                          </xs:restriction>
+                        </xs:simpleType>
+                      </xs:attribute>
+                      <xs:attribute name="name" use="required">
+                        <xs:simpleType>
+                          <xs:restriction base="xs:string">
+                            <xs:minLength value="1"/>
+                          </xs:restriction>
+                        </xs:simpleType>
+                      </xs:attribute>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="responseCode" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="ok"/>
+            <xs:enumeration value="error"/>
+            <xs:enumeration value="notProtected"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="message" type="xs:string" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

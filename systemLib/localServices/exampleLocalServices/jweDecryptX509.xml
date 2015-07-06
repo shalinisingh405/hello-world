@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wssec:webServiceSecurityDefinition usage="ignore" bindingType="REST" 
+    xmlns:wssec="http://www.intel.com/soae/localService/wssecDefinition-2007a/" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://www.intel.com/soae/localService/wssecDefinition-2007a/ ../wssecDefinition.xsd">
+  <jweDecrypt>
+    <keyType>x509</keyType>
+    <encryptionAcceptKeyInfoType>certificateChain</encryptionAcceptKeyInfoType>
+    <dataEncryptionAcceptAlgorithm><A128GCM/><A192GCM/><A256GCM/></dataEncryptionAcceptAlgorithm>
+    <keyEncryptionAcceptAlgorithm><RSA-OAEP/></keyEncryptionAcceptAlgorithm>
+    <serializationAcceptMethod>CompactSerialization</serializationAcceptMethod>
+    <jsonSecurityToken>
+      <security-config-package>foobar-asymmetric-key-pair</security-config-package>
+    </jsonSecurityToken>
+  </jweDecrypt>
+</wssec:webServiceSecurityDefinition>

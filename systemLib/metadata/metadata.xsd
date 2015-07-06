@@ -1,0 +1,251 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:addext="http://www.intel.com/soae/ws-addressing/addressing-2008a/" xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd" targetNamespace="http://www.intel.com/soae/protocolMetadata-2007a.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified" blockDefault="#all">
+  <!-- Note: we are importing WS-Addressing Endpoint Reference -->
+  <!-- While this element allows any element, there would have been no way to validated this timeout element -->
+  <!-- Therefore, all SOAE ws-addressing extensions have been placed in extension schema in localServices -->
+  <xs:import namespace="http://schemas.xmlsoap.org/ws/2004/08/addressing" schemaLocation="../importedSchemas/wsa-2004-08.xsd"/>
+  <xs:import namespace="http://www.intel.com/soae/ws-addressing/addressing-2008a/" schemaLocation="../localServices/ws-addressing-ext.xsd"/>
+  <xs:include schemaLocation="metadataCommon.xsd"/>
+  <xs:include schemaLocation="http.xsd"/>
+  <xs:include schemaLocation="jms.xsd"/>
+  <xs:include schemaLocation="ftp.xsd"/>
+  <xs:include schemaLocation="file.xsd"/>
+  <xs:include schemaLocation="mllp.xsd"/>
+  <!-- <xs:include schemaLocation='wsrm.xsd'/> supported in future release -->
+  <xs:include schemaLocation="mime.xsd"/>
+  <xs:include schemaLocation="ldap.xsd"/>
+  <xs:include schemaLocation="icap.xsd"/>
+  <xs:include schemaLocation="siteMinder.xsd"/>
+  <xs:include schemaLocation="oracleAccessManager.xsd"/>
+  <xs:include schemaLocation="tivoliAccessManager.xsd"/>
+  <xs:include schemaLocation="axis2.xsd"/>
+  <xs:include schemaLocation="custom.xsd"/>
+  <xs:include schemaLocation="tcp.xsd"/>
+  <xs:include schemaLocation="reliableDelivery.xsd"/>
+  <xs:include schemaLocation="kerberosKDC.xsd"/>
+  <xs:include schemaLocation="sftp.xsd"/>
+  <xs:include schemaLocation="ibmmq.xsd"/>
+  <xs:include schemaLocation="websocket.xsd"/>
+  <!-- =============================================================================== -->
+  <!--  Metadata that include all possible protocol types: input servers and           -->
+  <!--  invocation agents.                                                             -->
+  <!-- =============================================================================== -->
+  <!--  metadata root element  -->
+  <xs:element name="message">
+    <xs:complexType>
+      <xs:all>
+        <xs:element name="protocol">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="http"/>
+              <xs:enumeration value="https"/>
+              <xs:enumeration value="wsrm"/>
+              <xs:enumeration value="jms"/>
+              <xs:enumeration value="ftp"/>
+              <xs:enumeration value="ftps"/>
+              <xs:enumeration value="file"/>
+              <xs:enumeration value="mllp"/>
+              <xs:enumeration value="mime"/>
+              <xs:enumeration value="ldap"/>
+              <xs:enumeration value="icap"/>
+              <xs:enumeration value="siteMinder"/>
+              <xs:enumeration value="oracleAccessManager"/>
+              <xs:enumeration value="tivoliAccessManager"/>
+              <xs:enumeration value="axis2"/>
+              <xs:enumeration value="customService"/>
+              <xs:enumeration value="tcp"/>
+              <xs:enumeration value="reliableDelivery"/>
+              <xs:enumeration value="kerberosKDC"/>
+              <xs:enumeration value="timer"/>
+              <xs:enumeration value="sftp"/>
+              <xs:enumeration value="ibmmq"/>
+              <xs:enumeration value="tb-pcidss"/>
+              <xs:enumeration value="websocket"/>
+              <!-- http/tcp -->
+              <!-- http/ssl/tcp -->
+              <!-- ws-rm/http/ssl/tcp -->
+              <!-- jms/xxx -->
+              <!-- ftp/tcp; only supported for destinations -->
+              <!-- file; only supported for destinations -->
+              <!-- mllp/tcp; do not see need for us to support optional ssl/tls layer at this time -->
+              <!-- mime attachments -->
+              <!-- LDAP invocation agent -->
+              <!-- icap invocation agent -->
+              <!-- SiteMinder invocation agent -->
+              <!-- Oracle Access Manager invocation agent -->
+              <!-- Tivoli Access Manager invocation agent -->
+              <!-- Axis2 Custom Service -->
+              <!-- Custom Service -->
+              <!-- Raw TCP -->
+              <!-- KerberosKDC invocation agent -->
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:element>
+        <xs:element ref="wsa:EndpointReference" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+                WS-Addressing Endpoint Reference.
+                If this element is absent or empty, then all addressing must be derived from the provisioned (static) values of 
+                invocation agent or input server.
+                When associated with input server incoming request, source IP adress and port is record here.
+                When associated with invocation agent, destination IP-address and port are recorded here
+              </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <!-- Start of choice list -->
+        <!-- constraint: only one element from the following logical choice list should ever be populated. -->
+        <!-- Kludge: to elminate application retrofit issues and to all HTTP IS to generate epr element at the end chnage sequence to all -->
+        <!-- The only time that no choice element should occur is when the WFP is simulating a response due to some failure condition -->
+        <xs:element ref="httpMessage" minOccurs="0"/>
+        <xs:element ref="jmsMessage" minOccurs="0"/>
+        <xs:element ref="mllpMessage" minOccurs="0"/>
+        <xs:element ref="ftpMessage" minOccurs="0"/>
+        <xs:element ref="fileMessage" minOccurs="0"/>
+        <!-- <xs:element ref='wsrmMessage' minOccurs="0"/> supported in future release -->
+        <!-- MIME, intended for WFL process internal usage -->
+        <xs:element ref="mimeHeaders" minOccurs="0"/>
+        <!-- Invocation Agents -->
+        <xs:element ref="ldapMessage" minOccurs="0"/>
+        <xs:element ref="icapMessage" minOccurs="0"/>
+        <!-- <xs:element ref='siteMinderMessage' minOccurs="0"/> supported in future release -->
+        <!-- <xs:element ref='oracleAccessManagerMessage' minOccurs="0"/> supported in future release -->
+        <!-- <xs:element ref='tivoliAccessManagerMessage' minOccurs="0"/> supported in future release -->
+        <!-- <xs:element ref='kerberosKDC' minOccurs="0"/> supported in future release -->
+        <!-- Custom Services -->
+        <xs:element ref="axis2Message" minOccurs="0"/>
+        <xs:element ref="customMessage" minOccurs="0"/>
+        <xs:element ref="tcpMessage" minOccurs="0"/>
+        <xs:element ref="reliableDelivery" minOccurs="0"/>
+        <xs:element ref="websocketMessage" minOccurs="0"/>
+        <!-- end of choice list -->
+        <xs:element name="timer" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="source">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="inputServerName"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element ref="sftpMessage" minOccurs="0"/>
+        <xs:element ref="ibmmq" minOccurs="0"/>
+        <xs:element name="contentType" minOccurs="0">
+          <xs:complexType>
+            <xs:annotation>
+              <xs:documentation>
+                  How MIME message portion is conveyed between two transport endpoints.
+            This is recorded by IS for use in inbound message mime parsing.
+                  On outbound messages it is ignored.
+                  If contentType absent, it is assumed that the message does not contain a MIME portion.
+                  contentType must be non-empty when encodingType == detached, and empty when encodingType == embedded.
+                  For HTTP, encodingType == detached.
+                  For FTP or MLLP, contentType element absent or encodingType == embedded.
+                  For JMS, encodingType is either detached or embedded. 
+                  There is an effort to standardize how MIME content type via the SOAP/JMS binding.
+                  For this specification, contentType value is contentType.
+                  For LDAP, SiteMinder, Oracle Access Manager, Tivoli Access Manager and KerberosKDC; contentType must be absent.
+                </xs:documentation>
+            </xs:annotation>
+            <xs:simpleContent>
+              <xs:extension base="ContentType">
+                <xs:attribute name="encodingType" type="EncodingType" use="required"/>
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="contentEncoding" minOccurs="0">
+          <xs:complexType>
+            <xs:annotation>
+              <xs:documentation>
+
+	          The content-encoding header is described in section 14.11 of RFC 2616.
+                  "The primary purpose is to allow document compression without loss of the underlying media type."
+	          The default is "identity" ("no content encoding").
+	          If the element is present but the value is a zero length string it will be interpreted as "identity".
+		  The value is not case sensitive.
+
+                                     </xs:documentation>
+            </xs:annotation>
+            <xs:simpleContent>
+              <xs:extension base="xs:token"/>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="sequenceNumber" type="xs:unsignedLong" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+                Identifies message sequence within an application.
+                The sequence number is assigned by the input server when it completely receive the message body.
+                This is for test purposes to uniquely identify each message that is processed.
+              </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="sessionAffinityTag" type="NonEmptyString" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+				This is used for back end(invocation agent) load distribution correctly with
+				consideration of session, and must be
+				extracted and store into the metadata on front end(input server)
+				and can be used for workflow's correlation betweent activities.
+              			</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+
+        <xs:element name="errorStatus" minOccurs="0">
+          <xs:complexType>
+            <xs:annotation>
+              <xs:documentation>
+                  The only time that this element exists is when the WFP is simulating a response due to some failure condition, e.g., IA response timeout
+                </xs:documentation>
+            </xs:annotation>
+            <xs:sequence>
+              <xs:element name="status">
+                <xs:annotation>
+                  <xs:documentation>
+                      Failure condition as seen by WFL process
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="invokeFailure"/>
+                    <xs:enumeration value="replyFailure"/>
+                    <xs:enumeration value="invokeTimeout"/>
+                    <xs:enumeration value="replyTimeout"/>
+                    <xs:enumeration value="other"/>
+                    <!-- Unable to invoke specified entity or received notification about its death -->
+                    <!-- Specified entity response timeout occurred -->
+                    <!-- See following detail element for failure condition -->
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="details" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                  <xs:documentation>
+                      Expanded failure condition description
+                    </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:all>
+    </xs:complexType>
+  </xs:element>
+  <xs:simpleType name="ContentType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="0"/>
+      <!-- The length=0 for an xs:string is due to a problem with a schema based tool. -->
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="EncodingType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="detached"/>
+      <xs:enumeration value="embedded"/>
+      <!-- MIME portion carried outside of message (body) payload -->
+      <!-- MIME portion carried within the message (body) payload -->
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

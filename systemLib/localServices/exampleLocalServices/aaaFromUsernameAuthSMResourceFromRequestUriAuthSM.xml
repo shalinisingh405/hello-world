@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <usernameFromSecurityHeader></usernameFromSecurityHeader>
+    </extractIdentity>
+    <authenticateIdentity>
+      <siteMinderAuthentication>
+        <resource type="anyURI">
+          <use-extracted-resource></use-extracted-resource>
+        </resource>
+        <action>Get</action>
+      </siteMinderAuthentication>
+    </authenticateIdentity>
+  </identityProcessing>
+  <resourceProcessing>
+    <extractResource>
+      <requestUriFromHttpOperation></requestUriFromHttpOperation>
+    </extractResource>
+    <authorizeResource>
+      <siteMinderAuthorization>
+        <useSiteMinderAuthenticationParametrizations/>
+      </siteMinderAuthorization>
+    </authorizeResource>
+  </resourceProcessing>
+</aaa:aaaPolicy>

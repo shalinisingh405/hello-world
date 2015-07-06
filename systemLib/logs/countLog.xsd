@@ -1,0 +1,188 @@
+<?xml version='1.0' ?>
+<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'
+           xmlns='http://www.intel.com/soae/logSchema-2007a.xsd' targetNamespace='http://www.intel.com/soae/logSchema-2007a.xsd'>
+    <xs:include schemaLocation='logCommon.xsd'/>
+
+  <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <xs:simpleType name='Interval'>
+    <xs:annotation>
+      <xs:documentation>Time period that associate statistics were taken over</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base='xs:string'>
+      <xs:enumeration value='15Minutes'/>
+      <xs:enumeration value='30Minutes'/>
+      <xs:enumeration value='1Hour'/>
+      <xs:enumeration value='24Hours'/>
+      <xs:enumeration value='1Week'/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name='StatCounter'>
+    <xs:annotation>
+      <xs:documentation>Basic Count</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name='countId' type='xs:unsignedShort' minOccurs='1' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Value matches the ST_CounterName value that this counter was created with</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name='targetMoid' minOccurs='0' maxOccurs='1'>
+        <xs:complexType>
+          <xs:all>
+            <xs:element name='moId' type='MoId' maxOccurs='1'/>
+          </xs:all>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='sampleSum' type='xs:unsignedLong' minOccurs='0' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Sample Sum value</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name='samples' type='xs:unsignedLong' minOccurs='0' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Sample value</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name='count' type='xs:unsignedLong' minOccurs='1' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Current count value</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name='high' type='xs:unsignedLong' minOccurs='0' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Highest count value in interval</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name='low' type='xs:unsignedLong' minOccurs='0' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Lowest count value in interval</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name='average' type='xs:unsignedLong' minOccurs='0' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Average count value in interval</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name='rate' minOccurs='0' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Rate during interval</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base='xs:decimal'>
+            <xs:totalDigits value='4'/>
+            <xs:fractionDigits value='2'/>
+            <xs:minInclusive value='0.0'/>
+            <xs:maxInclusive value='1.00'/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name='percent' minOccurs='0' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Percentage during interval</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base='xs:decimal'>
+            <xs:totalDigits value='4'/>
+            <xs:fractionDigits value='2'/>
+            <xs:minInclusive value='0.0'/>
+            <xs:maxInclusive value='1.00'/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name='counterName' type='xs:string' use='required'>
+      <xs:annotation>
+        <xs:documentation>Count Name</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name='attachedThisInterval' type='xs:boolean' use='optional' default='false'>
+      <xs:annotation>
+        <xs:documentation>Indicated that this count accumulation started within this time interval</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <xs:complexType name='CountBody'>
+    <xs:annotation>
+      <xs:documentation>Actual Statistics</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name='interval' type='Interval' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='reportMoid' minOccurs='1' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>Managed Object that stratistics are associated with</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name='moId' type='MoId' minOccurs='1'/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='collectionTime' type='xs:dateTime' minOccurs='1' maxOccurs='1'>
+        <xs:annotation>
+          <xs:documentation>When were these statistics taken</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name='statCounter' type='StatCounter' minOccurs='1' maxOccurs='unbounded'>
+        <xs:annotation>
+          <xs:documentation>One or more actual counts</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <xs:complexType name='CountLogEntryHeader'>
+    <xs:complexContent>
+      <xs:extension base='LogEntryHeader'>
+        <xs:sequence>
+          <xs:annotation>
+            <xs:documentation>this sequence elements are restricted to count log usage</xs:documentation>
+          </xs:annotation>
+          <!-- In addition to default log entry header, this log type should also include the following additional elements -->
+          <xs:element name='logLevel' type='LogLevel' minOccurs='0' maxOccurs='1'>
+            <xs:annotation>
+              <xs:documentation>Add future hook for counts to be group by log level, e.g. only recording normal information counts but not more detail debugging counts</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <xs:complexType name='CountLogEntry'>
+    <xs:annotation>
+      <xs:documentation>Count/Statistic Log entry</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name='header' type='CountLogEntryHeader' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='body' minOccurs='1' maxOccurs='1'>
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name='statistics' type='CountBody' maxOccurs='1'/>
+            <xs:element name='infoMsg' type='xs:string' maxOccurs='1'/>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <xs:element name='log'>
+    <xs:annotation>
+      <xs:documentation>Count Log root element</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base='Log'>
+          <xs:sequence>
+            <xs:element name='logEntry' type='CountLogEntry' minOccurs='0' maxOccurs='unbounded'/>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

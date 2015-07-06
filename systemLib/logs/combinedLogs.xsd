@@ -1,0 +1,29 @@
+<?xml version='1.0' ?> 
+<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'
+           xmlns='http://www.intel.com/soae/logSchema-2007a.xsd' targetNamespace='http://www.intel.com/soae/logSchema-2007a.xsd'>
+  <xs:include schemaLocation='transactionLogBody.xsd'/>
+  <xs:include schemaLocation='traceLogBody.xsd'/>
+  <xs:include schemaLocation='exceptionLogBody.xsd'/>
+  <xs:include schemaLocation='commandLogBody.xsd'/>
+
+  <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <!-- Root transation log element                                         -->
+  <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <xs:element name='log'>
+    <xs:annotation>
+      <xs:documentation>Summary Log root element. Includes transaction, exception and trace log entries acroos entire cluster</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base='Log'>
+          <xs:choice minOccurs='0' maxOccurs='unbounded'>
+            <xs:element name='logEntry' type='TransactionLogEntry'/>
+            <xs:element name='trcEntry' type='TraceLogEntry'/>
+            <xs:element name='excEntry' type='ExceptionLogEntry'/>
+            <xs:element name='cmdEntry' type='CommandLogEntry'/>
+          </xs:choice>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

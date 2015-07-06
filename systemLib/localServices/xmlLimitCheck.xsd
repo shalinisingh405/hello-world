@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   <xmlLimitCheckRequest> describes the policies for the xml document check
+   local service and the <xmlLimitCheckResponse> describes the response.
+
+   The service iterates over the document and counts things (like the number
+   of attribute per element or the nesting of elements) and measure things
+   (like the length of comments).   Each item has a name.
+
+   All lengths are measured in bytes, not characters.  Characters are encoded
+   in utf-8.  Perhaps we should use characters rather than bytes, but this
+   would require every bytes to be examined.
+
+   If any of these items exceeds the limit specified in the <xmlLimitCheckRequest>
+   object then the document check fails (pass="0").
+
+   If @limit is not specified in the request then this item is not checked.  It is
+   still counted and the result appears in the response.
+
+   If an item does not appear in the request list then it will NOT appear in the
+   response list.
+
+   If the short-circuit option is true then the document check routine stops as
+   soon as it discovers a limit has been exceeded and the (incomplete) results
+   are returned to the caller (and shortCircuit="1" is set in the response).
+   This may result in a failure to detect counts which exceed their limits due
+   to data in the remainder of the document being skipped.
+
+   If the short-circuit option is false then the document check continues to the
+   end of the document (even if a limit is exceeded) so that the document counters
+   (and error message) will be accurate.
+
+   In the response document, @shortCircuit indicates that processing stopped
+   before the end of the input document because a limit was exceeded.  It is
+   possible for processing to be complete AND a llmit to be exceeded if the
+   limit violation was not detected before the end of the document.
+
+   Whether the document passes or does not pass a response is returned to the caller
+   which summarizes the information collected.  If the check fails then a human
+   readable error message is stored in the returned document.  The error message
+   resembles:
+
+       <error>Document limits exceeded:
+               The element-nesting limit of 20 has been exceeeded (actual is 23),
+               The element-name-length limit of 64 has been exceeded (actual is 80).
+        </error>   
+   
+   For each item in the response, @pass indicates whether it failed the limit check.
+   An item which has no @limit will have no @pass value. For /xmlLimitCheckResponse
+   element, @pass is the AND of each individual @pass result.
+
+      document length
+        This is not the actual length of the document, since this information is
+      not avaible from esii.  Instead this is a very gross estimate.  It is
+        the sum of the lengths of every character item and symbol reported by the
+        esii::iterator.  The way this is measured may need to be reviewed.
+
+      tag length
+  The length of the element local names, attribute local name, and
+        processing instruction target names.  Does not include prefixes.
+
+      namespace prefix length
+      The number of bytes in the prefix of a namespace declaration.
+
+      namespace uri length
+         The number of bytes in the uri of a namespace declaration.
+
+      attribute length
+    The number of bytes in an attribute value (does not apply to namespace
+    declaration uri).  This is after line end normalization (i.e. replacing
+    \r\n with \n.
+     
+      content length
+    Length of a single character data or CDATA section item.  Note that all
+    adjacent character data and CDATA constitute a single item.
+
+      comment length
+    Does not include the leading and trailing punctuation. 
+
+      pi length
+    Does not include the length of the target (covered by "tag").
+
+      attributes per element
+    Does not include namespace declarations, which are counted separately. 
+
+      open elements
+    The number of element for which start tags have been processed, but
+    not end tags.
+
+      open namespace declarations
+        The number of namespace declarations which are active.
+        Does not include the pre-defined xml namespace or the empty 
+        namespace.
+      
+      pi
+    The number of processing instructions 
+
+      children per element
+    The number of immediate children for any element.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:xl="http://www.intel.com/soae/localService/xmlLimitCheck-2007a/" 
+           targetNamespace="http://www.intel.com/soae/localService/xmlLimitCheck-2007a/">
+  <xs:element name="xmlLimitCheckRequest" type="xl:XmlLimitCheckRequest"/>
+  <!--
+   There is no name attribute for the XmlLimitCheckRequest since it is
+   derived from the service name in the asf.xml file.  This allows a 
+   single control file to be used in several xmlLimitCheck services by
+   just copying the file.  
+
+   The name of the service is present in the response.  This is handled
+   by the service manager invoke method.
+-->
+  <xs:complexType name="XmlLimitCheckRequest">
+    <xs:sequence>
+      <xs:element name="data">
+        <xs:complexType>
+          <xs:all>
+            <xs:element name="documentLength" type="xl:XmlLimitCheckRequestItem" minOccurs="0"/>
+            <xs:element name="tagLength" type="xl:XmlLimitCheckRequestItem" minOccurs="0"/>
+            <xs:element name="namespaceUriLength" type="xl:XmlLimitCheckRequestItem" minOccurs="0"/>
+            <xs:element name="namespacePrefixLength" type="xl:XmlLimitCheckRequestItem" minOccurs="0"/>
+            <xs:element name="attributeValueLength" type="xl:XmlLimitCheckRequestItem" minOccurs="0"/>
+            <xs:element name="contentLength" type="xl:XmlLimitCheckRequestItem" minOccurs="0"/>
+            <xs:element name="commentLength" type="xl:XmlLimitCheckRequestItem" minOccurs="0"/>
+            <xs:element name="piLength" type="xl:XmlLimitCheckRequestItem" minOccurs="0"/>
+            <xs:element name="pi" type="xl:XmlLimitCheckRequestItem" minOccurs="0"/>
+            <xs:element name="attributesPerElement" type="xl:XmlLimitCheckRequestItem" minOccurs="0"/>
+            <xs:element name="openElements" type="xl:XmlLimitCheckRequestItem" minOccurs="0"/>
+            <xs:element name="openNamespaces" type="xl:XmlLimitCheckRequestItem" minOccurs="0"/>
+            <xs:element name="childrenPerElement" type="xl:XmlLimitCheckRequestItem" minOccurs="0"/>
+          </xs:all>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="shortCircuit" type="xs:boolean" use="required"/>
+  </xs:complexType>
+  <xs:element name="xmlLimitCheckResponse" type="xl:XmlLimitCheckResponse"/>
+  <xs:complexType name="XmlLimitCheckResponse">
+    <xs:sequence>
+      <xs:element name="error" type="xs:string"/>
+      <xs:element name="data">
+        <xs:complexType>
+          <xs:all>
+            <xs:element name="documentLength" type="xl:XmlLimitCheckResponseItem" minOccurs="0"/>
+            <xs:element name="tagLength" type="xl:XmlLimitCheckResponseItem" minOccurs="0"/>
+            <xs:element name="namespaceUriLength" type="xl:XmlLimitCheckResponseItem" minOccurs="0"/>
+            <xs:element name="namespacePrefixLength" type="xl:XmlLimitCheckResponseItem" minOccurs="0"/>
+            <xs:element name="attributeValueLength" type="xl:XmlLimitCheckResponseItem" minOccurs="0"/>
+            <xs:element name="contentLength" type="xl:XmlLimitCheckResponseItem" minOccurs="0"/>
+            <xs:element name="commentLength" type="xl:XmlLimitCheckResponseItem" minOccurs="0"/>
+            <xs:element name="piLength" type="xl:XmlLimitCheckResponseItem" minOccurs="0"/>
+            <xs:element name="pi" type="xl:XmlLimitCheckResponseItem" minOccurs="0"/>
+            <xs:element name="attributesPerElement" type="xl:XmlLimitCheckResponseItem" minOccurs="0"/>
+            <xs:element name="openElements" type="xl:XmlLimitCheckResponseItem" minOccurs="0"/>
+            <xs:element name="openNamespaces" type="xl:XmlLimitCheckResponseItem" minOccurs="0"/>
+            <xs:element name="childrenPerElement" type="xl:XmlLimitCheckResponseItem" minOccurs="0"/>
+          </xs:all>
+          <!--
+          **********************************************************************
+          *                                                                    *
+          * The names of these elements are hardcoded in src/rapid/XmlCounts.h *
+          *                                                                    *
+          **********************************************************************
+          -->
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:NCName" use="required"/>
+    <xs:attribute name="pass" type="xs:boolean" use="required"/>
+    <xs:attribute name="shortCircuit" type="xs:boolean" use="required"/>
+    <!--
+        The name of the xml limit check service.
+    -->
+    <!-- The AND of the @pass values for all /documentCount/count/@pass -->
+    <!--
+       Indicates that processing was stopped before the end of the input document
+       because it was known that a limit was exceeded AND /documentCheck/@shortCircuit
+       was true.
+      
+       /xmlLimitCheckResponse/@shortCircuit may be false even if /xmlLimitCheckRequest/@shortCircuit
+       is true if the entire document was processed before it was discovered that a limit was
+       exceeded (or no limit was exceeded).
+    -->
+  </xs:complexType>
+  <xs:complexType name="XmlLimitCheckRequestItem">
+    <xs:attribute name="limit" type="xs:long" use="optional"/>
+  </xs:complexType>
+  <xs:complexType name="XmlLimitCheckResponseItem">
+    <xs:attribute name="limit" type="xs:long" use="required"/>
+    <xs:attribute name="actual" type="xs:long" use="required"/>
+    <xs:attribute name="pass" type="xs:boolean" use="required"/>
+  </xs:complexType>
+</xs:schema>

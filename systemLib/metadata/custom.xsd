@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" 
+           xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd" targetNamespace="http://www.intel.com/soae/protocolMetadata-2007a.xsd" 
+           elementFormDefault="qualified" attributeFormDefault="unqualified" blockDefault="#all">
+  <xs:import namespace="http://schemas.xmlsoap.org/ws/2004/08/addressing" schemaLocation="../importedSchemas/wsa-2004-08.xsd"/>
+  <xs:element name="customMessage">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice>
+          <xs:element name="source" type="xs:anyType"/>
+          <xs:element name="destination" type="xs:anyType"/>
+        </xs:choice>
+        <xs:element name="transport" type="xs:anyType" minOccurs="0"/>
+        <xs:element name="additionalInfo" type="xs:anyType" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

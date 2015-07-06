@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This schema contains miscellaneous SOAE related ws-addressing extension elements & attributes.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:addext="http://www.intel.com/soae/ws-addressing/addressing-2008a/" 
+           targetNamespace="http://www.intel.com/soae/ws-addressing/addressing-2008a/" 
+           elementFormDefault="qualified" blockDefault="#all">
+
+  <!-- ============================================================================================== -->
+  <!--  The following elements & attributes are utilized within service-ref and metadata documents    -->
+  <!-- ============================================================================================== -->
+
+  <xs:element name="timeout" type="addext:CallerTimeout"/>
+  <xs:simpleType name="CallerTimeout">
+    <xs:annotation>
+      <xs:documentation>
+        Maximum timeout value in seconds that caller is requesting called party to impose upon this task.
+        Zero, empty or absent implies that caller is not imposing any explicit timeout value.
+        Therefore, only default timeout values should be used.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:unsignedInt"/>
+  </xs:simpleType>
+
+  <xs:element name="websocket" type="addext:WebsocketExtension" />
+
+  <xs:complexType name="WebsocketExtension" >
+    <xs:annotation>
+      <xs:documentation>
+        Additional structure may be added in the future.
+      </xs:documentation>
+    </xs:annotation>    
+  </xs:complexType>
+
+</xs:schema>

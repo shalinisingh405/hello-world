@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ..\aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <usernameFromHttpBasicAuthenticationHeader></usernameFromHttpBasicAuthenticationHeader>
+    </extractIdentity>
+    <authenticateIdentity>
+      <ldapAuthentication>
+        <distinguishedNamePrefix>UID=</distinguishedNamePrefix>
+        <distinguishedNamePostfix>,CN=employee,OU=sales,DC=Acme,DC=com,C=US</distinguishedNamePostfix>
+      </ldapAuthentication>
+    </authenticateIdentity>
+    <mapIdentity>
+      <createTokenViaWsTrust>
+        <version>1.4</version>
+        <soapVersion>1.2</soapVersion>
+        <requestType>Issue</requestType>
+        <tokenType>SAML-v2.0</tokenType>
+        <rstFormat>RST</rstFormat>
+        <appliesTo type="anyURI">
+          <staticValue>http://localhost:2000/sales/SalesPaymentService</staticValue>
+        </appliesTo>
+        <lifetime>
+          <skew>5</skew>
+          <maxExpirationTime type="unsignedInt">
+            <staticValue>500</staticValue>
+          </maxExpirationTime>
+        </lifetime>
+        <wsSecurityPolicyGroup>./STS_WS_Security_processing.wspolicygroup</wsSecurityPolicyGroup>
+        <clientAuthenticationMethod>
+          <mechanism>Use_WS-Security_Policy_Group</mechanism>
+          <expectedTokenType>Saml_Assertion</expectedTokenType>
+          <source>
+            <certificateFromSecurityConfig>our-sales-proxy-certificate</certificateFromSecurityConfig>
+          </source>
+        </clientAuthenticationMethod>
+        <onBehalfOf>
+          <useExtractedUsername>
+            <usernameInternalName>int:extractedIdentityUsername</usernameInternalName>
+          </useExtractedUsername>
+        </onBehalfOf>
+        <toFieldPopulation>true</toFieldPopulation>
+      </createTokenViaWsTrust>
+    </mapIdentity>
+  </identityProcessing>
+</aaa:aaaPolicy>

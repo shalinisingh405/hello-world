@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <usernameFromHttpBasicAuthenticationHeader></usernameFromHttpBasicAuthenticationHeader>
+    </extractIdentity>
+    <authenticateIdentity>
+      <siteMinderAuthentication>
+        <resource type="anyURI">
+          <use-extracted-resource></use-extracted-resource>
+        </resource>
+        <action>Post</action>
+      </siteMinderAuthentication>
+    </authenticateIdentity>
+    <mapIdentity>
+      <createSamlAssertion>
+        <assertionInfo>
+          <v2dot0Info>
+            <generalAssertionInfo>
+              <Issuer type="string">
+                <staticValue>some-bogus-issuer-name</staticValue>
+              </Issuer>
+              <IssuerFormatAttribute>urn:oasis:names:tc:SAML:2.0:nameid-format:unspecified</IssuerFormatAttribute>
+              <encryptAssertion>true</encryptAssertion>
+            </generalAssertionInfo>
+            <Subject>
+              <NameID type="string">
+                <staticValue>dummy-name</staticValue>
+              </NameID>
+              <SubjectConfirmation>
+                <Method>urn:oasis:names:tc:SAML:2.0:cm:bearer</Method>
+              </SubjectConfirmation>
+            </Subject>
+          </v2dot0Info>
+        </assertionInfo>
+        <encryptionInfo>
+          <generateDataEncryptionMethod>aes256</generateDataEncryptionMethod>
+          <encryptKeyInfo>
+            <symmetric>
+              <keyRecipientPair>
+                <recipientKey>
+                  <security-config-package>demo-secret-1</security-config-package>
+                </recipientKey>
+                <recipient type="anyURI">
+                  <staticValue>URL uniquelly identifying recipient 1</staticValue>
+                </recipient>
+              </keyRecipientPair>
+              <keyRecipientPair>
+                <recipientKey>
+                  <keyFromWorkflow type="string">
+                    <inputFromWorkflow>prompt for recipient 2 secret</inputFromWorkflow>
+                  </keyFromWorkflow>
+                </recipientKey>
+                <recipient type="anyURI">
+                  <inputFromWorkflow>prompt for URL to uniquely identifying recipient 2</inputFromWorkflow>
+                </recipient>
+              </keyRecipientPair>
+            </symmetric>
+          </encryptKeyInfo>
+        </encryptionInfo>
+      </createSamlAssertion>
+    </mapIdentity>
+  </identityProcessing>
+  <resourceProcessing>
+    <extractResource>
+      <requestUriFromHttpOperation></requestUriFromHttpOperation>
+    </extractResource>
+  </resourceProcessing>
+</aaa:aaaPolicy>

@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://www.intel.com/soae/localService/siteminder-2009a/" 
+           xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           targetNamespace="http://www.intel.com/soae/localService/siteminder-2009a/" 
+           elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:simpleType name="actionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="GET"/>
+      <xs:enumeration value="PUT"/>
+      <xs:enumeration value="POST"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="credentialReqirementType">
+    <xs:sequence>
+      <xs:element name="credentialType" maxOccurs="unbounded">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="basic"/>
+            <xs:enumeration value="digest"/>
+            <xs:enumeration value="x509-cert"/>
+            <xs:enumeration value="x509-cert-and-user-dn"/>
+            <xs:enumeration value="x509-cert-issuer-dn"/>
+            <xs:enumeration value="x509-cert-or-basic"/>
+            <xs:enumeration value="x509-cert-or-form-based"/>
+            <xs:enumeration value="NT-challenge-response"/>
+            <xs:enumeration value="SSL-required"/>
+            <xs:enumeration value="redirect-to-html-form"/>
+            <xs:enumeration value="allow-save-credentials-hint"/>
+            <xs:enumeration value="preserve-session-id"/>
+            <xs:enumeration value="do-not-challenge"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="sessionRequestType">
+    <xs:sequence>
+      <xs:element name="resource">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="action" type="actionType"/>
+      <xs:element name="clientIpAddress">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="7"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="server">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="createSsoToken" type="xs:boolean" default="false"/>
+    <xs:attribute name="authorization" type="xs:boolean" default="false"/>
+    <xs:attribute name="terminate" type="xs:boolean" default="false"/>
+  </xs:complexType>
+  <xs:complexType name="sessionResponseType">
+    <xs:sequence>
+      <xs:element name="credentialRequirements" type="credentialReqirementType" minOccurs="0"/>
+      <xs:element name="attributes" minOccurs="0" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="attribute" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:simpleContent>
+                  <xs:extension base="xs:string">
+                    <xs:attribute name="id" use="required">
+                      <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                          <xs:minLength value="1"/>
+                        </xs:restriction>
+                      </xs:simpleType>
+                    </xs:attribute>
+                    <xs:attribute name="name">
+                      <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                          <xs:minLength value="1"/>
+                        </xs:restriction>
+                      </xs:simpleType>
+                    </xs:attribute>
+                  </xs:extension>
+                </xs:simpleContent>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="group" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="authentication"/>
+                <xs:enumeration value="authorization"/>
+                <xs:enumeration value="session"/>
+                <xs:enumeration value="sso-token"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ssoToken" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="realm">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:minLength value="1"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+  
+  <xs:element name="createSessionRequest">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="sessionRequestType">
+          <xs:sequence>
+            <xs:element name="credentials">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="basic" minOccurs="0">
+                    <xs:annotation>
+                      <xs:documentation>A Basic authentication credential.  Note the body of this element (basic) is the password.</xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                      <xs:simpleContent>
+                        <xs:extension base="xs:string">
+                          <xs:attribute name="username" use="required">
+                            <xs:annotation>
+                              <xs:documentation>The username or user id for the basic authentication.</xs:documentation>
+                            </xs:annotation>
+                          </xs:attribute>
+                        </xs:extension>
+                      </xs:simpleContent>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name="x509certificate" type="xs:base64Binary" minOccurs="0">
+                    <xs:annotation>
+                      <xs:documentation>A X.509 Certificate credential.  This should be the raw data of the certificate.</xs:documentation>
+                    </xs:annotation>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>  
+  
+  <xs:element name="validateSessionRequest">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="sessionRequestType">
+          <xs:sequence>
+            <xs:element name="ssoToken">
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:minLength value="1"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+          </xs:sequence>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="terminateSessionRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ssoToken">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:minLength value="1"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:element>
+        <xs:element name="clientIpAddress" minOccurs="0">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:minLength value="7"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="siteMinderRequest">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="createSessionRequest"/>
+        <xs:element ref="validateSessionRequest"/>
+        <xs:element ref="terminateSessionRequest"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="siteMinderResponse">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="sessionResponseType">
+          <xs:attribute name="message" type="xs:string" use="optional"/>
+          <xs:attribute name="responseCode" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+				<xs:enumeration value="ok"/>
+				<xs:enumeration value="error"/>
+				<xs:enumeration value="notProtected"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,177 @@
+<!-- edited with XMLSpy v2007 sp2 (http://www.altova.com) by WADE L POZIOMBKA (INTEL CORPORATION) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd" targetNamespace="http://www.intel.com/soae/protocolMetadata-2007a.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified" blockDefault="#all">
+	<xs:complexType name="FileAttributesType">
+		<xs:sequence>
+			<xs:element name="extension" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="type" use="required">
+			<xs:annotation>
+				<xs:documentation>The type of the resource: file or directory.</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:enumeration value="dir"/>
+					<xs:enumeration value="file"/>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="size">
+			<xs:annotation>
+				<xs:documentation>Size of the resource.  Absence means SFTP did not report this value.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="accessTime" type="xs:unsignedInt">
+			<xs:annotation>
+				<xs:documentation>Access time measured in seconds from epoc.  Absence means SFTP did not report the value</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="modTime" type="xs:unsignedInt">
+			<xs:annotation>
+				<xs:documentation>Modify time measured in seconds from epoc.  Absence means SFTP did not report the value</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="canRead" type="xs:boolean">
+			<xs:annotation>
+				<xs:documentation>Flag indicating whether or not the user has read access to the resource.  Absence means the server did not report this attribute.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="canWrite" type="xs:boolean">
+			<xs:annotation>
+				<xs:documentation>Flag indicating whether or not the user has write access to the resource.  Absence means the server did not report this attribute.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<!--  Extended simple types  -->
+	<xs:simpleType name="NonEmptyString">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="YesNoEnum">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="yes"/>
+			<xs:enumeration value="no"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="TrueFalseEnum">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="false"/>
+			<xs:enumeration value="true"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="IpAddress">
+		<xs:annotation>
+			<xs:documentation>
+          Ip address in either Iv4, IPv6 or URI format. However, using IP address is safer because we can resolve actual IP address even when DNS is down or inaccessable.
+        </xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="Header">
+  	    <xs:annotation>
+	    	<xs:documentation>
+<![CDATA[
+
+The original header string is not stored in the metadata.  The header string is reconstructed from the metadata. 
+It may not be identical to the original header.  For instance, extra spaces around separators is not present..
+
+        For this metadata (pretty printed):
+
+            <header name="accept">
+              <field>
+                <value>text/html</value>
+              </field>
+              <field>
+                <value>image/gif</value>
+              </field>
+              <field>
+                <value>image/jpeg</value>
+              </field>
+              <field>
+                <value>*</value>
+                <param name="q">.2</param>
+              </field>
+              <field>
+                <value>*/*</value>
+                <param name="q">.2</param>
+              </field>
+            </header>
+
+        Creates the string:
+
+            text/html,image/gif,image/jpeg,*;q=.2,*/*;q=.2
+]]>
+ 	        </xs:documentation>
+	    </xs:annotation>
+		<xs:sequence>
+			<xs:element name="unparsed" type="xs:string" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="field" type="Field" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+	</xs:complexType>
+	<xs:complexType name="Field">
+		<xs:sequence>
+			<xs:element name="value" type="xs:string" minOccurs="0"/>
+			<xs:element name="param" type="Param" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Param">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="name" type="xs:string" use="required"/>
+				<xs:attribute name="nameOnly" type="TrueFalseEnum" use="optional"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="SslSend">
+		<xs:sequence>
+			<!-- application can dynamically override/supply any options in associated output server ssl policy/deployment -->
+			<xs:element name="acceptableCiphers" type="NonEmptyString" minOccurs="0"/>
+			<xs:element name="farEndAuthenticate" type="xs:boolean" default="true" minOccurs="0"/>
+			<xs:element name="verificationDepth" default="1" minOccurs="0">
+				<xs:simpleType>
+					<xs:restriction base="xs:unsignedShort">
+						<xs:maxInclusive value="9"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ourCertificate" type="NonEmptyString" minOccurs="0"/>
+			<!-- if farEndAuthenticate==true & ourKey not supplied then ourCertificate must contain key -->
+			<xs:element name="ourKey" type="NonEmptyString" minOccurs="0"/>
+			<xs:element name="keyPassphrase" type="NonEmptyString" minOccurs="0"/>
+			<xs:element name="trustedCaGroup" type="NonEmptyString" minOccurs="0"/>
+			<xs:element name="sendTrustedCa" type="xs:boolean" default="false" minOccurs="0"/>
+			<xs:element name="caPath" type="NonEmptyString" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="SslReceived">
+		<xs:sequence>
+			<xs:element name="cert" type="NonEmptyString" minOccurs="0"/>
+			<xs:element name="cipher" type="NonEmptyString"/>
+			<xs:element name="sessionId" type="NonEmptyString"/>
+		</xs:sequence>
+	</xs:complexType>
+
+        <xs:simpleType name="ConnectionId" >
+          <xs:annotation>
+            <xs:documentation>
+              This identifies the websocket connection id assigned by the IS or IA when
+              an http connection is upgraded to a websocket connection.  It is opaque to
+              the user, but has the format:
+
+		o IS or IA
+		o colon
+		o decimal number that specifies the actual IS or IA
+		o colon
+		o url safe base64 value for the (internal) connection id
+
+  	    </xs:documentation>
+          </xs:annotation>
+
+          <xs:restriction base="xs:token" />
+
+        </xs:simpleType>
+
+</xs:schema>

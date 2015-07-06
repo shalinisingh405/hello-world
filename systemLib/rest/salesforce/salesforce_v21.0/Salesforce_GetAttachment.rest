@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:md="http://www.intel.com/soae/protocolMetadata-2007a.xsd" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:tns="http://www.intel.com/soae/rest/salesforce/getAttachment" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="Salesforce_GetAttachment" targetNamespace="http://www.intel.com/soae/rest/salesforce/getAttachment">
+  <wsdl:message name="Salesforce_GetAttachmentRequest">
+    <wsdl:part name="sobjectUri" type="xsd:string"/>
+    <wsdl:part name="id" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="Salesforce_GetAttachmentResponse">
+    <wsdl:part name="body" type="xsd:base64Binary"/>
+  </wsdl:message>
+  <wsdl:portType name="Salesforce_GetAttachment">
+    <wsdl:operation name="invoke">
+      <wsdl:input message="tns:Salesforce_GetAttachmentRequest"/>
+      <wsdl:output message="tns:Salesforce_GetAttachmentResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="Salesforce_GetAttachmentBinding" type="tns:Salesforce_GetAttachment">
+    <http:binding verb="GET"/>
+    <wsdl:operation name="invoke">
+      <http:operation location="(sobjectUri)/attachment/(id)/body"/>
+      <wsdl:input>
+        <http:urlReplacement/>
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="body" type="application/octet-stream"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Salesforce_GetAttachmentService">
+    <wsdl:port binding="tns:Salesforce_GetAttachmentBinding" name="Salesforce_GetAttachmentPort">
+      <http:address location="https://na1.salesforce.com"/>
+    </wsdl:port>
+  </wsdl:service>
+  <plnk:partnerLinkType name="Salesforce_GetAttachmentPartnerLinkType">
+    <plnk:role name="service" portType="tns:Salesforce_GetAttachment"/>
+  </plnk:partnerLinkType>
+</wsdl:definitions>

@@ -1,0 +1,186 @@
+<?xml version="1.0"?>
+<!-- edited with XMLSpy v2007 sp2 (http://www.altova.com) by WADE L POZIOMBKA (INTEL CORPORATION) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.intel.com/soae/logSchema-2007a.xsd" targetNamespace="http://www.intel.com/soae/logSchema-2007a.xsd">
+	<xs:include schemaLocation="logCommon.xsd"/>
+	<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+	<xs:simpleType name="EventId">
+		<xs:annotation>
+			<xs:documentation>Event Id: used to bind related command and exception log entries together</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:minLength value="3"/>
+			<xs:maxLength value="11"/>
+			<xs:pattern value="[0-9]{1,5}[\-]{1}[0-9]{1,5}"/>
+			<!-- unsignedShort dash unsignedShort -->
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="Login">
+		<xs:annotation>
+			<xs:documentation>Login request</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="userid" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>User Identifier attempting to login</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="loginStatus" type="xs:boolean">
+				<xs:annotation>
+					<xs:documentation>Was the login attempt successful</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="detailReason" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Detail Reason if login denied</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Logout">
+		<xs:annotation>
+			<xs:documentation>User logging out</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="userid" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>User Identifier</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CommandStart">
+		<xs:annotation>
+			<xs:documentation>Command Issued</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="userid" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>User id of command issuer. Not defined for automatically generated commands</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="commandType">
+				<xs:annotation>
+					<xs:documentation>Type of command being issued</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="CLI"/>
+						<xs:enumeration value="WI"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="eventId" type="EventId"/>
+			<xs:element name="commandAndParameter" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Command and associated parameters</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CommandContinue">
+		<xs:annotation>
+			<xs:documentation>Acknowledgement that command is being processed</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="userid" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>User id of command issuer. Not defined for automatically generated commands</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="eventId" type="EventId"/>
+			<xs:element name="status" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Command continuation status</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="detailReason" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Hook for code to output additional information</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CommandEnd">
+		<xs:annotation>
+			<xs:documentation>Command completion</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="userid" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>User id of command issuer. Not defined for automatically generated commands</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="eventId" type="EventId"/>
+			<xs:element name="commandAndParameter" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Command and associated parameters</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="completionStatus">
+				<xs:annotation>
+					<xs:documentation>Completion Status</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string"/>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="detailReason" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Detail Reason if command failed</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+	<xs:complexType name="CommandLogEntryHeader">
+		<xs:complexContent>
+			<xs:extension base="LogEntryHeader">
+				<xs:sequence>
+					<xs:annotation>
+						<xs:documentation>this sequence elements are restricted to command log usage</xs:documentation>
+					</xs:annotation>
+					<!-- In addition to default log entry header, this log type should also include the following additional elements -->
+					<xs:element name="logType" type="LogType"/>
+					<xs:choice>
+						<xs:element name="automatic" type="xs:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>This was an internally generated administrator defined command/script</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:choice>
+					<xs:element name="file" type="xs:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>File name of code generating the log entry. Only generated when DEBUG enabled.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="line" type="xs:unsignedInt" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Line number within file where log entry is generated. Only generated when DEBUG enabled.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+	<xs:complexType name="CommandLogEntry">
+		<xs:annotation>
+			<xs:documentation>Command Log entry</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="header" type="CommandLogEntryHeader"/>
+			<xs:element name="body">
+				<xs:complexType>
+					<xs:choice>
+						<xs:element name="login" type="Login"/>
+						<xs:element name="logout" type="Logout"/>
+						<xs:element name="commandStart" type="CommandStart"/>
+						<xs:element name="commandContinue" type="CommandContinue"/>
+						<xs:element name="commandEnd" type="CommandEnd"/>
+						<xs:element name="infoMsg" type="xs:string"/>
+					</xs:choice>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

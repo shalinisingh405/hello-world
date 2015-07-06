@@ -1,0 +1,162 @@
+<!-- edited with XMLSpy v2007 sp2 (http://www.altova.com) by WADE L POZIOMBKA (INTEL CORPORATION) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd" targetNamespace="http://www.intel.com/soae/protocolMetadata-2007a.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified" blockDefault="#all">
+	<xs:include schemaLocation="metadataCommon.xsd"/>
+	<!-- =============================================================================== -->
+	<!--  JMS message element: input & output servers                                    -->
+	<!--  JMS versions supported: jms, sun-MQ, active-MQ                                 -->
+	<!-- =============================================================================== -->
+	<xs:element name="jmsMessage">
+		<xs:complexType>
+			<xs:sequence>
+				<!-- This element is optional if the address is specified in EPR -->
+				<xs:choice minOccurs="0">
+					<xs:element name="source" type="JmsSource"/>
+					<xs:element name="destination" type="JmsDestination"/>
+				</xs:choice>
+				<xs:element name="transport" type="JmsTransport"/>
+				<!-- specific message related data -->
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<!--  source element  -->
+	<xs:complexType name="JmsSource">
+		<xs:sequence>
+			<xs:element name="inputServerName" type="NonEmptyString"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!--  destination element  -->
+	<xs:complexType name="JmsDestination">
+		<xs:sequence>
+			<xs:element name="invocationAgentName" type="NonEmptyString"/>
+			<!-- todo: should really be an IRI and not a URI, need to look into some of the associated special conversion issues, etc. -->
+		</xs:sequence>
+	</xs:complexType>
+	<!-- transport element  -->
+	<xs:complexType name="JmsTransport">
+		<xs:sequence>
+			<!-- expect feedback from developer if there is any need for semantic changes -->
+			<xs:element name="destName" type="NonEmptyString" minOccurs="0"/>
+			<xs:element ref="destType" minOccurs="0"/>
+			<xs:element name="id" type="xs:string" minOccurs="0"/>
+			<xs:element name="correlationId" type="xs:string" minOccurs="0"/>
+			<xs:element ref="deliveryMode" minOccurs="0"/>
+			<xs:element name="priority" type="xs:unsignedInt" minOccurs="0"/>
+			<xs:element name="timestamp" minOccurs="0">
+				<xs:simpleType>
+					<xs:restriction base="xs:long">
+						<xs:minInclusive value="0"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ttl" minOccurs="0">
+				<xs:simpleType>
+					<xs:restriction base="xs:long">
+						<xs:maxInclusive value="0"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="expiry" minOccurs="0">
+				<xs:simpleType>
+					<xs:restriction base="xs:long">
+						<xs:maxInclusive value="0"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="deliveryCount" type="xs:unsignedInt" minOccurs="0"/>
+			<xs:element name="replyToName" type="NonEmptyString" minOccurs="0"/>
+			<xs:element ref="replyToType" minOccurs="0"/>
+			<xs:element name="msgType" type="NonEmptyString" minOccurs="0"/>
+			<xs:element ref="transacted" minOccurs="0"/>
+			<xs:element ref="dataType" minOccurs="0"/>
+			<xs:element ref="properties" minOccurs="0"/>
+			<xs:element name="isReceiveOnly" type="xs:boolean" default="false" minOccurs="0"/>
+			<xs:element name="messageSelector" minOccurs="0">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="destType">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:enumeration value="QUEUE"/>
+				<xs:enumeration value="TOPIC"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="deliveryMode">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:enumeration value="PERSISTENT"/>
+				<xs:enumeration value="NON_PERSISTENT"/>
+				<!-- comment it out because we do not want it to show up on GUI
+          <xs:enumeration value='RELIABLE'>
+            <xs:annotation>
+              <xs:documentation>
+                This value is reserved for future usage associated with Tibco EMS. 
+                It should NOT be used with any normal JMS implemantation.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          -->
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="replyToType">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:enumeration value="QUEUE"/>
+				<xs:enumeration value="TOPIC"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="transacted">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:enumeration value="true"/>
+				<xs:enumeration value="false"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="dataType">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:enumeration value="bytes"/>
+				<xs:enumeration value="text"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="properties">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="property" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="property">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute name="name" type="NonEmptyString" use="required"/>
+					<xs:attribute name="type" use="required">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:enumeration value="bool"/>
+								<xs:enumeration value="byte"/>
+								<xs:enumeration value="short"/>
+								<xs:enumeration value="int"/>
+								<xs:enumeration value="long"/>
+								<xs:enumeration value="float"/>
+								<xs:enumeration value="double"/>
+								<xs:enumeration value="string"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

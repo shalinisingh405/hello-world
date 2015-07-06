@@ -1,0 +1,25 @@
+<message xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd"
+         xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing">
+  <!-- In this example, an Invocation agent is utilizing MLLP -->
+  <!-- This is indicated in the following protocol element -->
+  <protocol>mllp</protocol>
+  <wsa:EndpointReference>
+    <!-- the destination URI associated with the outgoing request -->
+    <wsa:Address>actual-endpoint-address</wsa:Address>
+  </wsa:EndpointReference>
+  <mllpMessage>
+    <destination>
+      <!-- application defined invocation agent name to process this request -->
+      <invocationAgentName>IA-1</invocationAgentName>
+      <!-- MLLP release version: using release 1, not 2 -->
+      <release>MLLP_R1</release>
+    </destination>
+    <transport/>
+    <!-- byte value used for the carriage return (second byte wrapper after the end byte) default: CR (0x0D) -->
+    <carriageReturn>13</carriageReturn>
+    <!-- byte value used for the end (message trailer wrapper); default: FS (0x1C) -->
+    <endBlock>28</endBlock>
+    <!-- byte value used for the start (message header wrapper); default: VT (0x0B) -->
+    <startBlock>11</startBlock>
+  </mllpMessage>
+</message>

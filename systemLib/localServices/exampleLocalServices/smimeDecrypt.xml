@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<smime:smimePolicy xmlns:smime="http://www.intel.com/soae/localService/smimeDefinition-2007a/" 
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                   xsi:schemaLocation="http://www.intel.com/soae/localService/smimeDefinition-2007a/ ../smime.xsd">
+  <decrypt>
+    <keyPair>demo-public-private-key-pair</keyPair>
+  </decrypt>
+</smime:smimePolicy>

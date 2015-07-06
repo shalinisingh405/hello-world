@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <usernameFromHttpBasicAuthenticationHeader></usernameFromHttpBasicAuthenticationHeader>
+    </extractIdentity>
+    <authenticateIdentity>
+      <tivoliAccessManagerAuthentication>
+        <tivoliAccessManagerConfigUrl></tivoliAccessManagerConfigUrl>
+      </tivoliAccessManagerAuthentication>
+    </authenticateIdentity>
+    <mapIdentity>
+      <createUsernameToken>
+        <keyFormat>
+          <passwordText></passwordText>
+          <usernamePasswordSource>
+            <useExtractedIdentity></useExtractedIdentity>
+          </usernamePasswordSource>
+        </keyFormat>
+      </createUsernameToken>
+    </mapIdentity>
+  </identityProcessing>
+  <resourceProcessing>
+    <extractResource>
+      <requestUriFromHttpOperation><component>path</component><index>-2</index></requestUriFromHttpOperation>
+    </extractResource>
+    <authorizeResource>
+      <tivoliAccessManagerAuthorization>
+        <resource type="anyURI">
+          <use-extracted-resource></use-extracted-resource>
+        </resource>
+        <defaultAction>T</defaultAction>
+        <resourceActionMap>
+          <resourceRegExpressionMatch>[.]*resourceX[.]*</resourceRegExpressionMatch>
+          <action>r</action>
+          <action>c</action>
+          <action>x</action>
+        </resourceActionMap>
+        <resourceActionMap>
+          <resourceRegExpressionMatch>[.]*resourceXY[.]*</resourceRegExpressionMatch>
+          <action>B</action>
+        </resourceActionMap>
+        <resourceActionMap>
+          <resourceRegExpressionMatch>[.]*resourceXYZ</resourceRegExpressionMatch>
+          <action>R</action>
+          <action>N</action>
+        </resourceActionMap>
+        <tivoliAccessManagerConfigUrl>tivoliam://a/b/c/d</tivoliAccessManagerConfigUrl>
+      </tivoliAccessManagerAuthorization>
+    </authorizeResource>
+  </resourceProcessing>
+</aaa:aaaPolicy>

@@ -1,0 +1,282 @@
+<!-- edited with XMLSpy v2007 sp2 (http://www.altova.com) by WADE L POZIOMBKA (INTEL CORPORATION) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd" targetNamespace="http://www.intel.com/soae/protocolMetadata-2007a.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified" blockDefault="#all">
+	<xs:include schemaLocation="metadataCommon.xsd"/>
+	<!-- =============================================================================== -->
+	<!--  message element: FTP input & output servers                                    -->
+	<!-- =============================================================================== -->
+	<!--  FTP protocol header: root element  -->
+	<xs:element name="ftpMessage">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:choice minOccurs="0">
+					<xs:element name="source" type="FtpSource"/>
+					<xs:element name="destination" type="FtpDestination"/>
+				</xs:choice>
+				<xs:element name="transport" type="FtpTransport" minOccurs="0"/>
+				<!-- specific message related data -->
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<!--  source element  -->
+	<xs:complexType name="FtpSource">
+		<xs:sequence>
+			<xs:element name="inputServerName" type="NonEmptyString"/>
+			<xs:element name="ip" type="NonEmptyString" minOccurs="0"/>
+			<!-- Ip address that we receive request on -->
+			<xs:element name="port" type="xs:unsignedShort"/>
+			<!-- Port that we receive request on -->
+			<xs:element name="sslReceived" type="SslReceived" minOccurs="0"/>
+			<!-- only supported when protocol=ftps -->
+		</xs:sequence>
+	</xs:complexType>
+	<!--  destination element  -->
+	<xs:complexType name="FtpDestination">
+		<xs:sequence>
+			<xs:element name="invocationAgentName" type="NonEmptyString"/>
+			<xs:element name="sslSend" type="SslSend" minOccurs="0"/>
+			<!-- only supported when protocol=ftps -->
+		</xs:sequence>
+	</xs:complexType>
+	<!-- transport element  -->
+	<xs:complexType name="FtpTransport">
+		<xs:sequence>
+			<!-- We suppose that metadata may contain only a few parameters. Others will be taken from the standard config -->
+			<xs:element name="host" type="NonEmptyString" minOccurs="0"/>
+			<xs:element name="dport" type="NonEmptyString" minOccurs="0"/>
+			<xs:element name="user" type="NonEmptyString" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>User id for dynamic invocation agent file mode.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="password" type="NonEmptyString" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Password for dynamic invocation agent file mode.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="path" type="NonEmptyString" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>For file put mode this specifies the path to which to put the file.  For file Poll, this is the directory from which to retrieve the file.  Not used for command mode.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:choice>
+				<xs:element name="file" type="NonEmptyString">
+					<xs:annotation>
+						<xs:documentation>In  one-way mode this is the file to received or to write.  Not valid in FTP pass thru mode.</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="command">
+					<xs:annotation>
+						<xs:documentation>The FTP Passthru request element indicating the command to send to the back end ftp server. In general this is raw FTP commands.  The one exception is a psuedo command "LOGIN" which encapsulates USER and PASS commands.</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="name">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:minLength value="3"/>
+										<xs:maxLength value="8"/>
+										<xs:enumeration value="CWD">
+											<xs:annotation>
+												<xs:documentation source="change working directory"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="DELE">
+											<xs:annotation>
+												<xs:documentation source="delete a remote file"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="LIST">
+											<xs:annotation>
+												<xs:documentation source="list remote files"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="MDTM">
+											<xs:annotation>
+												<xs:documentation source="return the modification time of a file"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="MKD">
+											<xs:annotation>
+												<xs:documentation source="make a remote directory"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="NLST">
+											<xs:annotation>
+												<xs:documentation source="name list of remote directory"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="PWD">
+											<xs:annotation>
+												<xs:documentation source="print working directory"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="QUIT">
+											<xs:annotation>
+												<xs:documentation source="terminate the connection"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="RETR">
+											<xs:annotation>
+												<xs:documentation source="retrieve a remote file"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="RMD">
+											<xs:annotation>
+												<xs:documentation source="remove a remote directory"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="RNFR">
+											<xs:annotation>
+												<xs:documentation source="rename from"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="RNTO">
+											<xs:annotation>
+												<xs:documentation source="rename to"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="SITE">
+											<xs:annotation>
+												<xs:documentation source="site-specific commands"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="SIZE">
+											<xs:annotation>
+												<xs:documentation source="return the size of a file"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="STOR">
+											<xs:annotation>
+												<xs:documentation source="store a file on the remote host"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="TYPE">
+											<xs:annotation>
+												<xs:documentation source="set transfer type"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="CDUP">
+											<xs:annotation>
+												<xs:documentation source="CWD to the parent of the current directory"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="HELP">
+											<xs:annotation>
+												<xs:documentation source="return help on using the server"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="MODE">
+											<xs:annotation>
+												<xs:documentation source="set transfer mode"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="STOU">
+											<xs:annotation>
+												<xs:documentation source="store a file uniquely"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="STRU">
+											<xs:annotation>
+												<xs:documentation source="set file transfer structure"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="SYST">
+											<xs:annotation>
+												<xs:documentation source="return system type"/>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="LOGIN"/>
+										<xs:enumeration value="MLSD"/>
+										<xs:enumeration value="MLST"/>
+										<xs:enumeration value="OPTS"/>
+										<xs:enumeration value="RENAME">
+											<xs:annotation>
+												<xs:documentation>This is a pseudo-command (that is synthetic and not exactly matching with standard raw FTP commands) used to ease the work in proxying between SFTP and FTP.</xs:documentation>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="STAT">
+											<xs:annotation>
+												<xs:documentation>This is a pseudo-command (that is synthetic and not exactly matching with standard raw FTP commands) used to ease the work in proxying between SFTP and FTP.</xs:documentation>
+											</xs:annotation>
+										</xs:enumeration>
+										<xs:enumeration value="REALPATH">
+											<xs:annotation>
+												<xs:documentation>This is a pseudo-command (that is synthetic and not exactly matching with standard raw FTP commands) used to ease the work in proxying between SFTP and FTP.</xs:documentation>
+											</xs:annotation>
+										</xs:enumeration>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="arg" minOccurs="0" maxOccurs="2">
+								<xs:annotation>
+									<xs:documentation>Note it is not normal for FTP commands to have more than one argument.  Two values should only exist for the RENAME pseudo-command as it is a combination of RNFR and RNTO commands.  So normally this should be zero or one argument.</xs:documentation>
+								</xs:annotation>
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:minLength value="1"/>
+										<xs:maxLength value="16384"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="sessionId">
+								<xs:annotation>
+									<xs:documentation>The FTP session id. Used when proxying session from front end to backend.</xs:documentation>
+								</xs:annotation>
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:minLength value="1"/>
+										<xs:maxLength value="128"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+						</xs:sequence>
+						<xs:attribute name="respondInXML" type="xs:boolean">
+							<xs:annotation>
+								<xs:documentation>Since 2.6 - indicates that the reply (especially from LIST) should be formatted in XML.  Used so that SFTP to FTP proxy can iterate the response to format proper SFTP response.  Can also be used in explicit command mode to iterate list results in the workflow.  However, it should NOT be used in pure FTP to FTP proxy as the results would be improperly formatted for the proxy client.  Currently only used on LIST command.</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+						<xs:attribute name="lenient" type="xs:boolean">
+							<xs:annotation>
+								<xs:documentation>Since 2.6 - indicates that the FTP command be somewhat more flexible than it normally should.  Used in cases like SFTP to FTP proxy.  For example, SFTP does not have two different delete commands as does FTP (DELE, RMD).  So when  processing a DELE request (whick SFTP rm maps to) the behavior will be lenient and delete either a file or the directory depending on the type of the resource.  Currently only used on DELE command.</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="response">
+					<xs:annotation>
+						<xs:documentation>The FTP Passthru response from the backend server.</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="code" type="xs:unsignedShort"/>
+							<xs:element name="message" minOccurs="0">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:minLength value="1"/>
+										<xs:maxLength value="128"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="attributes" type="FileAttributesType" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Used in response to STAT pseudo-command.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:attribute name="sessionId">
+							<xs:annotation>
+								<xs:documentation>Since 2.6, return session id.</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+									<xs:maxLength value="128"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:attribute>
+					</xs:complexType>
+				</xs:element>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

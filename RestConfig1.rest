@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:intel-esg="http://www.intel.com/soae/localServices/REST/" xmlns:md="http://www.intel.com/soae/protocolMetadata-2007a.xsd" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:restconfig="http://www.example.com/JSON_Selection/restconfig" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="RestConfig1" targetNamespace="http://www.example.com/JSON_Selection/restconfig">
+  <wsdl:message name="RestConfig1Request">
+    <wsdl:part name="body" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="RestConfig1Response">
+    <wsdl:part name="body" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:portType name="RestConfig1">
+    <wsdl:operation name="invoke">
+      <wsdl:input message="restconfig:RestConfig1Request"/>
+      <wsdl:output message="restconfig:RestConfig1Response"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="RestConfig1Binding" type="restconfig:RestConfig1">
+    <http:binding verb="POST"/>
+    <wsdl:operation name="invoke">
+      <http:operation/>
+      <wsdl:input>
+        <mime:content part="body" type="application/json"/>
+        <intel-esg:parameterMapping/>
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="body" type="application/json"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="RestConfig1Service">
+    <wsdl:port binding="restconfig:RestConfig1Binding" name="RestConfig1Port">
+      <http:address location="http://localhost:8080"/>
+    </wsdl:port>
+  </wsdl:service>
+  <plnk:partnerLinkType name="RestConfig1PartnerLinkType">
+    <plnk:role name="service" portType="restconfig:RestConfig1"/>
+  </plnk:partnerLinkType>
+</wsdl:definitions>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This schema contains miscellaneous CBR related elements & attributes for binding and routing local CBR services.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+           xmlns:cbr-epr="http://www.intel.com/soae/wsa/epr-2007a/" 
+           targetNamespace="http://www.intel.com/soae/wsa/epr-2007a/" 
+           elementFormDefault="qualified" blockDefault="#all">
+  <!--
+    <xs:import namespace="http://schemas.xmlsoap.org/wsdl/"/> 
+    The relative reference is because our firewall denials our validator the ability to access the official schema locations
+  -->
+  <xs:import namespace="http://schemas.xmlsoap.org/wsdl/" schemaLocation="../importedSchemas/wsdl.xsd"/>
+  <!-- ================================================================================================== -->
+  <!-- The following elements & attributes are utilized within WS-Address EPR Definition (WED) documents  -->
+  <!-- ================================================================================================== -->
+  <xs:attribute name="name" type="cbr-epr:XpathExpressionMatchName">
+    <xs:annotation>
+      <xs:documentation>
+        This attribute is intented to only be utilized within a wsa:EndpointReference element within an application WED document.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:simpleType name="XpathExpressionMatchName">
+    <xs:annotation>
+      <xs:documentation>
+        This string must match the XPath expression name defined in the associated XED document.
+        Note: All XPath expression match names defined within the assocaited XED document must be resolved within the 
+        assocaited WED document.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:element name="simpleParameter" type="cbr-epr:SimpleParameter"/>
+  <xs:complexType name="SimpleParameter">
+    <xs:annotation>
+      <xs:documentation>
+        Mechanism for returning additional information to application from XPath routing evaluation.
+        Application can define a list of simple parameters each with a unique name and return value (string).
+        These simple parameters will be returned within WS-Addressing Endpoint Reference element ReferenceParameters sub-element.
+        If required we could modify extension base type to be any element.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="name" type="xs:NCName">
+          <xs:annotation>
+            <xs:documentation>
+              Name of simple parameter being returned
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+</xs:schema>

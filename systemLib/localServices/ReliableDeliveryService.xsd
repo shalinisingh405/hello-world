@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2007 sp2 (http://www.altova.com) by WADE L POZIOMBKA (INTEL CORPORATION) -->
+<xs:schema xmlns="http://www.intel.com/soae/localService/ReliableDelivery-2009a/" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.intel.com/soae/localService/ReliableDelivery-2009a/" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:attributeGroup name="reliableMessageIDType">
+		<xs:attribute name="userMessageID" use="required">
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:minLength value="1"/>
+					<xs:maxLength value="45"/>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:element name="response">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute name="internalMessageID" type="xs:long" use="required"/>
+					<xs:attribute name="isSuccess" type="xs:boolean" use="required"/>
+					<xs:attribute name="isDuplicate" type="xs:boolean" use="required"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="checkpoint">
+		<xs:annotation>
+			<xs:documentation>Comment describing your root element</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="userState" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="data" type="xs:string"/>
+						</xs:sequence>
+						<xs:attribute name="name" use="required">
+							<xs:simpleType>
+								<xs:restriction base="xs:NMTOKEN">
+									<xs:minLength value="1"/>
+									<xs:maxLength value="45"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:attribute>
+						<xs:attribute name="contentType"/>
+						<xs:attribute name="isSimpleType" type="xs:boolean" default="false"/>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="name" use="required">
+				<xs:simpleType>
+					<xs:restriction base="xs:NMTOKEN">
+						<xs:minLength value="1"/>
+						<xs:maxLength value="45"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="createTimestamp" type="xs:dateTime"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="reliableMessage">
+		<xs:annotation>
+			<xs:documentation>This element is received by the retry input server.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="checkpoint" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attributeGroup ref="reliableMessageIDType"/>
+			<xs:attribute name="internalMessageID" type="xs:long" use="required"/>
+			<xs:attribute name="attempts" type="xs:short" use="required"/>
+			<xs:attribute name="attemptsRemaining" type="xs:short" use="required"/>
+			<xs:attribute name="createTimestamp" type="xs:dateTime" use="required"/>
+			<xs:attribute name="updateTimestamp" type="xs:dateTime" use="required"/>
+			<xs:attribute name="nextAttemptTimestamp" type="xs:dateTime" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="startRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="checkpoint"/>
+			</xs:sequence>
+			<xs:attributeGroup ref="reliableMessageIDType"/>
+			<xs:attribute name="attemptsRemaining" type="xs:unsignedInt" use="optional" default="3"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="checkpointRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="checkpoint"/>
+			</xs:sequence>
+			<xs:attribute name="internalMessageID" type="xs:long" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="finishRequest">
+		<xs:complexType>
+			<xs:attribute name="internalMessageID" use="required"/>
+			<xs:attribute name="delete" default="delete-user-state">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="no-delete"/>
+						<xs:enumeration value="delete-user-state"/>
+						<xs:enumeration value="delete-checkpoints"/>
+						<xs:enumeration value="delete-all"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

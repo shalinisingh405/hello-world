@@ -1,0 +1,28 @@
+<message xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" 
+         xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd">
+  <!-- In this example, an Invocation agent is utilizing JMS -->
+  <!-- This is indicated in the following protocol element -->
+  <protocol>jms</protocol>
+  <jmsMessage>
+    <destination>
+      <!-- application defined invocation agent name to process this request -->
+      <invocationAgentName>IA-1</invocationAgentName>
+    </destination>
+    <transport>
+      <destName>InboundQueue</destName>
+      <destType>QUEUE</destType>
+      <deliveryMode>PERSISTENT</deliveryMode>
+      <priority>4</priority>
+      <timestamp>1193398328979</timestamp>
+      <expiry>0</expiry>
+      <replyToName>OutboundQueue</replyToName>
+      <replyToType>QUEUE</replyToType>
+      <dataType>text</dataType>
+      <properties>
+        <property name="SOAPJMS_soapAction" type="string">
+          http://my.com/foo/bar
+        </property>
+      </properties>
+    </transport>
+  </jmsMessage>
+</message>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy samlVersion="2.0" soapVersion="deferred" writeTransactionLog="true"
+               xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <nameFromSamlSubject>
+        <requiredSamlEntitiesAndValues>
+          <SubjectNameIdentifierFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName</SubjectNameIdentifierFormat>
+          <SubjectConfirmationMethod>urn:oasis:names:tc:SAML:2.0:cm:holder-of-key</SubjectConfirmationMethod>
+          <expectedHolderOfKeyKeyInfo>X509Certificate</expectedHolderOfKeyKeyInfo>
+          <clientCredentialSource>peerCertificateFromSsl</clientCredentialSource>
+          <NotBeforeAndNotOnOrAfter>onlyCheckSubjectConfirmationDataElements</NotBeforeAndNotOnOrAfter>
+          <checkUniqueness>false</checkUniqueness>
+        </requiredSamlEntitiesAndValues>
+        <extractMostSpecificPartOfName>true</extractMostSpecificPartOfName>
+        <inputBindingInfo>
+          <importSource>from-ESG-HTTP-Authorization-saml2-bearer</importSource>
+          <inflate>true</inflate>
+          <base64Decode>true</base64Decode>
+          <specialExceptionHandling>
+            <typeFailureResponse>401-Unauthorized</typeFailureResponse>
+            <realm type="anyURI">
+              <staticValue>some-fixed-application-realm</staticValue>
+            </realm>
+          </specialExceptionHandling>
+          <actor>foobar</actor>
+        </inputBindingInfo>
+      </nameFromSamlSubject>
+    </extractIdentity>
+    <authenticateIdentity>
+      <ldapAuthentication>
+        <distinguishedNamePrefix>UID=</distinguishedNamePrefix>
+        <distinguishedNamePostfix>,CN=employee,OU=Sales,O=Acme,DC=com,C=US</distinguishedNamePostfix>
+      </ldapAuthentication>
+    </authenticateIdentity>
+  </identityProcessing>
+</aaa:aaaPolicy>

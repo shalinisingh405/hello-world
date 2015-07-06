@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns="http://urlencoded" 
+           targetNamespace="http://urlencoded" 
+           elementFormDefault="qualified">
+  <!-- Specifying http://urlencoded identifies that an encoded url should be generated.
+      
+       This url will be of the form user-defined-name=user-defined-value where an ampersand will separate
+       different name value pairs. 
+       e.g., firstName=firstValue&secondName=SecondValue&xmldata=AnyXmlData
+
+       A user can specify an unbounded number of name/value pairs.
+
+       Note: when XML data is passed it must be converted into a string with the data processed 
+       by the externsion function: xml-serialize
+  -->
+  <xs:element name="query">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="param" type="Param" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="Param">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="name" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+</xs:schema>

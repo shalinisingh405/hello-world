@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ..\aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <usernameFromHttpBasicAuthenticationHeader/>
+    </extractIdentity>
+    <authenticateIdentity>
+      <oracleEntitlementServerAuthentication>
+        <serverUrl>http://1.2.3.4:900/Authentication</serverUrl>
+      </oracleEntitlementServerAuthentication>
+    </authenticateIdentity>
+    <mapIdentity>
+      <createUsernameToken>
+        <keyFormat>
+          <passwordText></passwordText>
+          <usernamePasswordSource>
+            <useExtractedIdentity></useExtractedIdentity>
+          </usernamePasswordSource>
+        </keyFormat>
+      </createUsernameToken>
+    </mapIdentity>
+  </identityProcessing>
+  <resourceProcessing>
+    <extractResource>
+      <requestUriFromHttpOperation>
+        <component>path</component>
+        <index>-1</index>
+      </requestUriFromHttpOperation>
+      <prefix>/</prefix>
+    </extractResource>
+    <authorizeResource>
+      <oracleEntitlementServerXacmlAuthorization writeTransactionLog="false">
+        <resource type="anyURI">
+          <inputFromWorkflow>oracleEntitlementServerXacmlAuthorization_Resource</inputFromWorkflow>
+        </resource>
+        <action>
+          <staticValue></staticValue>
+        </action>
+        <environmentSetting>
+          <environment id="23" type="date"/>
+          <environment id="34" type="string"/>
+          <environment id="459" type="time"/>
+          <environment id="129" type="ip"/>
+        </environmentSetting>
+      </oracleEntitlementServerXacmlAuthorization>
+    </authorizeResource>
+  </resourceProcessing>
+</aaa:aaaPolicy>

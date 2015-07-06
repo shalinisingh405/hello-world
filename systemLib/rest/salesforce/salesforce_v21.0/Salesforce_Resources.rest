@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:intel-esg="http://www.intel.com/soae/localServices/REST/" xmlns:md="http://www.intel.com/soae/protocolMetadata-2007a.xsd" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:salesforce="http://www.intel.com/soae/rest/salesforce" xmlns:tns="http://www.intel.com/soae/rest/salesforce/resources" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="Salesforce_Resources" targetNamespace="http://www.intel.com/soae/rest/salesforce/resources">
+  <wsdl:message name="Salesforce_ResourcesRequest">
+    <wsdl:part name="api" type="xsd:string"/>
+    <wsdl:part intel-esg:fixed="application/xml" name="accept" type="xsd:anyType" intel-esg:type="md:Header"/>
+  </wsdl:message>
+  <wsdl:message name="Salesforce_ResourcesResponse">
+    <wsdl:part name="body" type="xsd:anyType" intel-esg:type="salesforce:urls"/>
+  </wsdl:message>
+  <wsdl:portType name="Salesforce_Resources">
+    <wsdl:operation name="invoke">
+      <wsdl:input message="tns:Salesforce_ResourcesRequest"/>
+      <wsdl:output message="tns:Salesforce_ResourcesResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="Salesforce_ResourcesBinding" type="tns:Salesforce_Resources">
+    <http:binding verb="GET"/>
+    <wsdl:operation name="invoke">
+      <http:operation location="(api)"/>
+      <wsdl:input>
+        <http:urlReplacement/>
+        <intel-esg:httpHeaders>
+          <intel-esg:header name="accept" part="accept"/>
+        </intel-esg:httpHeaders>
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="body" type="application/xml"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Salesforce_ResourcesService">
+    <wsdl:port binding="tns:Salesforce_ResourcesBinding" name="Salesforce_ResourcesPort">
+      <http:address location="https://na1.salesforce.com"/>
+    </wsdl:port>
+  </wsdl:service>
+  <plnk:partnerLinkType name="Salesforce_ResourcesPartnerLinkType">
+    <plnk:role name="service" portType="tns:Salesforce_Resources"/>
+  </plnk:partnerLinkType>
+</wsdl:definitions>

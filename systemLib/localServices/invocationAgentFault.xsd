@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:soae-fault="http://www.intel.com/soae/bpelFault-2009a/" 
+           targetNamespace="http://www.intel.com/soae/bpelFault-2009a/" 
+           elementFormDefault="unqualified">
+
+  <xs:include schemaLocation="soaeBpelFault.xsd" />
+
+  <!-- ========================================================================
+
+    Defines the soae bpel fault details for the invocationAgentFailure
+    
+    ======================================================================== -->
+
+  <xs:element name="invocationAgentFault" type="soae-fault:InvocationAgentFault">
+    <xs:annotation>
+      <xs:documentation>Error trying to establish connection with the remote party</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:simpleType name="InvocationAgentFaultType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ServiceUnavailable">
+        <!-- Note we do not attempt to distinguish the type of IA: traditional, InterApp, BuiltIn, etc. -->
+        <xs:annotation>
+          <xs:documentation>No active invocation agent is available to service the request.</xs:documentation>
+        </xs:annotation>  
+      </xs:enumeration>
+      <xs:enumeration value="ResourceUnavailable">
+        <xs:annotation>
+          <xs:documentation>Insufficient system resources available to service the request.</xs:documentation>
+        </xs:annotation>  
+      </xs:enumeration>
+      <xs:enumeration value="MalformedRequest">
+        <xs:annotation>
+          <xs:documentation>The service and/or operation specified is invalid.</xs:documentation>
+        </xs:annotation>  
+      </xs:enumeration>
+      <xs:enumeration value="LocalTimeout">
+        <xs:annotation>
+          <xs:documentation>Workflow timed out waiting for a response to an invocation request.</xs:documentation>
+        </xs:annotation>  
+      </xs:enumeration>
+      <!-- The following may be reported by the actual invocation agent (in addition to ResourceUnavailable). -->
+      <xs:enumeration value="RemoteTimeout">
+        <xs:annotation>
+          <xs:documentation>Invocation agent timed out waiting for a response from a remote server.</xs:documentation>
+        </xs:annotation>  
+      </xs:enumeration>
+      <xs:enumeration value="ConnectionFailure">
+        <xs:annotation>
+          <xs:documentation>Invocation agent failed to connect to a remote server.</xs:documentation>
+        </xs:annotation>  
+      </xs:enumeration>
+      <!-- Catch all: Indicates improvements in software fault isolation should be improved. -->
+      <xs:enumeration value="Other">
+        <xs:annotation>
+          <xs:documentation>Unexpected processing exception encountered.</xs:documentation>
+        </xs:annotation>  
+      </xs:enumeration>
+    </xs:restriction>  
+  </xs:simpleType>
+
+  <xs:complexType name="InvocationAgentFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="faultType" type="soae-fault:InvocationAgentFaultType"/>
+                <xs:element name="application">
+                  <xs:complexType>
+                    <xs:sequence>
+                      <xs:element name="name" type="xs:string"/>
+	                  <xs:element name="version" type="xs:string"/>
+	                </xs:sequence>
+                  </xs:complexType>
+                </xs:element>
+                <xs:element name="workflowName" type="xs:string"/>
+	        <xs:element name="workflowBindingName" type="xs:string"/>
+	        <xs:element name="serviceName" type="xs:string"/>
+	        <xs:element name="operationName" type="xs:string"/>
+	        <xs:element name="invocationAgentName" type="xs:string" minOccurs="0"/>
+	        <xs:element name="invocationEndpoint" type="xs:string" minOccurs="0"/>
+	        <xs:element name="detectedDateTime" type="xs:dateTime"/>
+	        <xs:element name="transactionId" type="xs:string"/>
+	        <xs:element name="timeout" minOccurs="0">
+                  <xs:complexType>
+                    <xs:sequence>
+                      <xs:element name="requestDateTime" type="xs:dateTime"/>
+                      <xs:element name="timeoutValue" type="xs:nonNegativeInteger">
+                        <xs:annotation>
+                          <xs:documentation>Timeout value in milliseconds</xs:documentation>
+                        </xs:annotation>  
+                      </xs:element>
+                    </xs:sequence>  
+                  </xs:complexType>   
+                </xs:element>
+             </xs:sequence>
+           </xs:complexType>
+         </xs:element>
+       </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <xs:element name="backendServerInvocationError" type="soae-fault:BackendServerInvocationError">
+    <xs:annotation>
+	  <xs:documentation>Error condition reported by the invoked server</xs:documentation>
+	</xs:annotation>
+  </xs:element>
+  
+  <xs:complexType name="BackendServerInvocationError"/>
+  
+  <xs:element name="soapEnvelopeParsingError" type="soae-fault:SoapEnvelopeParsingError">
+    <xs:annotation>
+	  <xs:documentation>Error parsing incoming SOAP envelope</xs:documentation>
+	</xs:annotation>
+  </xs:element>
+  
+  <xs:complexType name="SoapEnvelopeParsingError">
+    <xs:sequence>
+	  <xs:element name="errorType">
+	    <xs:simpleType>
+		  <xs:restriction base="xs:string">
+		    <xs:enumeration value="SoapVersionMismatch">
+			  <xs:annotation>
+			    <xs:documentation>Unexpected SOAP envelope version</xs:documentation>
+			  </xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="BadEnvelope">
+			  <xs:annotation>
+			    <xs:documentation>Not an XML or unrecognized envelope structure</xs:documentation>
+			  </xs:annotation>
+			</xs:enumeration>
+		  </xs:restriction>
+		</xs:simpleType>
+	  </xs:element>
+      <xs:element name="expectedSoapVersion" type="xs:string" minOccurs="0">
+        <xs:annotation>
+	      <xs:documentation>The expected SOAP version (only available for errorType=SoapVersionMismatch)</xs:documentation>
+	 	</xs:annotation>
+	  </xs:element>
+	  <xs:element name="actualSoapVersion" type="xs:string" minOccurs="0">
+	    <xs:annotation>
+		  <xs:documentation>The actual SOAP version (only available for errorType=SoapVersionMismatch)</xs:documentation>
+		</xs:annotation>
+	  </xs:element>
+	</xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

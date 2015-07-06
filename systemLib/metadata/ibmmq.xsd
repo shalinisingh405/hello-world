@@ -1,0 +1,305 @@
+<!-- edited with XMLSpy v2007 sp2 (http://www.altova.com) by WADE L POZIOMBKA (INTEL CORPORATION) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd" targetNamespace="http://www.intel.com/soae/protocolMetadata-2007a.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified" blockDefault="#all">
+	<xs:include schemaLocation="metadataCommon.xsd"/>
+	<!-- =============================================================================== -->
+	<!--  IBM MQ specific metadata                -->
+	<!-- =============================================================================== -->
+	<xs:element name="ibmmq">
+		<xs:complexType>
+			<xs:sequence>
+				<!-- This element is optional if the address is specified in EPR -->
+				<xs:choice minOccurs="0">
+					<xs:element name="source">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="inputServerName" type="NonEmptyString"/>
+								<xs:element name="host"/>
+								<xs:element name="port"/>
+								<xs:element name="channel"/>
+								<xs:element name="queueManager"/>
+								<xs:element name="queue"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="destination">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="invocationAgentName"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+				</xs:choice>
+				<xs:element name="transport">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="mqmd" minOccurs="0">
+								<xs:complexType>
+									<xs:all>
+										<xs:element name="accountingToken" type="xs:base64Binary" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>The accounting token. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="applicationIdData" type="xs:string" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Application ID data. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="applicationOriginData" type="xs:string" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Data about the originating application. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="backoutCount" type="xs:int" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>The number of times the message has been backed out. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="characterSet" type="xs:int" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>The coded character set identifier of character data in the application message data. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="correlationId" type="xs:base64Binary" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Specifies the correlation identifier of the message to be retrieved. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="encoding" type="xs:int" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Specifies the representation used for numeric values in the application message data. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="expiry" type="xs:int" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>The expiry time (in tenths of a second). </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="feedback" type="xs:int" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>The nature of the feedback report. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="format" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>A name which indicates the nature of the data in the message. </xs:documentation>
+											</xs:annotation>
+											<xs:simpleType>
+												<xs:restriction base="xs:string">
+													<xs:enumeration value="MQFMT_NONE"/>
+													<xs:enumeration value="MQFMT_ADMIN"/>
+													<xs:enumeration value="MQFMT_CHANNEL_COMPLETED"/>
+													<xs:enumeration value="MQFMT_CICS"/>
+													<xs:enumeration value="MQFMT_COMMAND_1"/>
+													<xs:enumeration value="MQFMT_COMMAND_2"/>
+													<xs:enumeration value="MQFMT_DEAD_LETTER_HEADER"/>
+													<xs:enumeration value="MQFMT_DIST_HEADER"/>
+													<xs:enumeration value="MQFMT_EMBEDDED_PCF"/>
+													<xs:enumeration value="MQFMT_EVENT"/>
+													<xs:enumeration value="MQFMT_IMS"/>
+													<xs:enumeration value="MQFMT_IMS_VAR_STRING"/>
+													<xs:enumeration value="MQFMT_MD_EXTENSION"/>
+													<xs:enumeration value="MQFMT_PCF"/>
+													<xs:enumeration value="MQFMT_REF_MSG_HEADER"/>
+													<xs:enumeration value="MQFMT_RF_HEADER"/>
+													<xs:enumeration value="MQFMT_RF_HEADER_1"/>
+													<xs:enumeration value="MQFMT_RF_HEADER_2"/>
+													<xs:enumeration value="MQFMT_STRING"/>
+													<xs:enumeration value="MQFMT_TRIGGER"/>
+													<xs:enumeration value="MQFMT_WORK_INFO_HEADER"/>
+													<xs:enumeration value="MQFMT_XMIT_Q_HEADER"/>
+													<xs:enumeration value="MQFMT_NONE_ARRAY"/>
+													<xs:enumeration value="MQFMT_ADMIN_ARRAY"/>
+													<xs:enumeration value="MQFMT_CHANNEL_COMPLETED_ARRAY"/>
+													<xs:enumeration value="MQFMT_CICS_ARRAY"/>
+													<xs:enumeration value="MQFMT_COMMAND_1_ARRAY"/>
+													<xs:enumeration value="MQFMT_COMMAND_2_ARRAY"/>
+													<xs:enumeration value="MQFMT_DEAD_LETTER_HEADER_ARRAY"/>
+													<xs:enumeration value="MQFMT_DIST_HEADER_ARRAY"/>
+													<xs:enumeration value="MQFMT_EMBEDDED_PCF_ARRAY"/>
+													<xs:enumeration value="MQFMT_EVENT_ARRAY"/>
+													<xs:enumeration value="MQFMT_IMS_ARRAY"/>
+													<xs:enumeration value="MQFMT_IMS_VAR_STRING_ARRAY"/>
+													<xs:enumeration value="MQFMT_MD_EXTENSION_ARRAY"/>
+													<xs:enumeration value="MQFMT_PCF_ARRAY"/>
+													<xs:enumeration value="MQFMT_REF_MSG_HEADER_ARRAY"/>
+													<xs:enumeration value="MQFMT_RF_HEADER_ARRAY"/>
+													<xs:enumeration value="MQFMT_RF_HEADER_1_ARRAY"/>
+													<xs:enumeration value="MQFMT_RF_HEADER_2_ARRAY"/>
+													<xs:enumeration value="MQFMT_STRING_ARRAY"/>
+													<xs:enumeration value="MQFMT_TRIGGER_ARRAY"/>
+													<xs:enumeration value="MQFMT_WORK_INFO_HEADER_ARRAY"/>
+													<xs:enumeration value="MQFMT_XMIT_Q_HEADER_ARRAY"/>
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:element>
+										<xs:element name="groupId" type="xs:base64Binary" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>The ID of the message group. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="messageFlags" type="xs:int" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Flags controlling the segmentation and status of the message. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="messageId" type="xs:base64Binary" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Message ID.</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="messageSequenceNumber" type="xs:int" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Sequence number of logical message within group.</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="messageType" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Indicates the type of the message. </xs:documentation>
+											</xs:annotation>
+											<xs:simpleType>
+												<xs:restriction base="xs:int">
+													<xs:minInclusive value="1"/>
+													<xs:maxInclusive value="999999999"/>
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:element>
+										<xs:element name="offset" type="xs:int" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Offset of data in the physical message from the start of the logical message.</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="originalLength" type="xs:int" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Original length of a segmented message.</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="persistence" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>The message persistence. </xs:documentation>
+											</xs:annotation>
+											<xs:simpleType>
+												<xs:restriction base="xs:string">
+													<xs:enumeration value="MQPER_NOT_PERSISTENT"/>
+													<xs:enumeration value="MQPER_PERSISTENCE_AS_Q_DEF"/>
+													<xs:enumeration value="MQPER_PERSISTENT"/>
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:element>
+										<xs:element name="priority" type="xs:int" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>The message priority. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="putApplicationName" type="xs:string" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>The name of the application that put the message. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="putApplicationType" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>The type of application that put the message. </xs:documentation>
+											</xs:annotation>
+											<xs:simpleType>
+												<xs:restriction base="xs:string">
+													<xs:enumeration value="MQAT_AIX"/>
+													<xs:enumeration value="MQAT_CICS"/>
+													<xs:enumeration value="MQAT_DOS"/>
+													<xs:enumeration value="MQAT_IMS"/>
+													<xs:enumeration value="MQAT_MVS"/>
+													<xs:enumeration value="MQAT_OS2"/>
+													<xs:enumeration value="MQAT_OS400"/>
+													<xs:enumeration value="MQAT_QMGR"/>
+													<xs:enumeration value="MQAT_UNIX"/>
+													<xs:enumeration value="MQAT_WINDOWS"/>
+													<xs:enumeration value="MQAT_JAVA"/>
+													<xs:enumeration value="MQAT_UNKNOWN"/>
+													<xs:enumeration value="MQAT_NO_CONTEXT"/>
+													<xs:enumeration value="MQAT_CICS_VSE"/>
+													<xs:enumeration value="MQAT_VMS"/>
+													<xs:enumeration value="MQAT_GUARDIAN"/>
+													<xs:enumeration value="MQAT_VOS"/>
+													<xs:enumeration value="MQAT_DEFAULT"/>
+													<xs:enumeration value="MQAT_NSK"/>
+													<xs:enumeration value="MQAT_CICS_BRIDGE"/>
+													<xs:enumeration value="MQAT_NOTES_AGENT"/>
+													<xs:enumeration value="MQAT_WINDOWS_NT"/>
+													<xs:enumeration value="MQAT_IMS_BRIDGE"/>
+													<xs:enumeration value="MQAT_XCF"/>
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:element>
+										<xs:element name="putDateTime" type="xs:dateTime" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>The time and date when the message was put.</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="replyToQueueManagerName" type="xs:string" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>The name of the queue manager to which reply or reply messages should be sent. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="replyToQueueName" type="xs:string" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>The name of the queue to which a reply should be sent. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="report" type="xs:int" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>This field enables the application sending the original message to specify which report messages are required, whether the application message data is to be included in them, and also how the message and correlation ID in the report or reply are to be set. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="userId" type="xs:string" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>The user ID. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="version" type="xs:int" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>This field shows Structure version number. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+									</xs:all>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="properties" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="property" minOccurs="0" maxOccurs="unbounded">
+											<xs:complexType>
+												<xs:simpleContent>
+													<xs:extension base="xs:string">
+														<xs:attribute name="name" type="NonEmptyString" use="required"/>
+														<xs:attribute name="type" use="required">
+															<xs:simpleType>
+																<xs:restriction base="xs:string">
+																	<xs:enumeration value="boolean"/>
+																	<xs:enumeration value="byte"/>
+																	<xs:enumeration value="short"/>
+																	<xs:enumeration value="int"/>
+																	<xs:enumeration value="long"/>
+																	<xs:enumeration value="float"/>
+																	<xs:enumeration value="double"/>
+																	<xs:enumeration value="string"/>
+																</xs:restriction>
+															</xs:simpleType>
+														</xs:attribute>
+													</xs:extension>
+												</xs:simpleContent>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="isGetOnly" type="xs:boolean" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Indicates that the Invocation Agent request is to receive a message (not send one).</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

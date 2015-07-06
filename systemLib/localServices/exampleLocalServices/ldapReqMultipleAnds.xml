@@ -1,0 +1,85 @@
+<ExternLookupRequest  
+    xmlns="http://www.intel.com/soae/localService/ldap-2007a/" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://www.intel.com/soae/localService/ldap-2007a/ ../ldap.xsd"> 
+
+  <!-- General Comment: Substitute your DN, password, etc. as require. 
+       Remove any element that your actual usage do NOT require.
+
+       For detail description of LDAP request see:
+       1) Directory Services Markup Language v2.0 December 18, 2001
+       2) IETF RFC 2251: Lightweight Directory Access Protocol (v3) December 1997
+  -->
+
+  <Access>
+    <!-- Optional element. If absent or empty then the default values of the administrative 
+         domain name and password are used.
+
+         Note: dynamic LDAP server address and port can be specified via wsa:EndpointReference wsa:Address element of 
+               service-ref assigned to LDAP partnerLink. 
+    -->
+    <authRequest dn="cn=somehostname.mydomain.com,ou=Network,o=YourOrg,c=NL">
+      <SimpleAuthRequest>
+        <Password>abc</Password>
+      </SimpleAuthRequest>
+    </authRequest>
+  </Access>
+  <batchRequest> 
+    <!-- One or more operations to be performed. 
+         Three types of request operations supported: search, auth (authentication) and compare (some kind
+         of user validation).
+         At most one of each type requests can be allowed per request.
+         If a search operation is present, then it must be the first operation in the request.
+         No order restriction between auth and search operations.
+    -->
+    <searchRequest dn="ou=sales,o=scr,c=us" scope="wholeSubtree" derefAliases="neverDerefAliases">
+      <!-- Specifies search criteria and attributes used to fetch all eligible entries in seach result -->
+      <!-- See IETF RFC 2254 for detail description of filtering syntax -->
+      <filter>
+        <and>
+          <substrings name="cn">
+            <initial>S</initial>
+          </substrings>
+          <equalityMatch name="ObjectClass">
+            <value>InetOrgperson</value>
+          </equalityMatch>
+          <and>
+            <substrings name="sn">
+              <any>rod</any>
+            </substrings>
+            <substrings name="sn">
+              <any>but</any>
+            </substrings>
+          </and>
+        </and>
+      </filter>
+      <attributes>
+        <attribute name="uid"/>
+        <attribute name="cn"/>
+        <attribute name="dob"/>
+      </attributes>
+    </searchRequest>
+    <authRequest dn="cn=user123,ou=Network,o=YourOrg,c=NL">
+      <!-- Provided for authentication purpose. 
+           Only password based authentication is supported at present.
+           Authentication will happen based upon dn and password given within this element.
+           If DN value is absent, then the DN of the first entry from the search result (result of preceding 
+           search operation) will be used.
+       -->
+      <SimpleAuthRequest>
+        <Password>abc</Password>
+      </SimpleAuthRequest>
+    </authRequest>
+    <compareRequest dn="cn=user123,ou=Network,o=YourOrg,c=NL">
+      <!-- This element used to validate user using LDAP compare operation.
+           For a given user specified by DN value, it verifies whether the specified attribute (value of 
+           'name' attribute of 'assertion' tag) with specified value is really part of the user entry. 
+           If DN value is absent, then the DN of the first entry from the search result (result of preceding 
+           search operation) will be used.
+      -->
+      <assertion name="userPassword">
+        <value>abc</value>
+      </assertion>
+    </compareRequest>
+  </batchRequest>
+</ExternLookupRequest>

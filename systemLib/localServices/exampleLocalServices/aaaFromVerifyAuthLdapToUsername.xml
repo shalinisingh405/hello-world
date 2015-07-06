@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ..\aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <bstFromVerifyOperation extractMostSpecificComponentFromSubjectName="true">subjectName</bstFromVerifyOperation>
+    </extractIdentity>
+    <authenticateIdentity>
+      <ldapAuthentication>
+        <distinguishedNamePrefix>uid=</distinguishedNamePrefix>
+        <distinguishedNamePostfix>,cn=Employee,OU=Sales,DC=companyXyz,C=US</distinguishedNamePostfix>
+      </ldapAuthentication>
+    </authenticateIdentity>
+    <mapIdentity>
+      <createHttpBasicAuthentication>
+        <usernamePasswordSource>
+          <securityConfig>demo-username-password</securityConfig>
+        </usernamePasswordSource>
+      </createHttpBasicAuthentication>
+    </mapIdentity>
+  </identityProcessing>
+</aaa:aaaPolicy>

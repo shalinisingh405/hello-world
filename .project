@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>JsonExample</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>com.intel.ssg.cbr.ide.core.CBRBuilder</name>
+			<arguments>
+				<dictionary>
+					<key>PARTNERLINK_BINDING#Process.bpel#Receive#myRole#port</key>
+					<value>RestConfigPort</value>
+				</dictionary>
+				<dictionary>
+					<key>PARTNERLINK_BINDING#Process1.bpel#Receive#myRole#port</key>
+					<value>RestConfig1Port</value>
+				</dictionary>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>com.intel.ssg.cbr.ide.core.CBRNature</nature>
+	</natures>
+</projectDescription>

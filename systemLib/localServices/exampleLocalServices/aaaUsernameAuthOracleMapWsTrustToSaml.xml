@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <usernameFromHttpBasicAuthenticationHeader></usernameFromHttpBasicAuthenticationHeader>
+    </extractIdentity>
+    <authenticateIdentity>
+      <oracleAccessManagerAuthentication>
+        <resource type="anyURI">
+          <use-extracted-resource></use-extracted-resource>
+        </resource>
+        <method>Get</method>
+      </oracleAccessManagerAuthentication>
+    </authenticateIdentity>
+    <mapIdentity>
+      <createTokenViaWsTrust>
+        <version>1.4</version>
+        <soapVersion>1.2</soapVersion>
+        <requestType>Issue</requestType>
+        <tokenType>SAML-v2.0</tokenType>
+        <rstFormat>RST</rstFormat>
+        <wsSecurityPolicyGroup>some-security-group-with-a-signature-in-it</wsSecurityPolicyGroup>
+        <clientAuthenticationMethod>
+          <mechanism>Use_WS-Security_Policy_Group</mechanism>
+          <source>
+            <useExtractedIdentity>
+              <usernameInternalName>int:extractedIdentityUsername</usernameInternalName>
+            </useExtractedIdentity>
+          </source>
+        </clientAuthenticationMethod>
+        <toFieldPopulation>true</toFieldPopulation>
+      </createTokenViaWsTrust>
+    </mapIdentity>
+  </identityProcessing>
+  <resourceProcessing>
+    <extractResource>
+      <requestUriFromHttpOperation></requestUriFromHttpOperation>
+    </extractResource>
+  </resourceProcessing>
+</aaa:aaaPolicy>

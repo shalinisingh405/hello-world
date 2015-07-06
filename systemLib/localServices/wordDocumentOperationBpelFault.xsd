@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:soae-fault="http://www.intel.com/soae/bpelFault-2009a/" 
+           targetNamespace="http://www.intel.com/soae/bpelFault-2009a/" 
+           elementFormDefault="unqualified">
+
+  <xs:include schemaLocation="soaeBpelFault.xsd" />
+
+  <!-- ========================================================================
+
+    Defines the soae bpel faults for word document operation functions:
+
+	extract-word-xml-file
+	replace-word-xml-file
+	
+    
+    ======================================================================== -->
+
+  <xs:element name="wordDocumentOperationFault" type="soae-fault:WordDocumentOperationFault"/>
+
+  <xs:complexType name="WordDocumentOperationFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+
+				<xs:element name="desc" type="xs:string"/>
+
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+</xs:schema>

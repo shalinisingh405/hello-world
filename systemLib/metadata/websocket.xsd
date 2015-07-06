@@ -1,0 +1,121 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd"
+	targetNamespace="http://www.intel.com/soae/protocolMetadata-2007a.xsd"
+	elementFormDefault="qualified" attributeFormDefault="unqualified"
+	blockDefault="#all">
+
+	<xs:include schemaLocation="metadataCommon.xsd" />
+
+	<!-- websocket protocol header: root element -->
+
+	<xs:element name="websocketMessage">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="source" type="WebsocketSourceOrDestination"
+					minOccurs="0" />
+
+				<xs:element name="destination" type="WebsocketSourceOrDestination"
+					minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>
+
+							The destination element is historical. It plays no role
+							in controlling the destination of a message or the invocation
+							agent that handles the message.
+
+						</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+
+				<xs:element name="transport" type="WebsocketTransport" />
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:complexType name="WebsocketSourceOrDestination">
+		<xs:sequence>
+
+			<xs:element name="type">
+				<xs:simpleType>
+					<xs:restriction base="xs:token">
+						<xs:enumeration value="IA" />
+						<xs:enumeration value="IS" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+
+			<xs:element name="name" type="NonEmptyString" />
+
+			<xs:element name="connectionId" type="ConnectionId" />
+
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- transport element -->
+
+	<xs:complexType name="WebsocketTransport">
+		<xs:choice>
+			<xs:element name="websocketRequest" type="WebsocketRequest" />
+		</xs:choice>
+	</xs:complexType>
+
+	<xs:complexType name="WebsocketRequest">
+
+		<xs:all minOccurs="1">
+
+			<xs:element name="messageType" type="MessageType" />
+
+			<xs:element name="contentType" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>
+						For "text" websocket messages: text/plain;charset=utf-8
+						For "binary" websocket messages: application/octet-stream
+						For control websocket messages this is application/octet-stream.
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+
+		</xs:all>
+
+	</xs:complexType>
+
+	<xs:simpleType name="MessageType">
+
+		<xs:annotation>
+			<xs:documentation>
+
+				"open" action is handled as an http message (not a websocket message).
+
+				type of data (text or binary) indicated by contentType
+
+			</xs:documentation>
+		</xs:annotation>
+
+		<xs:restriction base="xs:token">
+
+			<xs:enumeration value="data" />
+
+			<!-- request the connection be closed or notification that the connection 
+				has been closed. -->
+
+			<xs:enumeration value="close" />
+
+			<!-- request the connection be dropped or notification that the connection 
+				has been dropped. -->
+
+			<xs:enumeration value="drop" />
+
+			<!-- received a ping message or send a ping message. -->
+
+			<xs:enumeration value="ping" />
+
+			<!-- received a pong message or send a pong message. -->
+
+			<xs:enumeration value="pong" />
+
+		</xs:restriction>
+
+	</xs:simpleType>
+
+</xs:schema>

@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<xs:schema 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:cbr="http://www.intel.com/soae/bpel/bpel20-2007a/"
+    targetNamespace="http://docs.oasis-open.org/wsbpel/2.0/process/executable" 
+    elementFormDefault="qualified">
+
+    <!-- xs:import
+        namespace="http://www.intel.com/soae/bpel/bpel20-2007a/"
+        schemaLocation="bpel-cbr-attributes.xsd" / -->
+
+    <xs:simpleType name="VariableName">
+        <xs:restriction base="xs:NCName">
+            <xs:pattern value="[^\.]+"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="YesNo">
+        <xs:restriction base="xs:string" >
+            <xs:enumeration value="yes"/>
+            <xs:enumeration value="no"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- type declaration for validate attribute in assign activity -->
+    <xs:simpleType name="OnlyNo">
+        <xs:restriction base="xs:string" >
+            <xs:enumeration value="no"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="RoleTypes">
+        <xs:restriction base="xs:string" >
+            <xs:enumeration value="myRole"/>
+            <xs:enumeration value="partnerRole"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!--/bpel:process/bpel:import-->
+    <xs:complexType name="Import">
+        <xs:sequence>
+          <xs:element name="workaround" minOccurs="0" maxOccurs="0" />
+        </xs:sequence>
+        <xs:attribute name="namespace" type="xs:anyURI" use="optional"/>
+        <xs:attribute name="location" type="xs:anyURI" use="optional"/>
+        <xs:attribute name="importType" type="xs:anyURI"/>
+    </xs:complexType>
+
+    <!--/bpel:process/bpel:partnerLinks-->
+    <xs:complexType name="PartnerLinks">
+        <xs:sequence>
+            <xs:element name="partnerLink" minOccurs="1" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                      <xs:element name="workaround" minOccurs="0" maxOccurs="0" />
+                    </xs:sequence>
+                    <xs:attribute name="name" type="xs:NCName" use="required"/>
+                    <xs:attribute name="partnerLinkType" type="xs:QName" use="required"/>
+                    <xs:attribute name="myRole" type="xs:NCName" use="optional"/>
+                    <xs:attribute name="partnerRole" type="xs:NCName" use="optional"/>
+                    <xs:attribute name="initializePartnerRole" type="bpel:YesNo" use="optional"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!--//bpel:variables-->
+    <xs:complexType name="Variables">
+        <xs:sequence>
+            <xs:element name="variable" minOccurs="1" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="from" type="bpel:FromSpec" minOccurs="0"  maxOccurs="1"/>
+                    </xs:sequence>
+                    <xs:attribute name="name" type="bpel:VariableName" use="required"/>
+                    <xs:attribute name="messageType" type="xs:QName" use="optional"/>
+                    <xs:attribute name="type" type="xs:QName" use="optional"/>
+                    <xs:attribute name="element" type="xs:QName" use="optional"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Catch">
+        <xs:group ref="bpel:activity"/>
+        <xs:attribute name="faultName" type="xs:QName" use="optional"/>
+        <xs:attribute name="faultVariable" type="bpel:VariableName" use="optional"/>
+        <xs:attribute name="faultMessageType" type="xs:QName" use="optional"/>
+        <xs:attribute name="faultElement" type="xs:QName" use="optional"/>        
+    </xs:complexType>
+        
+    <xs:complexType name="CatchAll">
+        <xs:group ref="bpel:activity"/>
+    </xs:complexType>
+    
+    <!--//bpel:fauleHandlers-->
+    <xs:complexType name="FaultHandlers">
+        <xs:sequence>
+            <xs:element name="catch" type="bpel:Catch" minOccurs="0" maxOccurs="unbounded"/>            
+            <xs:element name="catchAll" type="bpel:CatchAll" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="FromParts">
+        <xs:sequence>
+            <xs:element name="fromPart" minOccurs="1" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:attribute name="part" type="xs:NCName" use="required"/>
+                    <xs:attribute name="toVariable" type="bpel:VariableName" use="required"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ToParts">
+        <xs:sequence>
+            <xs:element name="toPart" minOccurs="1" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:attribute name="part" type="xs:NCName" use="required"/>
+                    <xs:attribute name="fromVariable" type="bpel:VariableName" use="required"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!--FROM SPEC-->
+    <xs:complexType name="FromSpecQuery">
+        <xs:sequence>
+            <xs:element name="query" minOccurs="0" maxOccurs="1" type="bpel:restricted-query" >
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="variable" type="bpel:VariableName" use="required"/>
+        <xs:attribute name="part" type="xs:NCName" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="FromSpecLiteral" mixed="true">
+        <xs:sequence>
+            <xs:any namespace="##any" processContents="lax" minOccurs="0"/>
+        </xs:sequence>
+        <!-- xs:attribute ref="xml:space" use="optional"/ -->
+        <xs:anyAttribute namespace="http://www.w3.org/XML/1998/namespace" processContents="lax" />
+    </xs:complexType>
+
+    <!--Ugly -->
+    <xs:complexType name="FromSpec" mixed="true">
+        <xs:sequence>
+            <xs:element name="literal" type="xs:anyType" minOccurs="0" maxOccurs="1"/>
+<!--
+  Temporary workaround for problem with xml:space for bpel:literal
+  THM 2008-03-28
+-->
+<!--
+            <xs:element name="literal" type="bpel:FromSpecLiteral" minOccurs="0" maxOccurs="1"/>
+-->
+            <xs:element name="query" minOccurs="0" maxOccurs="1" type="bpel:restricted-query" >
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="variable" type="bpel:VariableName" use="optional"/>
+        <xs:attribute name="part" type="xs:NCName" use="optional"/>
+        <xs:attribute name="expressionLanguage" type="xs:anyURI" use="optional"/>
+        <xs:attribute name="partnerLink" type="xs:NCName" use="optional"/>
+        <xs:attribute name="endpointReference" type="bpel:RoleTypes" use="optional"/>
+        <xs:anyAttribute namespace="http://www.intel.com/soae/bpel/bpel20-2007a/" processContents="lax"/>
+    </xs:complexType>
+    <!--End of Ugly -->
+    <!--End of FROM SPEC-->
+
+    <!--TO SPEC-->
+    <xs:complexType name="ToSpecQuery">
+        <xs:sequence>
+            <xs:element name="query" minOccurs="0" maxOccurs="1" type="bpel:restricted-query" >
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="variable" type="bpel:VariableName" use="required"/>
+        <xs:attribute name="part" type="xs:NCName" use="optional"/>
+    </xs:complexType>
+
+    <!--Ugly -->
+    <xs:complexType name="ToSpec" mixed="true">
+        <xs:sequence>
+            <xs:element name="query" minOccurs="0" maxOccurs="1" type="bpel:restricted-query" >
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="variable" type="bpel:VariableName" use="optional"/>
+        <xs:attribute name="part" type="xs:NCName" use="optional"/>
+        <xs:attribute name="partnerLink" type="xs:NCName" use="optional"/>
+        <xs:attribute name="expressionLanguage" type="xs:anyURI" use="optional"/>
+    </xs:complexType>
+    <!--End of Ugly -->
+    <!--End of TO SPEC-->
+
+    <xs:complexType name="Operation" abstract="true">
+        <xs:sequence>
+          <xs:element ref="bpel:documentation" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:NCName" use="optional"/>
+        <xs:anyAttribute namespace="http://www.intel.com/soae/bpel/bpel20-2007a/" processContents="lax"/>
+    </xs:complexType>
+
+    <xs:complexType name="Receive">
+        <xs:complexContent>
+            <xs:extension base="bpel:Operation">
+                <xs:sequence>
+                    <xs:element name="fromParts" type="bpel:FromParts" minOccurs="0" maxOccurs="1" />
+                </xs:sequence>
+                <xs:attribute name="partnerLink" type="xs:NCName" use="required"/>
+                <xs:attribute name="portType" type="xs:QName" use="optional"/>
+                <xs:attribute name="operation" type="xs:NCName" use="required"/>
+                <xs:attribute name="variable" type="bpel:VariableName" use="optional"/>
+                <xs:attribute name="createInstance" type="bpel:YesNo" use="optional"/>
+                <!-- xs:attribute ref="cbr:ima-key" use="optional"/ -->
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Reply">
+        <xs:complexContent>
+            <xs:extension base="bpel:Operation">
+                <xs:sequence>
+                    <xs:element name="toParts" type="bpel:ToParts" minOccurs="0" maxOccurs="1"/>
+                </xs:sequence>
+                <xs:attribute name="partnerLink" type="xs:NCName" use="required"/>
+                <xs:attribute name="portType" type="xs:QName" use="optional"/>
+                <xs:attribute name="operation" type="xs:NCName" use="required"/>
+                <xs:attribute name="variable" type="bpel:VariableName" use="optional"/>
+                <xs:attribute name="faultName" type="xs:QName" use="optional"/>
+                <!-- xs:attribute ref="cbr:oma-key" use="optional"/ -->
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Invoke">
+        <xs:complexContent>
+            <xs:extension base="bpel:Operation">
+                <xs:sequence>
+                    <xs:element name="catch" type="bpel:Catch" minOccurs="0" maxOccurs="unbounded"/>            
+                    <xs:element name="catchAll" type="bpel:CatchAll" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="toParts" type="bpel:ToParts" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="fromParts" type="bpel:FromParts" minOccurs="0" maxOccurs="1"/>
+                </xs:sequence>
+                <xs:attribute name="partnerLink" type="xs:NCName" use="required"/>
+                <xs:attribute name="portType" type="xs:QName" use="optional"/>
+                <xs:attribute name="operation" type="xs:NCName" use="required"/>
+                <xs:attribute name="inputVariable" type="bpel:VariableName" use="optional"/>
+                <xs:attribute name="outputVariable" type="bpel:VariableName" use="optional"/>
+                <!-- xs:attribute ref="cbr:ima-key" use="optional"/ -->
+                <!-- xs:attribute ref="cbr:oma-key" use="optional"/ -->
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Assign">
+        <xs:complexContent>
+            <xs:extension base="bpel:Operation">
+                <xs:sequence>
+                    <xs:element name="copy" minOccurs="1" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:all>
+                                <xs:element name="from" type="bpel:FromSpec"/>
+                                <xs:element name="to" type="bpel:ToSpec"/>
+                            </xs:all>
+                            <xs:attribute name="ignoreMissingFromData" type="bpel:YesNo" use="optional"/>
+                            <xs:attribute name="keepSrcElementName" type="bpel:YesNo" use="optional"/>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+                <xs:attribute name="validate" type="bpel:OnlyNo" use="optional"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Throw">
+        <xs:complexContent>
+            <xs:extension base="bpel:Operation">
+                <xs:attribute name="faultName" type="xs:QName" use="required"/>
+                <xs:attribute name="faultVariable" type="bpel:VariableName" use="optional"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Exit">
+        <xs:complexContent>
+            <xs:extension base="bpel:Operation"/>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Empty">
+        <xs:complexContent>
+            <xs:extension base="bpel:Operation"/>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Sequence">
+        <xs:complexContent>
+            <xs:extension base="bpel:Operation">
+                <xs:choice minOccurs="1" maxOccurs="unbounded">
+                    <xs:group ref="bpel:activity"/>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Wait">
+       <xs:complexContent>
+        <xs:extension base="bpel:Operation">
+          <xs:sequence>
+            <xs:element name="for" >
+              <xs:complexType mixed="true" >
+                 <xs:sequence>
+     	           <xs:any namespace="##any" processContents="lax"
+		             minOccurs="0" maxOccurs="unbounded"/>
+                 </xs:sequence>
+                 <xs:attribute name="expressionLanguage" type="xs:anyURI"/>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:extension>
+       </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Condition" mixed="true">
+      <xs:sequence>
+        <xs:any namespace="##any" processContents="lax"
+	    minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="expressionLanguage" type="xs:anyURI"/>
+    </xs:complexType>
+
+    <xs:complexType name="If">
+        <xs:complexContent>
+            <xs:extension base="bpel:Operation">
+                <xs:sequence>
+                    <xs:element name="condition" type="bpel:Condition" minOccurs="1" maxOccurs="1"/>
+                    <xs:group ref="bpel:activity"/>
+                    <xs:element name="elseif" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="condition" type="bpel:Condition" minOccurs="1" maxOccurs="1"/>
+                                <xs:group ref="bpel:activity"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="else" minOccurs="0" maxOccurs="1">
+                        <xs:complexType>
+                            <xs:group ref="bpel:activity"/>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="While">
+        <xs:complexContent>
+            <xs:extension base="bpel:Operation">
+                <xs:sequence>
+                    <xs:element name="condition" type="bpel:Condition" minOccurs="1" maxOccurs="1"/>
+                    <xs:group ref="bpel:activity"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="RepeatUntil">
+        <xs:complexContent>
+            <xs:extension base="bpel:Operation">
+                <xs:sequence>
+                    <xs:group ref="bpel:activity"/>
+                    <xs:element name="condition" type="bpel:Condition" minOccurs="1" maxOccurs="1"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Rethrow">
+        <xs:complexContent>
+            <xs:extension base="bpel:Operation" />
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Validate">
+        <xs:complexContent>
+            <xs:extension base="bpel:Operation">
+                <xs:attribute name="variables" type="xs:string" use="optional"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Scope">
+        <xs:complexContent>
+            <xs:extension base="bpel:Operation">
+                <xs:choice maxOccurs="unbounded">
+                    <xs:element name="partnerLinks" type="bpel:PartnerLinks" minOccurs="1" maxOccurs="1"/>                    
+		    <xs:element name="variables" type="bpel:Variables" minOccurs="1" maxOccurs="1"/>
+                    <xs:element name="faultHandlers" type="bpel:FaultHandlers" minOccurs="0" maxOccurs="1"/>
+                    <xs:group ref="bpel:activity"/>
+                </xs:choice>
+                <xs:attribute name="exitOnStandardFault" type="bpel:YesNo" use="optional"/>
+                <xs:attribute name="isolated" type="bpel:YesNo" use="optional"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="ForEach">
+        <xs:complexContent>
+            <xs:extension base="bpel:Operation">
+                <xs:sequence>
+                    <xs:element name="startCounterValue" type="bpel:UnsignedIntExpression"/>
+                    <xs:element name="finalCounterValue" type="bpel:UnsignedIntExpression"/>
+                    <xs:element name="completionCondition" type="bpel:CompletionCondition" minOccurs="0"/>
+                    <xs:element name="scope" type="bpel:Scope" />
+                </xs:sequence>
+                <xs:attribute name="counterName" type="bpel:VariableName" use="required"/>
+                <xs:attribute name="parallel" type="bpel:YesNo" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="ExtensionActivity">
+      <xs:sequence>
+        <xs:any namespace="##other" processContents="lax"/>
+      </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="UnsignedIntExpression" mixed="true">
+        <xs:attribute name="expressionLanguage" type="xs:anyURI"/>
+    </xs:complexType>
+
+    <xs:complexType name="CompletionCondition">
+        <xs:sequence>
+            <xs:element name="branches" type="bpel:Branches" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Branches">
+        <xs:complexContent>
+            <xs:extension base="bpel:UnsignedIntExpression">
+                <xs:attribute name="successfulBranchesOnly" type="bpel:YesNo" default="no" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:group name="activity">
+        <xs:choice>
+            <!--ACTIVITY-->
+            <xs:element name="receive" type="bpel:Receive"/>
+            <xs:element name="reply" type="bpel:Reply"/>
+            <xs:element name="invoke" type="bpel:Invoke"/>
+            <xs:element name="assign" type="bpel:Assign"/>
+            <xs:element name="throw" type="bpel:Throw"/>
+            <xs:element name="exit" type="bpel:Exit"/>
+            <xs:element name="empty" type="bpel:Empty"/>
+            <xs:element name="wait" type="bpel:Wait"/>
+            <xs:element name="sequence" type="bpel:Sequence"/>
+            <xs:element name="if" type="bpel:If"/>
+            <xs:element name="while" type="bpel:While"/>
+            <xs:element name="repeatUntil" type="bpel:RepeatUntil"/>
+            <xs:element name="rethrow" type="bpel:Rethrow"/>
+            <xs:element name="validate" type="bpel:Validate"/>
+            <xs:element name="scope" type="bpel:Scope"/>
+            <xs:element name="forEach" type="bpel:ForEach"/>
+            <xs:element name="extensionActivity" type="bpel:ExtensionActivity"/>
+        </xs:choice>
+    </xs:group>
+
+    <xs:element name="process">
+        <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element name="import" type="bpel:Import" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="bpel:documentation" minOccurs="0" maxOccurs="1"/>
+                <xs:element name="partnerLinks" type="bpel:PartnerLinks" minOccurs="1" maxOccurs="1"/>
+                <xs:element name="variables" type="bpel:Variables" minOccurs="1" maxOccurs="1"/>
+                <xs:element name="faultHandlers" type="bpel:FaultHandlers" minOccurs="0" maxOccurs="1"/>
+                <xs:group ref="bpel:activity"/>
+            </xs:choice>
+            <xs:attribute name="name" type="xs:NCName"/>
+            <xs:attribute name="targetNamespace" type="xs:anyURI"/>
+            <xs:attribute name="queryLanguage" type="xs:anyURI" default="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"/>
+            <xs:attribute name="expressionLanguage" type="xs:anyURI" default="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"/>
+            <xs:attribute name="exitOnStandardFault" type="bpel:YesNo"/>
+            <xs:attribute name="suppressJoinFailure" type="bpel:YesNo" use="optional"/>
+        </xs:complexType>
+    </xs:element>
+
+      <xs:complexType name="restricted-query" >
+        <xs:simpleContent>
+          <xs:extension base="xs:string" >
+            <xs:attribute name="queryLanguage" type="xs:anyURI" use="optional"/>
+          </xs:extension>
+        </xs:simpleContent>
+      </xs:complexType>
+
+	<xs:element name="documentation" type="bpel:Documentation"/>
+
+	<xs:complexType name="Documentation" mixed="true">
+		<xs:sequence>
+			<xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+
+</xs:schema>

@@ -1,0 +1,61 @@
+  <message xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd" xmlns:addext="http://www.intel.com/soae/ws-addressing/addressing-2008a/" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing">
+    <protocol>icap</protocol>
+    <wsa:EndpointReference>
+      <!-- the destination URI associated with the outgoing request -->
+      <wsa:Address>icap://smg.intel.com</wsa:Address>
+      <addext:timeout>30</addext:timeout>
+    </wsa:EndpointReference>
+    <icapMessage>
+      <destination>
+        <!-- application defined invocation agent name to process this request -->
+        <invocationAgentName>InventoryQuery</invocationAgentName>
+      </destination>
+      <transport>
+        <!-- following element indicates that this is a request to send a message by the
+                     indicated invocation agent
+                 -->
+        <icapRequest>
+          <method>REQMOD</method>
+          <uri>/preorder.htm</uri>
+          <version>ICAP_10</version>
+          <headers>
+            <header name="foo">
+              <field>
+                <value>bar</value>
+              </field>
+            </header>
+          </headers>
+        </icapRequest>
+      </transport>
+      <encapsulatedReqMessage>
+        <httpMessage>
+          <destination>
+            <!-- application defined invocation agent name to process this request -->
+            <invocationAgentName>InventoryQuery</invocationAgentName>
+          </destination>
+          <transport>
+            <!-- following element indicates that this is a request to send a message by the
+                         indicated invocation agent
+                     -->
+            <httpRequest>
+              <!-- HTTP method to be utilized in this outgoing request: GET or PUT -->
+              <method>GET</method>
+              <!-- URI to be added to outgoing request -->
+              <uri>/preorder.htm</uri>
+              <!-- HTTP version utilized on this request: will use 1.1 -->
+              <version>HTTP_11</version>
+              <headers>
+                <!-- elements to be added to outgoing HTTP header with their associated value -->
+                <header name="foo">
+                  <field>
+                    <value>bar</value>
+                  </field>
+                </header>
+              </headers>
+            </httpRequest>
+          </transport>
+        </httpMessage>
+      </encapsulatedReqMessage>
+    </icapMessage>
+  </message>
+

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy soapVersion="deferred" samlVersion="2.0" 
+               xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <usernameFromHttpBasicAuthenticationHeader/>
+    </extractIdentity>
+    <authenticateIdentity>
+      <ldapAuthentication>
+        <distinguishedNamePrefix>uid=</distinguishedNamePrefix>
+        <distinguishedNamePostfix>,cn=employee,ou=sales,o=acme,DN=com,C=us</distinguishedNamePostfix>
+      </ldapAuthentication>
+    </authenticateIdentity>
+    <mapIdentity>
+      <createTokenViaWsTrust>
+        <version>1.4</version>
+        <soapVersion>1.2</soapVersion>
+        <requestType>Issue</requestType>
+        <tokenType>SAML-v2.0</tokenType>
+        <rstFormat>RST</rstFormat>
+        <clientAuthenticationMethod>
+          <mechanism>Use_SSL/TLS</mechanism>
+          <expectedTokenType>Username/Password</expectedTokenType>
+          <source>
+            <useExtractedIdentity>
+              <usernameInternalName>int:extractedIdentityUsername</usernameInternalName>
+            </useExtractedIdentity>
+          </source>
+        </clientAuthenticationMethod>
+        <toFieldPopulation>false</toFieldPopulation>
+        <authenticationType>urn:oasis:names:tc:SAML:1.0:am:password</authenticationType>
+        <outputBindingInfo>
+          <exportDestination>to-ESG-HTTP-Authorization-saml2-hok-ssl</exportDestination>
+          <deflate>true</deflate>
+          <base64Encode>true</base64Encode>
+          <QueryResponse>
+            <Destination type="anyURI">
+              <inputFromWorkflow>destination prompt for SAML query response</inputFromWorkflow>
+            </Destination>
+            <Consent>urn:oasis:names:tc:SAML:2.0:consent:obtained</Consent>
+            <responseIssuer type="string">
+              <inputFromWorkflow>issuer to be used for SAML query response</inputFromWorkflow>
+            </responseIssuer>
+          </QueryResponse>
+        </outputBindingInfo>
+      </createTokenViaWsTrust>
+    </mapIdentity>
+  </identityProcessing>
+</aaa:aaaPolicy>

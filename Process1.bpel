@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpws:process exitOnStandardFault="no" name="Process1"
+    suppressJoinFailure="yes"
+    targetNamespace="http://www.example.com/JsonExample/bpel/Process1"
+    xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/"
+    xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+    xmlns:exslt="http://exslt.org/dates-and-times"
+    xmlns:exslt-common="http://exslt.org/common"
+    xmlns:hl7-xf="http://www.intel.com/soae/hl7/"
+    xmlns:icap="http://www.intel.com/soae/localService/icap-2010a/"
+    xmlns:kerberos="http://www.intel.com/soae/localService/kerberosKDC-2009a/"
+    xmlns:ldap="http://www.intel.com/soae/localService/ldap-2007a/"
+    xmlns:md="http://www.intel.com/soae/protocolMetadata-2007a.xsd"
+    xmlns:ns="http://www.example.com/JsonExample/http/bin/Process1/Receive"
+    xmlns:ns1="http://www.example.com/JsonExample/restconfig"
+    xmlns:ns2="http://www.example.com/JSON_Selection/restconfig"
+    xmlns:saml10="urn:oasis:names:tc:SAML:1.0:assertion"
+    xmlns:saml10p="urn:oasis:names:tc:SAML:1.0:protocol"
+    xmlns:saml1x-soae="http://www.intel.com/soae/localService/saml1x-2010a/"
+    xmlns:saml20="urn:oasis:names:tc:SAML:2.0:assertion"
+    xmlns:saml20-soae="http://www.intel.com/soae/localService/saml20-2010a/"
+    xmlns:saml20p="urn:oasis:names:tc:SAML:2.0:protocol"
+    xmlns:soae-ab="urn:com.intel.ssg.cbr.ide.actionbuilder"
+    xmlns:soae-bpel="http://www.intel.com/soae/bpel/bpel20-2007a/"
+    xmlns:soae-cache="http://www.intel.com/soae/data-cache/2007a/"
+    xmlns:soae-fault="http://www.intel.com/soae/bpelFault-2009a/"
+    xmlns:soae-wsse="http://www.intel.com/soae/localService/wssecDefinition-2007a/"
+    xmlns:soae-xf="http://www.intel.com/soae/xpath/"
+    xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+    xmlns:soapenv12="http://www.w3.org/2003/05/soap-envelope"
+    xmlns:sql="urn:soae.intel.com/sql"
+    xmlns:sref="http://docs.oasis-open.org/wsbpel/2.0/serviceref"
+    xmlns:tns="http://www.example.com/JsonExample/bpel/Process1"
+    xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+    xmlns:wsax="http://www.intel.com/soae/ws-addressing/addressing-2008a/"
+    xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+    xmlns:wsse200207="http://schemas.xmlsoap.org/ws/2002/07/secext"
+    xmlns:wsse200212="http://schemas.xmlsoap.org/ws/2002/12/secext"
+    xmlns:wsse200306="http://schemas.xmlsoap.org/ws/2003/06/secext" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <bpws:sequence name="Sequence">
+        <bpws:extensionActivity>
+            <soae-ab:ReceiveBuilder allowCrossAppInvocation="false"
+                allowLocalInvocation="false" bindingType="Plain"
+                destinationType="{http://www.w3.org/2001/XMLSchema}anyType"
+                destinationTypeKind="TYPE" destinationVariable="Receive"
+                dontExtractMsgToVar="false"
+                endpointConfigurationType="REST"
+                imaKey="Receive_IMA_Key" inboundPoliciesGroup=""
+                maxConcurrentRequests="0" maxRequestRate="0"
+                multipartInboundData="false"
+                multipartOutboundData="false" name="Receive"
+                partnerLink="Receive" receiveRawEnvelope="false" temporalScope="NONE">
+                <soae-ab:inputData binary="true" empty="false" xsdType="{http://www.w3.org/2001/XMLSchema}anyType"/>
+                <soae-ab:outputData binary="true" oneway="false" xsdType="{http://www.w3.org/2001/XMLSchema}anyType"/>
+                <soae-ab:httpTransport
+                    establishWebsocketConnection="false"
+                    isCacheKey="false" isStreaming="false" method="POST"
+                    serviceURI="http://localhost:8080" soapAction=""/>
+                <soae-ab:wsdlEndpointConfig defaultFlags="0"
+                    inputMsg="ReceiveInput" inputMsgPart="body"
+                    operation="invoke" outputMsg="ReceiveOutput"
+                    outputMsgPart="body" port="RestConfig1Port"
+                    service="{http://www.example.com/JSON_Selection/restconfig}RestConfig1Service"
+                    soapVersion="1.1"
+                    tns="http://www.example.com/JSON_Selection/restconfig" wsdlFileName="JsonExample/RestConfig1.rest"/>
+                <soae-ab:inboundPolicies/>
+            </soae-ab:ReceiveBuilder>
+        </bpws:extensionActivity>
+        <bpws:extensionActivity>
+            <soae-ab:JSONSelection
+                destinationType="{http://www.w3.org/2001/XMLSchema}anyType"
+                destinationTypeKind="TYPE"
+                destinationVariable="JSONSelection"
+                input="xpath:{$Receive.body}"
+                jsonPath="$.employee.employment-info[?(@.employeeid==1)]"
+                name="JSONSelection" typeOfOperation="Return first item from an object or an array">
+                <soae-ab:variables/>
+            </soae-ab:JSONSelection>
+        </bpws:extensionActivity>
+        <bpws:extensionActivity>
+            <soae-ab:ReplyBuilder addAttachments="false"
+                compression="identity" destinationVariable=""
+                messageBodyFrom="" name="Reply"
+                passThroughEnabled="false" rawEnvelopeFrom=""
+                sendRawEnvelope="false" throwFault="false" xmlResponse="false">
+                <soae-ab:outputDataMapping mode="Xpath" partName="body" xpath="xpath:{$JSONSelection}"/>
+                <soae-ab:outboundPolicies/>
+            </soae-ab:ReplyBuilder>
+        </bpws:extensionActivity>
+    </bpws:sequence>
+</bpws:process>

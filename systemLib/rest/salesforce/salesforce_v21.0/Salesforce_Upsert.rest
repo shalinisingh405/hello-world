@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:intel-esg="http://www.intel.com/soae/localServices/REST/" xmlns:md="http://www.intel.com/soae/protocolMetadata-2007a.xsd" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:tns="http://www.intel.com/soae/rest/salesforce/upsert" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="Salesforce_Upsert" targetNamespace="http://www.intel.com/soae/rest/salesforce/upsert">
+  <wsdl:message name="Salesforce_UpsertRequest">
+    <wsdl:part name="body" type="xsd:anyType" intel-esg:type="xsd:anyType"/>
+    <wsdl:part name="objectUri" type="xsd:string"/>
+    <wsdl:part name="externalField" type="xsd:string"/>
+    <wsdl:part name="id" type="xsd:string"/>
+    <wsdl:part intel-esg:fixed="application/xml" name="accept" type="xsd:anyType" intel-esg:type="md:Header"/>
+  </wsdl:message>
+  <wsdl:message name="Salesforce_UpsertResponse"/>
+  <wsdl:portType name="Salesforce_Upsert">
+    <wsdl:operation name="invoke">
+      <wsdl:input message="tns:Salesforce_UpsertRequest"/>
+      <wsdl:output message="tns:Salesforce_UpsertResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="Salesforce_UpsertBinding" type="tns:Salesforce_Upsert">
+    <http:binding verb="PATCH"/>
+    <wsdl:operation name="invoke">
+      <http:operation location="(objectUri)/(externalField)/(id)"/>
+      <wsdl:input>
+        <http:urlReplacement/>
+        <intel-esg:httpHeaders>
+          <intel-esg:header name="accept" part="accept"/>
+        </intel-esg:httpHeaders>
+        <mime:content part="body" type="application/xml"/>
+      </wsdl:input>
+      <wsdl:output/>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Salesforce_UpsertService">
+    <wsdl:port binding="tns:Salesforce_UpsertBinding" name="Salesforce_UpsertPort">
+      <http:address location="https://na1.salesforce.com"/>
+    </wsdl:port>
+  </wsdl:service>
+  <plnk:partnerLinkType name="Salesforce_UpsertPartnerLinkType">
+    <plnk:role name="service" portType="tns:Salesforce_Upsert"/>
+  </plnk:partnerLinkType>
+</wsdl:definitions>

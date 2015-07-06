@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema  
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+  xmlns:smime="http://www.intel.com/soae/localService/smimeDefinition-2007a/" 
+  targetNamespace="http://www.intel.com/soae/localService/smimeDefinition-2007a/">
+  <!-- ======================================================================================================= -->
+  <!--   Secure/Multipurpose Internet Mail Extensions (S/MIME) Schema                                          -->
+  <!-- ======================================================================================================= -->
+  <xs:element name="smimePolicy" type="smime:SmimeDefinition"/>
+  <xs:complexType name="SmimeDefinition">
+    <xs:annotation>
+      <xs:documentation>
+        Defines application developer level S/MIME Information.
+        Actual security token, e.g., private key, trusted CA group, etc., and associate critical Cryptographic 
+        Security Parameters (CSPs), e.g., verification depth, CRL checking, etc., are defined in associated 
+        security config file.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:choice>
+      <xs:element name="sign" type="smime:Sign"/>
+      <xs:element name="verify" type="smime:Verify"/>
+      <xs:element name="encrypt" type="smime:Encrypt"/>
+      <xs:element name="decrypt" type="smime:Decrypt"/>
+      <xs:element name="signThenEncrypt">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sign" type="smime:Sign"/>
+            <xs:element name="encrypt" type="smime:Encrypt"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="decryptThenVerify">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="decrypt" type="smime:Decrypt"/>
+            <xs:element name="verify" type="smime:Verify"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+    <xs:attribute name="writeTransactionLog" type="xs:boolean" use="optional" default="true"/>
+  </xs:complexType>
+  <xs:complexType name="Sign">
+    <xs:sequence>
+      <xs:element name="signatureAlgorithm" fixed="RSA">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="RSA"/>
+            <xs:enumeration value="DSA"/>
+            <xs:enumeration value="ECDSA"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="digestAlgorithm" default="SHA1">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="SHA1"/>
+            <xs:enumeration value="SHA224"/>
+            <xs:enumeration value="SHA256"/>
+            <xs:enumeration value="SHA384"/>
+            <xs:enumeration value="SHA512"/>
+            <xs:enumeration value="MD5"/>
+            <xs:enumeration value="MD2"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="keyPair" type="smime:SecurityConfigHandle">
+        <xs:annotation>
+          <xs:documentation>
+            Name of a public/private RSA key pair security object in associated security config package.
+            The private key will be used to sign the attachment.
+            The certificate and associated CA Path will be package into the CMS signature.
+            Only PEM encoded certificate and CA Path certificates are supported.
+          </xs:documentation>
+        </xs:annotation>
+        <!-- constraint: 1) must resolve to asymmetricKeyPair security config object
+                         2) Only PEM encoded certificates and CA Path should be utilized
+                         3) If PKCS12 bag used then no more then a single CA certificate should be specified. This is because when
+                            CA certificates there is no implied certificate ordering. The AS2 standard RFC-4130 requires that the 
+                            complete certificate chain MUST be included in all certificates.
+        -->
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Verify">
+    <xs:sequence>
+      <xs:element name="saveSignerCertificate" type="xs:boolean" default="false"/>
+      <xs:element name="authenticationPolicy" type="smime:SecurityConfigHandle">
+        <xs:annotation>
+          <xs:documentation>
+            Name of web service authentication policy security object in associated security config.
+            Authentication policy will supply the trusted CA group, verification depth and CRL enforcement.
+          </xs:documentation>
+        </xs:annotation>
+        <!-- constraint: must resolve to webServiceAuthenticationPolicy security config object with key model = X.509 -->
+      </xs:element>
+      <xs:element name="caPath" minOccurs="0">
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="fromSecurityConfig" type="smime:SecurityConfigHandle">
+              <xs:annotation>
+                <xs:documentation>Name of CA Path security config object from assocaited security config package</xs:documentation>
+              </xs:annotation>
+              <!-- constraint: must resolve to a caPath security config object -->
+            </xs:element>
+            <xs:element name="fromWorkflow" type="smime:EmptyType">
+              <xs:annotation>
+                <xs:documentation>
+                  Indicates that CA Path is being supplied by the appliation coming from Workflow.
+                  The CA Path MUST be encoded in PEM format and ordered starting from the leaf and progressing through the immediate CAs and 
+                  terminating with the trusted root CA certificate.
+                </xs:documentation>
+              </xs:annotation>
+              <!--  constraint: Service Designer require to prompt developer for data from workflow when this S/MIME policy is bind to a specific action. -->
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Encrypt">
+    <xs:sequence>
+      <xs:element name="keyEncryptionAlgorithm" fixed="RSA">
+        <xs:annotation>
+          <xs:documentation>The bulk encryption algorithm to use</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="RSA"/>
+            <xs:enumeration value="RSA-OAEP"/>
+            <xs:enumeration value="DIFFIE-HELLMAN"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="bulkEncryptionAlgorithm" default="AES128">
+        <xs:annotation>
+          <xs:documentation>The bulk encryption algorithm to use</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="AES128"/>
+            <xs:enumeration value="AES192"/>
+            <xs:enumeration value="AES256"/>
+            <xs:enumeration value="DES3"/>
+            <xs:enumeration value="DES"/>
+            <xs:enumeration value="RC128"/>
+            <xs:enumeration value="RC64"/>
+            <xs:enumeration value="RC40"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="recipientCertificate">
+        <xs:annotation>
+          <xs:documentation>
+            Name of a certificate security object in associated security config package.
+            The public key from the recipient (consuming) certifcate will be used to encrypt the attachment.
+          </xs:documentation>
+        </xs:annotation>
+        <!-- constraint: must resolve to certificate security config object -->
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="fromSecurityConfig" type="smime:SecurityConfigHandle">
+              <xs:annotation>
+                <xs:documentation>Name of X.509 certificate security config object from assocaited security config package</xs:documentation>
+              </xs:annotation>
+              <!-- constraint: must resolve to a certificate security config object -->
+            </xs:element>
+            <xs:element name="fromWorkflow" type="smime:EmptyType">
+              <xs:annotation>
+                <xs:documentation>
+                  Indicates that X.509 certificate is being supplied by the application coming from Workflow.
+                  The cetificate can be in either PEM format or base64 encoded DER format.
+                </xs:documentation>
+              </xs:annotation>
+              <!--  constraint: Service Designer require to prompt developer for data from workflow when this S/MIME policy is bind to a specific action. -->
+            </xs:element>
+            <xs:element name="fromSmimeVerifyOperation" type="smime:EmptyType">
+              <xs:annotation>
+                <xs:documentation>Certificate was exported from a preceding S/MIME verify or decryptThenVerify action.</xs:documentation>
+              </xs:annotation>
+              <!-- desirable enhancement but could be deferred to a later release if actual need arises -->
+              <!--  constraint: Service Designer require to prompt developer for data from workflow when this S/MIME policy is bind to a specific action. -->
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Decrypt">
+    <xs:sequence>
+      <xs:element name="keyPair" type="smime:SecurityConfigHandle">
+        <xs:annotation>
+          <xs:documentation>
+            Name of a pulbic/private RSA key pair security object in associated security config package.
+            The private key will be used to decrypt the attachment.
+          </xs:documentation>
+        </xs:annotation>
+        <!-- constraint: must resolve to asymmetricKeyPair security config object -->
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="SecurityConfigHandle">
+    <xs:annotation>
+      <xs:documentation>Administrator defined name used to reference security configuration object</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="64"/>
+      <xs:pattern value="[-a-zA-Z0-9_\.]*"/>
+      <!-- dash A-Z a-z 0-9 underscore period -->
+    </xs:restriction>
+    <!-- constraint: name specified must match abstract handle defined in associated security package.
+        Also the type of the security object in the security package and wihtin the AAA policy must match
+      -->
+  </xs:simpleType>
+  <xs:complexType name="EmptyType"/>
+</xs:schema>

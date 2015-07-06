@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions 
+    targetNamespace="http://www.intel.com/soae/localService/icap-2010a/"
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:icap="http://www.intel.com/soae/localService/icap-2010a/"
+    xmlns:soae="http://www.intel.com/soae/wsdl/wsdl11-2007a/">
+   
+  <plnk:partnerLinkType name="ICAPPartnerLink">
+    <plnk:role name="ICAPServer" portType="icap:ICAPPortType" />
+  </plnk:partnerLinkType>
+  
+  <wsdl:message name="RequestMessage">
+    <wsdl:part name="body" type="xsd:base64Binary" />
+  </wsdl:message>
+  <wsdl:message name="ResponseMessage">
+    <wsdl:part name="body" element="xsd:base64Binary" />
+  </wsdl:message>
+  <wsdl:portType name="ICAPPortType">
+    <wsdl:operation name="invoke">
+      <wsdl:input message="icap:RequestMessage" />
+      <wsdl:output message="icap:ResponseMessage" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="ICAPBinding" type="icap:ICAPPortType">
+    <soae:binding transport="http://www.intel.com/soae/transport/http" />
+    <wsdl:operation name="invoke">
+      <wsdl:input>
+        <soae:content part="body" type="application/octet-stream" />
+      </wsdl:input>
+      <wsdl:output>
+        <soae:content part="body" type="application/octet-stream" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  
+  <wsdl:service name="ICAPService">
+    <wsdl:port name="ICAPPort" binding="icap:ICAPBinding">
+      <soae:address
+	      location="icap://localhost:1344/" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

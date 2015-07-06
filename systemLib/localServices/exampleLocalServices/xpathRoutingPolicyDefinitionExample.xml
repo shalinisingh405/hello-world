@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!-- wedExample.xml
+  Example of the WS-Addressing EPR Definition (WED) file.
+-->
+<!-- The name must be the same as its corresponding XPath Expressions Definition counter-part -->
+<xpd:XPathRoutingPolicyDefinition name="my-routing-service" 
+	xmlns:xpd="http://www.intel.com/soae/localService/xpathRoutingPolicyDefinition-2007a/">
+
+<wed:endpointReferences name="my-routing-service" deploymentState="default"
+    xmlns:wed="http://www.intel.com/soae/localService/wsaddressingEprDefinition-2007a/" 
+    xmlns:cbr-epr="http://www.intel.com/soae/localService/wsaddressingEprDefinition-2007a/" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <wsa:EndpointReference cbr-epr:name="foo">
+    <!-- the name needs to match the reference of the respective 	
+        XPath Expression in the corresponding XED file -->
+    <wsa:Address>http://www.acme.com/foo</wsa:Address>
+    <!-- this is the only required element -->
+    <wsa:ReferenceParameters>
+      <cbr-epr:simpleParameter name="param1">foo-value1</cbr-epr:simpleParameter>
+      <cbr-epr:simpleParameter name="param2">foo-value2</cbr-epr:simpleParameter>
+      <cbr-epr:simpleParameter name="my-partnerLink-name">my-foo-partnerLink-value</cbr-epr:simpleParameter>
+    </wsa:ReferenceParameters>
+  </wsa:EndpointReference>
+  
+  <wsa:EndpointReference cbr-epr:name="bar">
+    <!-- the name needs to match the reference of the 
+         respective XPath Expression in the corresponding XED file 
+    -->
+    <wsa:Address>http://www.acme.com/bar</wsa:Address>
+    <!-- this is the only required element -->
+    <wsa:ReferenceParameters>
+      <cbr-epr:simpleParameter name="param1">bar-value1</cbr-epr:simpleParameter>
+      <cbr-epr:simpleParameter name="param2">bar-value2</cbr-epr:simpleParameter>
+      <cbr-epr:simpleParameter name="my-partnerLink-name">my-bar-partnerLink-value</cbr-epr:simpleParameter>
+    </wsa:ReferenceParameters>
+  </wsa:EndpointReference>
+
+  <wed:endpointReferenceGroup name="my-group" >
+    <wed:EPRReference ref="foo" />
+    <wed:EPRReference ref="bar" />
+  </wed:endpointReferenceGroup>
+
+</wed:endpointReferences>
+
+<xed:xpathExpressions name="my-routing-service" reference="wed-example.xml" 
+    xmlns:xed="http://www.intel.com/soae/localService/xpathExpressionDefinition-2007a/" 
+    xmlns:tns0="http://www.acme.com/schemas/base-source-message">
+    
+  <expression reference="foo" xmlns:tns1="http://www.acme.com/schemas/source-message-1">tns0:a/b/c and tns1:x/y/z</expression>
+  <expression reference="bar" xmlns:tns2="http://www.acme.com/schemas/source-message-2">tns0:a/b/c and tns2:i/j/k</expression>
+  <expression reference="foo" xmlns:tns3="http://www.acme.com/schemas/source-message-3">tns0:a/b/c and tns3:p/q/r</expression>
+  <expression reference="my-group" xmlns:tns4="http://www.acme.com/schemas/source-message-4">tns0:a/b/c and tns4:d/e/f</expression>
+</xed:xpathExpressions>
+
+</xpd:XPathRoutingPolicyDefinition>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wssec:webServiceSecurityDefinition usage="ignore" bindingType="REST"
+    xmlns:wssec="http://www.intel.com/soae/localService/wssecDefinition-2007a/" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://www.intel.com/soae/localService/wssecDefinition-2007a/ ../wssecDefinition.xsd">
+  <jwsVerify>
+    <keyType>x509</keyType>
+    <signatureAcceptKeyInfoType>certificateChain</signatureAcceptKeyInfoType>
+    <signatureAcceptAlgorithm><RS256/><RS384/><RS512/></signatureAcceptAlgorithm>
+    <serializationAcceptMethod>CompactSerialization</serializationAcceptMethod>
+    <jsonSecurityToken>
+      <useIncoming/>
+    </jsonSecurityToken>
+    <authenticationPolicy>X509-authenication-policy</authenticationPolicy>
+  </jwsVerify>
+</wssec:webServiceSecurityDefinition>

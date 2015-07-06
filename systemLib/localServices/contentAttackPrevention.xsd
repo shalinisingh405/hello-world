@@ -1,0 +1,1843 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema 
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+  xmlns:cap="http://www.intel.com/soae/localService/contentAttackPreventionDefinition-2007a/"  
+  targetNamespace="http://www.intel.com/soae/localService/contentAttackPreventionDefinition-2007a/" elementFormDefault="qualified">
+
+  <!-- ========================================================================
+
+    Content Attack Prevention (CAP) Definition
+    -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+    Defines a policy for the kind of checks to be performed as part of 
+    the content attack check. 
+
+    The name of the policy is not part of this schema.  
+
+    The policy can be referenced indirectly by giving a policy name.  The
+    policy name is looked up in the asf to find the actual location of the policy
+    file.  The policy file can be part of the application bundle or located on
+    a remote server.
+
+    The policy can be loaded without reference to the asf file by using a
+    url. In these cases, generally, the url will have a scheme of "file",
+    "http", or "https".
+
+    When the location is specified as a relative url, the actual location of the
+    policy can be modified at deploy time using the web interface to specify one
+    or more base urls.  The component which fetches the policy will merge the
+    relative url of the policy with each base url one-by-one and attempt to fetch
+    the policy  file.
+
+    The checks fall into two broad categories:
+
+       Checks applied to the content of a document ("content checks").
+       Checks applied to the message and attachment metadata ("metadata checks").
+
+    For content, the nodes to be checked are specified by the user in
+    the Workflow Editor when the content attack policy action is
+    created.  The nodes to be checked may be from different documents.
+
+    Information in Policy vs. Run-Time Information
+    -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+    For Content Attack, some information is specified in the policy itself
+    and other information is specified by the workflow program at run-time or
+    during construction of the workflow program with the Workflow Editor.
+
+    This allows the check to be tailored to the data.
+
+    The nodes to be inspected within a document are specified using an
+    xpath expression during construction of the workflow program in the Workflow
+    Editor.
+
+    When a policy specifies that a check against a schema is required, the
+    targetNamespace/schemaLocation and global element/type of that schema are 
+    specified  during construction of the workflow program in the Workflow Editor,
+    not in the policy file.
+
+    In contrast, the "forbidden word list", the "xml limits", etc. are specified
+    in the policy file. The site can change them by changing the policy file
+    without any change to the constructed workflow program.  The changes
+    take effect when the existing policy is removed from the document cache
+    because of expiration or a manual operation (e.g. Management Console
+    operation).
+
+    Global Checks vs. Node Specific Checks for Content Checks
+    -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+
+    Some of the checks are "global" and apply to an entire document when
+    any node from a document is specified in the argument list:
+
+          forbid DTD
+          xml limit check
+
+    Global checks are done only once per operation, regardless of the number 
+    of nodes specified by the xpath expression.
+
+    Some of the checks are "node specific" and apply only to the specified
+    nodes (and descendants of that node).  When the node to be checked is
+    an element node then the check applies to all attributes and children
+    (including child elements) recursively.
+
+          sql injection check
+          xpath injection check
+          forbidden word check
+          required regular expression check
+          forbidden regular expression check
+          schema check
+
+    Special Considerations for Schema Check
+    -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+   
+    A schema check for a node acts as though the selected element node is
+    the root element of a document.  That node and its descendants 
+    become a "virtual document".  The virtual document inherits all
+    the namespace declarations which are in scope.
+
+    Only an element node or document root can be specified as a node
+    when it is expected to do a schema check.  You cannot specifiy an
+    attribute, text node, namespace node, comment, or processing-instruction
+
+    Application Level vs. Workflow Level Xml Limits Check
+    -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+
+    An xml limit check can occur in two different places: (a) at the application
+    level during the initial processing of the document for classification
+    and (b) in the workflow program.  Violation are handled differently for
+    these two cases.
+
+    There are no application level checks for json at this time.
+
+    Only xml limit checks and the "forbid DTD" check can take place at the
+    application level.  Any other checks defined in the policy are ignored
+    at the application level, but will be honored at the workflow program
+    level if a CAP action using the policy is executed in the workflow.
+
+    Only the application level check can detect a violation of "forbid DTD" rule
+    and other tests related to DTD processing.
+
+    If the application level policy is violated, parsing of the input message may
+    stop before parsing of the document is complete.  The input processor will 
+    respond to the user with a less detailed message and a different HTTP response
+    code (if the request was sent using HTTP) and the workflow program will never
+    be started.
+
+    If the workflow program performs the xml limit check then the entire document
+    will be inspected even if an xml limit violation is detected at the start of
+    the document.  Thus it is possible to have multiple violations reported (e.g.
+    the element nesting level is exceeded AND the maximum number of attributes
+    per element is exceeded).
+
+    An application level policy is static.  It must be part of the application
+    bundle. It cannot be downloaded from a remote server and cannot be changed
+    without restarting the application.  This is to avoid problems in starting
+    applications should a remote server be unavailable.
+
+    Before R2.4, an application level policy was identified by a policy named 
+    "application". If there was no policy named "application" then the first
+    policy defined in the asf.xml file would be used as the application level
+    policy. From R2.4 onwards, the user needs to designate application level
+    policy explicitly in the workflow editor. The original procedure for choosing
+    an application-level policy based on the name or position is no longer used.
+
+    Parts of the Policy
+    -+-+-+-+-+-+-+-+-+-
+
+    The policy is in three parts:
+
+        The <badContentAction> defines what actions should take place when
+        the content does not pass the content attack tests.
+
+            writeTransactionLog: indicates that the designer wants a 
+            message written to the transaction log.  This depends
+            on code generated for the workflow engine and cannot be
+            changed by decisions made at run-time.
+
+            reject: Specifies whether a message which fails the content
+            attacks should be rejected (i.e. dropped) or "passed through"
+            (i.e. continue processing). This depends on code generated for
+            the workflow engine and the decision cannot be changed by
+            decisions made at run-time.
+
+        The <filter> part indicates whether xml comments (and 
+        processing-instructions) should be checked if found in 
+        the document.
+
+        Other filters may be added in the future.
+
+        The <inspection> part describes the kinds of checks that should be
+        performed and is quite long.
+
+    Regular Expression Syntax
+    -+-+-+-+-+-+-+-+-+-+-+-+-
+
+    The "required" and "forbidden" regular expression sets are based on
+    w3c schema pattern regular expressions.
+
+    The regular expression used elsewhere is based on pcre (Perl Compatible
+    Regular Expression) syntax.
+
+    Special Handling of Whitespace
+    -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+    No content checks (e.g. sql injection, xpath injection, forbidden
+    word checks, regex checks, etc.) are performed on text fields which
+    are only whitespace or empty strings.  In other words, elements
+    such as:
+
+              <division></division>
+              <division>   </division>
+
+    will not be interpreted as a content attack, even though they
+    do not match the required regular expression pattern.
+
+    -+-+-+-+-+-+-+-+-+-+-+
+    CAP Violation Details
+    -+-+-+-+-+-+-+-+-+-+-+
+
+    The workflow editor CAP action has an option to suppress details
+    of the CAP violation.  If this is selected, the original CAP 
+    workflow fault is caught and a new workflow fault is thrown which
+    omits details.  The original fault can be found in the exception
+    log when the log level is set to an appropriate vaule (e.g. TRACE).
+
+    -+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+    Description of Content Checks
+    -+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+
+    The (optional) checks that can be performed on a node or subtree:
+
+        a. contains strings that look like a sql injection attack
+
+        b. contains strings that look like an xpath injection attack
+
+        c. includes a required regex.
+
+             If there is more than one "required regex", then the content is
+             accepted only if all regex match the content. If any of
+             the regex do not match the content it is rejected.
+            
+             Every node must match every required regex.
+
+        d. does not include a forbidden regex
+
+             If there is more than one "forbidden regex" then the content is
+             rejected if any regex matches the content. If none of the regex
+             matches the content it is accepted.
+
+             No node may match any forbidden regex.
+
+        e. excludes certain words (dirty words) such as perl keywords
+
+             Whitespace characters are defined as the ascii characters:
+
+                        space, tab, linefeed, and carriage return
+             
+             For the content check, a "word" is defined as a sequence of
+             characters delimited by whitespace characters or the beginning
+             or end of the string being inspected. A word cannot include 
+             whitespace characters.  A whitespace character is not a word.
+
+             According to this definition, a word cannot overlap another word
+             and the prefix of a word is not a word. For example checking
+             "apples" does NOT check "a", or "ap", or "app", etc.
+
+        f. schema check (from R2.4 onwards, this flag is removed from policy file)
+
+             This is no longer a boolean item in the policy.  It is implied 
+             based on the invocation parameters in the workflow code whether
+             to do schema check. If the user specifies (when constructing the
+             workflow program) a schema targetNamespace/schemaLocation and,
+             optionally, a global element/type then schema validation is
+             performed.
+
+             If a global element/type is specified by the workflow program then the 
+             top-level element of the document (or virtual document) must match
+             the specified global element/type.
+
+             If no global element or global type is specified by the workflow
+             program then the document is considered valid if it matches any
+             global element of that schema.  There is no wildcard for global types.
+
+        g. xml limit check
+
+             This specifies limits on document nesting, attributes/element and
+             so on in order to prevent pathological documents from being passed 
+             through the system.
+
+             For each of the dozen of so items, the user can specify a limit.  Some of
+             the limits are in terms of bytes (e.g. length of element tag) and some
+             of the limits are in terms of counts (number of attributes/element).
+
+             Since characters are encoded in utf-8, limits based on the number of bytes
+             should assume utf-8 encoding.  Ascii characters require a single byte,
+             but other characters may require two or more bytes.
+
+             If no check is to be made, then the item should be omitted from the list
+             or the limit attribute should be omitted.
+
+             A detailed description of each xml limits appears later in the schema.
+
+        h. json check
+
+             This specifies limits on array/object nesting, member names, maximum number
+             of members in an object, and so on in order to prevent pathological json 
+             documents from being passed through the system.
+
+             For each of the items, the user can specify a limit.  Some of
+             the limits are in terms of bytes (e.g. length of member name), some
+             of the limits are in terms of counts (number of items/array), and
+             some of the limits are boolean values where 0 means "skip this check" and 
+             1 means enforce this check (e.g. non-xml characters forbidden).
+
+             Since characters are encoded in utf-8, limits based on the number of bytes
+             should assume utf-8 encoding.  Ascii characters require a single byte,
+             but other characters may require two or more bytes.
+
+             Limits are actually flags and must have the value 0 (skip) or  1 (enforce).
+
+             If no check is to be made, then the item should be omitted from the list
+             or the limit attribute should be omitted.
+
+             A brief description of json limits appears later in the schema.
+
+        i. forbid DTD
+
+             Violations of "forbid DTD" can only be detected at application level 
+             when the input document is being parsed for classification. At the
+             workflow level the DTD is not visible and this can never be violated
+
+        j. virus check
+
+             Allows invocation of specialized content attack services, some of 
+             which may be located on remote servers.
+
+    -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    Description of Regular Expressions
+    -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+    The regex objects contain a desc field which is used in fault messages to
+    identify the regex which caused the content to be rejected.  If not specified
+    the desc will be automatically generated and look something like 
+    "regular expression #1".
+
+    ======================================================================== -->
+
+  <xs:element name="contentAttackPreventionPolicy" type="cap:ContentAttackPreventionPolicy"/>
+
+  <xs:complexType name="ContentAttackPreventionPolicy">
+    <xs:all>
+      
+      <!-- Allows the user to save information about the Policy. -->
+
+      <xs:element name="desc" type="xs:string" minOccurs="0"/>
+
+      <xs:element name="badContentAction" type="cap:BadContentAction"/>
+
+      <xs:element name="filter">
+        <xs:complexType>
+          <xs:sequence>
+
+            <!-- This applies to both comments and processing-instructions. -->
+
+            <xs:element name="checkComments" type="xs:boolean" default="true"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="inspection" type="cap:Inspection"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="BadContentAction">
+    <xs:all>
+      <xs:element name="writeTransactionLog" type="xs:boolean" default="true"/>
+      <xs:element name="reject" type="xs:boolean" default="true"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="Inspection">
+    <xs:all>
+      <xs:element name="sqlCheck" type="xs:boolean" default="true" minOccurs="0"/>
+      <xs:element name="xpathCheck" type="xs:boolean" default="false" minOccurs="0"/>
+      <xs:element name="forbidDTD" type="xs:boolean" default="true" minOccurs="0"/>
+      <xs:element name="forbiddenWordSet" type="cap:WordSet" minOccurs="0"/>
+      <xs:element name="requiredRegExSet" type="cap:RequiredRegExSet" minOccurs="0"/>
+      <xs:element name="forbiddenRegExSet" type="cap:ForbiddenRegExSet" minOccurs="0"/>
+      <xs:element name="xmlLimitCheck" type="cap:XmlLimitCheck" minOccurs="0"/>
+      <xs:element name="httpMetadataCheck" type="cap:HttpMetadataCheck" minOccurs="0"/>
+      <xs:element name="attachmentCheck" type="cap:AttachmentCheck" minOccurs="0"/>
+      <xs:element name="virusChecks" type="cap:VirusChecks" minOccurs="0"/>
+      <xs:element name="soapCheck" type="cap:SoapCheck" minOccurs="0"/>
+      <xs:element name="wsaCheck" type="cap:WsaCheck" minOccurs="0"/>
+      <xs:element name="messageCheck" type="cap:MessageCheck" minOccurs="0"/>
+      <xs:element name="jsonCheck" type="cap:JsonCheck" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="WordSet">
+    <xs:sequence>
+      <xs:element name="word" type="cap:NoWhitespace" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="caseBlind" type="xs:boolean" default="false" use="optional"/>
+  </xs:complexType>
+
+  <xs:complexType name="RequiredRegExSet">
+    <xs:sequence>
+      <xs:element name="requiredRegEx" type="cap:RegEx" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ForbiddenRegExSet">
+    <xs:sequence>
+      <xs:element name="forbiddenRegEx" type="cap:RegEx" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="RegEx">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="desc" type="xs:string" use="optional"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="MessageCheck">
+    <xs:all>
+      <xs:element name="maxMessageLength" type="xs:nonNegativeInteger" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="AttachmentCheck">
+      <xs:annotation>
+        <xs:documentation>
+
+Even if a multipart message has only a root attachment, it is still
+a multipart message and all these checks apply.
+
+        </xs:documentation>
+      </xs:annotation>
+
+    <xs:all>
+
+      <xs:element name="requiredAttachmentHeaders" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+
+The list of the required attachment headers. The listed headers MUST be
+present on each attachment, including the root attachment. 
+
+An exception is that "Content-Id" header need not be present for the root
+attachment even when present in this list.
+
+          </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="requiredAttachmentHeader" type="cap:NoWhitespace" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="attachmentContentTypes" type="cap:ContentTypes" minOccurs="0">
+         <xs:annotation>
+            <xs:documentation>
+
+If this element is present then the content-type of the attachment (other
+than the root attachment) must match one of those in the contentType list.
+
+Root attachments are covered by a separate list.
+
+            </xs:documentation>
+         </xs:annotation>
+      </xs:element>
+
+      <xs:element name="rootContentTypes" type="cap:ContentTypes" minOccurs="0">
+         <xs:annotation>
+            <xs:documentation>
+
+If this element is present then the content-type of the root attachment
+must match one of those in the contentType list.
+
+Attachments other than the root attachment are covered by a separate list.
+
+            </xs:documentation>
+         </xs:annotation>
+
+       </xs:element>
+
+    </xs:all>
+
+    <xs:attribute name="enabled" use="required" type="xs:boolean"/>
+
+    <xs:attribute name="multipartMessages" use="required">
+      <xs:annotation>
+        <xs:documentation>
+
+A multipart message with only a root attachment counts as a multipart
+message with an attachment even though the root part is the only 
+attachment.
+
+        </xs:documentation>
+      </xs:annotation>
+
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="allowed"/>
+          <xs:enumeration value="required"/>
+          <xs:enumeration value="forbidden"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+      
+    <xs:attribute name="maxAttachmentCount" type="xs:nonNegativeInteger" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+
+A root attachment is NOT included in this count. 
+Thus a value of zero is meaningful. 
+
+If omitted then there is no limit on the number of attachments.
+
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    
+    <xs:attribute name="maxAttachmentLength" type="xs:nonNegativeInteger" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+The maximum size (in bytes) of any attachment.  This also applies to the root attachment.
+
+If omitted then there is no limit on the length of attachments, except limits
+imposed by other restrictions (such as a limit on the size of the entire message).
+
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>    
+
+  </xs:complexType>
+  
+  <xs:complexType name="SoapCheck">
+
+    <xs:sequence>
+      <xs:element name="soapHeaderChildren" type="cap:SoapHeaderChildren" minOccurs="0"/>
+    </xs:sequence>
+
+    <xs:attribute name="soapStructureCheck" type="xs:boolean" use="optional">
+       <xs:annotation>
+         <xs:documentation>
+
+  When the cap policy is executed, the workflow program specifies the expected soap uri.
+  This routine scans the soap message to make the following checks:
+
+      The namespace-uri of the soap:Envelope, soap:Header, and soap:Body
+      match the soap uri passed by the workflow program.
+
+      Performs a lightweight check (not using the schema processor) to
+      verify that the structure of the document resembles:
+
+
+         &lt;soap:Envelope&gt;
+           &lt;soap:Header&gt; [Optional]
+             &lt;xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/&gt;
+           &lt;/soap:Header&gt;
+           &lt;soap:Body&gt;
+             &lt;xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded" /&gt;
+           &lt;/soap:Body&gt;     
+         &lt;/soap:Envelope&gt;
+
+  There is no real soap schema check in this section, only the lightweight
+  structure check.  To get a soap schema check use the Content Attack section.
+
+  The soap structure check will be skipped if the content-type of the primary
+  input document is not xml compatible.  One can constrain the content-type of
+  the primary input document using the Metadata check of the Policy.
+
+
+
+         </xs:documentation>
+       </xs:annotation>
+
+    </xs:attribute>
+   
+  </xs:complexType>
+  
+  <xs:complexType name="SoapHeaderChildren">
+      <xs:annotation>
+        <xs:documentation>
+
+Describes the elements which are pemitted to appear as children of the soap:Header.
+This is restricted to certain well-known schemas: ws-security and ws-addressing.
+
+These well-known schemas are in addition to any schemas and elements specified
+during construction of the workflow as part of the content-attack-prevention
+activity.
+
+This option differs from the WSACheck in that it performs only schema checks
+while the WSACheck is designed to performs semantic checks (like domain name
+checks) but does not perform full schema checks.
+
+        </xs:documentation>
+      </xs:annotation>
+
+      <xs:sequence>
+        <xs:element name="element" minOccurs="0" maxOccurs="unbounded">
+      <xs:annotation>
+        <xs:documentation>
+
+The permitted elements are described as a simple flat list:
+
+   schema family is an abbreviation for several versions of the same basic schema
+
+   schema version is the version in the form yyyy-mm (e.g. 2004-01) or when combined
+   with the schema family (e.g. wsa-2004-01).
+
+   element name is a specific element from that version of the schema (e.g. Security).
+
+   [Not implemented] forbidExtension controls the handling of xs:any and
+   xs:anyAttributes appearing in these schemas.  When forbidExtensions is true 
+   then xs:anyAttribute and xs:any are ignored.
+
+To specify that a given element is permitted in three versions of a schema 
+family will require three children of soapHeaderChildren.
+
+        </xs:documentation>
+      </xs:annotation>
+
+           <xs:complexType>
+             <xs:attribute name="schemaVersion" type="cap:soapHeaderSchemaVersion"/>
+             <xs:attribute name="name" type="xs:NCName"/>
+             <xs:attribute name="forbidExtensions" type="xs:boolean" use="optional" default="false">
+               <xs:annotation>
+                 <xs:documentation>Not implemented.</xs:documentation>
+               </xs:annotation>
+             </xs:attribute>
+           </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+
+      <xs:attribute name="denyUnspecified" type="xs:boolean" use="required">
+        <xs:annotation>
+          <xs:documentation>
+
+  When soap header checking is enabled:
+
+    Consider the "union of elements" created from the union of:
+
+        (1) Custom Headers: The elements specified during construction of the
+            workflow Content Attack Prevention activity using Service Designer.
+
+        (2) Standard Headers: The elements specified in the Policy as part
+            of the soap header children checking.
+
+    When "deny unspecified" is true:
+
+      Every soap header in the message must match one of the elements in
+      the union of elements, otherwise it is a Policy violation.
+
+      When a matching element is found, the header is schema validated
+      using the schema associated with that element.  If schema validation
+      fails it is a Policy violation.
+
+      This is somewhat like "strict" schema validation.
+
+    When "deny unspecified" is false:
+
+      If a soap header matches an element specified in the union of elements
+      in the Policy:
+
+          It is schema validated using the definition of that element.
+          If schema validation fails it is a Policy violation.
+
+      Otherewise, the soap header does not match any of the elements in the
+      union of elements:
+
+          No additional checking is performed and there is no Policy violation.
+
+      This is somewhat like "lax" schema validation.
+
+  There is no special handling of the case where there is a match to the uri
+  of an element but the element's local name is not present in the schema
+  associated with that uri. A soap header either matches on both namespace and
+  element or it does not match at all.
+
+          </xs:documentation>
+        </xs:annotation>
+
+      </xs:attribute>
+
+      <xs:attribute name="enabled" use="required" type="xs:boolean">
+        <xs:annotation>
+          <xs:documentation>
+
+  When disabled, no checking of soap headers is performed, even when headers are 
+  passed to the CAP run-time as part of the soap headers check.
+
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+
+  </xs:complexType>
+
+  <xs:simpleType name="soapHeaderSchemaVersion">
+
+    <xs:restriction base="xs:token">
+
+      <xs:annotation>
+        <xs:documentation>
+
+        ws-a schemas:
+
+          2003-03 ==&gt; http://schemas.xmlsoap.org/ws/2003/03/addressing
+          2004-03 ==&gt; http://schemas.xmlsoap.org/ws/2004/03/addressing
+          2004-08 ==&gt; http://schemas.xmlsoap.org/ws/2004/08/addressing
+          2005-08 ==&gt; http://www.w3.org/2005/08/addressing
+
+        wsse schemas:
+
+          2002-07 ==&gt; http://schemas.xmlsoap.org/ws/2002/07/secext
+          2002-12 ==&gt; http://schemas.xmlsoap.org/ws/2002/12/secext
+          2003-06 ==&gt; http://schemas.xmlsoap.org/ws/2003/06/secext
+          2004-01 ==&gt; http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd
+
+        </xs:documentation>
+      </xs:annotation>
+
+      <xs:enumeration value="wsa-2003-03"/>
+      <xs:enumeration value="wsa-2004-03"/>
+      <xs:enumeration value="wsa-2004-08"/>
+      <xs:enumeration value="wsa-2005-08"/>
+
+      <!-- wsse = web service security extenions -->
+
+      <xs:enumeration value="wsse-2002-07"/>
+      <xs:enumeration value="wsse-2002-12"/>
+      <xs:enumeration value="wsse-2003-06"/>
+      <xs:enumeration value="wsse-2004-01"/>
+
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="WsaCheck">
+    <xs:annotation>
+      <xs:documentation>
+
+  This option differs from the wsa checks performed under soap checks in that
+  it is designed to do semantic checks (like domain name checking) rather than
+  the syntactic checks performed by schema validation in the soap check.  It
+  does perform limited syntactic checks, but they are not complete schema checks.
+
+  There are multiple versions of ws-addressing.  When the policy is created
+  the exact version is specified in the wsa check using an abbreviation
+  for the version based on the namespace.
+
+  For example:
+
+       version:   2003-03
+       namespace: http://schemas.xmlsoap.org/ws/2003/03/addressing
+
+  This namespace is used to match the namespace of ws elements appearing
+  in the soap header of the document.
+
+  The ws-addressing checks will be skipped if the content of the primary
+  input document is not xml compatible.  One can constrain the content-type of
+  the primary input document using the Metadata check of the Policy.
+
+  If a wsa element is required according to the wsa check:
+
+     IF the Policy has soap header checking enabled
+     AND soap header checking has "deny unspecified" set to true
+
+     THEN the wsa elements should be a subset of the elements specified
+     for soap header checking, otherwise a message can never pass
+     both checks.
+
+
+     </xs:documentation>
+  </xs:annotation>
+
+    <xs:all>
+      <xs:element name="wsaElements" type="cap:WsaElements" minOccurs="0"/> 
+    </xs:all>
+
+    <xs:attribute name="enabled" use="required" type="xs:boolean"/>
+    <xs:attribute name="wsaVersion" use="required" type="cap:WsaVersion"/>
+
+  </xs:complexType>
+
+    
+  <xs:simpleType name="WsaVersion">
+    <xs:annotation>
+      <xs:documentation>
+
+The ws-a version is used in xpath expressions to select the WS-A elements
+appearing in soap headers for additional validation.  The extra validation
+includes such things as requiring that a wsa:FaultTo be present
+or requiring that the domain name appearing in a wsa:ReplyTo element
+be in a certain domain or subnet.
+
+2003-03 ==&gt; http://schemas.xmlsoap.org/ws/2003/03/addressing
+2004-03 ==&gt; http://schemas.xmlsoap.org/ws/2004/03/addressing
+2004-08 ==&gt; http://schemas.xmlsoap.org/ws/2004/08/addressing
+2005-08 ==&gt; http://www.w3.org/2005/08/addressing
+
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="2003-03"/> 
+      <xs:enumeration value="2004-03"/> 
+      <xs:enumeration value="2004-08"/> 
+      <xs:enumeration value="2005-08"/> 
+     </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="WsaElements">
+    <xs:sequence>
+      <xs:element name="wsaElement" type="cap:WsaElement" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="WsaElement">
+    <xs:annotation>
+      <xs:documentation>
+
+        To pass the address checks it must satisfy both
+        the netMask tests (if present) and the domain name
+        tests (if present).
+
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:all>
+      <xs:element name="ipAddressCheck" type="cap:IpAddressCheck" minOccurs="0"/>
+    </xs:all>
+
+    <xs:attribute name="name" use="required">
+      <xs:annotation>
+        <xs:documentation>
+
+The name of the checked WS-Addressing elements.  The exact
+WS-A version to use is specified by the workflow program.
+The wsa that appears in the name here is purely for clarity.
+
+        </xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="wsa:To"/>
+          <xs:enumeration value="wsa:From"/>
+          <xs:enumeration value="wsa:ReplyTo"/>
+          <xs:enumeration value="wsa:FaultTo"/>
+          <xs:enumeration value="wsa:Action"/>
+          <xs:enumeration value="wsa:MessageID"/>
+          <xs:enumeration value="wsa:RelatesTo"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+
+    <xs:attribute name="required" type="xs:boolean" use="required">
+      <xs:annotation>
+        <xs:documentation>
+If <code>true</code> then this WS-A header must be present.
+        </xs:documentation>
+      </xs:annotation>
+     </xs:attribute>
+
+  </xs:complexType>
+  
+  <xs:complexType name="IpAddressCheck">
+    <xs:all>
+       <xs:element name="desc" type="xs:string" minOccurs="0"/>
+       <xs:element name="netMasks" type="cap:NetMasks" minOccurs="0"/>
+       <xs:element name="domainNames" type="cap:DomainNames" minOccurs="0"/>
+    </xs:all>
+
+  </xs:complexType>
+  
+  <xs:complexType name="NetMasks">
+    <xs:sequence>
+      <xs:element name="netMask" minOccurs="1" maxOccurs="unbounded">
+         <xs:complexType>
+
+            <xs:simpleContent>
+              <xs:extension base="cap:NumericIpAddress">
+                <xs:attribute name="negated" type="xs:boolean" use="optional">
+	          <xs:annotation>
+        	    <xs:documentation>
+
+  If "negated" is omitted or false:
+
+     The netMask represents a range of addresses that is permitted
+     - unless there is also a match with a netMask item which has the
+     "negated" attribute true.
+
+  If "negated" is true:
+
+     The netMask represents a range of address that is not permitted
+     even if there is also a match with a netMask item which is not
+     negated.
+
+  Even if the netMask matches, the address may not be allowed because
+  of other restrictions (e.g. a domain name restriction).
+
+  If the ip address being tested is in symbolic form, a DNS lookup is
+  performed to determine the numeric address.  If the ip address being
+  testsed is in dots-and-numbers form then no reverse dns lookup is
+  necessary to perform a netmask test and no reverse dns lookup is done.
+
+	             </xs:documentation>
+	           </xs:annotation>
+                </xs:attribute>
+
+  <!-- The actual limit is 32 (ipv4) and 128 (ipv6).  However, this
+       dependence is not easily captured in the schema without
+       incompatible changes.  The limit is checked at run-time -->
+ 
+                <xs:attribute name="significantBits" use="required">
+                   <xs:simpleType>
+                     <xs:restriction base="xs:nonNegativeInteger">
+                       <xs:minInclusive value="0"/>
+                       <xs:maxInclusive value="128"/>
+                     </xs:restriction>
+                   </xs:simpleType>
+                </xs:attribute>
+
+              </xs:extension>
+            </xs:simpleContent>
+
+         </xs:complexType>
+       </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="DomainNames">
+    <xs:sequence>
+      <xs:element name="domainName" minOccurs="1" maxOccurs="unbounded">
+
+       <xs:annotation>
+         <xs:documentation>
+
+  Describes a range of addresses that are permitted. The name may be 
+  a partial name (e.g. .gov or co.uk or acme.co.uk).  Unlike netMask sets,
+  there is no negated form.
+
+  Even if the domain name matches, the address may not be allowed
+  because of other restrictions (e.g. a netMask restriction).
+
+  If the ip address being tested is in dots-and-number format a reverse
+  lookup is performed to determine the corresponding domain name.  If
+  the ip address being tested is in symbolic form then no dns lookup is
+  necessary to peform the domain name test and none is performed.
+
+         </xs:documentation>
+       </xs:annotation>
+
+         <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base="xs:token"/>
+            </xs:simpleContent>
+         </xs:complexType>
+
+       </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="VirusChecks">
+
+    <xs:sequence>
+      <xs:element ref="cap:virusCheck" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+
+    <xs:attribute name="enabled" type="xs:boolean" use="required"/>
+
+  </xs:complexType>
+  
+  <xs:element name="virusCheck" type="cap:VirusCheck">
+       <xs:annotation>
+         <xs:documentation>
+
+A policy may specify multiple virus checks.  There may be several kinds
+of virus checks and a given kind may have different parameters.  Some
+implementations may be lightweight and internal to soae while others
+may be external.
+
+         </xs:documentation>
+       </xs:annotation>
+  </xs:element>
+
+  <xs:complexType name="VirusCheck">
+    <xs:annotation>
+      <xs:documentation>
+
+A base type which is extended for each kind of virus check.
+
+         </xs:documentation>
+       </xs:annotation>
+
+      <xs:sequence/>
+
+  </xs:complexType>
+  
+  <xs:element name="icapVirusCheck" substitutionGroup="cap:virusCheck">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="cap:VirusCheck">
+
+        <xs:attribute name="icapServer" type="xs:anyURI" use="required">
+          <xs:annotation>
+            <xs:documentation>
+
+
+
+The icapServer specifies the url that the icap invocation agent
+should use for the icap server.  
+
+This can be changed using the Management Console.
+
+
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+
+        <xs:attribute name="enabled" type="xs:boolean" use="required">
+          <xs:annotation>
+            <xs:documentation>
+
+An icapVirusCheck may be disabled while leaving the information in the policy
+file for later reference.  An ICAP check can only be enabled if the
+workflow programmer chose to include virus check support when writing 
+the workflow program.  An attempt to enable virus check support when
+it is unsupported by the workflow program will cause loading of the
+policy to fail.
+
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="ContentTypes">
+     <xs:annotation>
+        <xs:documentation>
+
+If this element is present then the content-type of the simple message
+must match one of those in the contentType list.  This does not apply
+to multipart messages which are covered by a separate list
+
+        </xs:documentation>
+     </xs:annotation>
+
+     <xs:sequence>
+        <xs:element name="contentType" type="cap:NoWhitespace" minOccurs="1" maxOccurs="unbounded"/>
+     </xs:sequence>
+  </xs:complexType>      
+
+  <xs:simpleType name="NoWhitespace">
+    <xs:restriction base="xs:string">
+      <!-- exclude ascii whitespace characters -->
+      <xs:pattern value="[^ \t\r\n]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- =========================================================================== -->
+
+  <!--
+     The http metadata check applies to both http requests and http responses.
+
+     If an item is omitted then that check is skipped.
+
+     The tests are implicitly AND conditions.  In order for a request to be
+     accepted and processed every test which is specified in the metadata check
+     must be passed.  A test which is omitted from the policy file is not used
+     (obviously).
+
+     Restrictions on http method, http query parameters, and http path are not
+     meaningful for http responses, so they are ignored when a Policy is 
+     applied to the metadta of an http response.
+
+     When an item contains a list (e.g. methods allows a list of GET and/or POST) and
+     no items are present in the list then this test can never be satisfied and it is
+     probably an error.  In other words, an empty list does NOT cause the test
+     to be skipped.  This is why most lists in the policy file must have at least
+     one item in order to be schema valid.
+
+     Restrictions based on regular expressions use PCRE (Perl Compatibile Regular
+     Expressions).  This is not the w3c schema based regular expression language
+     used for xs:pattern.
+
+     The input processor is responsible for canonicalizing % encoded data in urls.
+     In other  words, a "%41" in the url counts as 1 byte in the metadata because it is 
+     converted to the letter "A".  The copyright symbol (code point 169) is
+     represented as %C2%A9 in the url, but is two bytes when converted to utf-8
+     even though it represents a single character.  A "+" in the query parameter is
+     converted to a space character.
+
+     Despite the fact that the input processor checks that query parameter names
+     and values are properly encoded according to utf-8 and xml rules, it is likely
+     that this will not be enforced consistently for all input servers. For instance,
+     it is known that some input servers do not perform this kind of checking for
+     header names and values. 
+
+     When there are length limits for strings in the metadata (e.g. header name
+     length) this is always measured in bytes (not characters) using utf-8 encoding.
+     This is unlike w3c schema which measures string length in characters. 
+
+     For query parameters and headers it is possible to specify a "general limit"
+     and a parameter/header "specific limit".  The general limit applies to all items
+     unless there is a parameter/header specific limit for that item.  The
+     parameter/header specific limit may be larger or smaller than the general limit.
+     If  there is no parameter/header speific limit set for an item then the general
+     limit applies.
+
+     The calulated length of an http header value is not necessarily exactly the 
+     same as the length when it appears "on the wire".  This is because header comments,
+     are discard, whitespace may be removed, and punctuation characters may not be
+     represented.  To emphasize this, it is called the http header token value length
+     in some cases (except that it too long for normal use).
+
+     A fragment identifier (http://acme.com#some-fragment) is not part of the url
+     and is not part of the metadata.  The fragment identifier is used by the /consumer/
+     of the document and is not passed to the server.
+    
+  -->
+
+  <!-- ======================================================================== -->
+
+ <xs:complexType name="HttpMetadataCheck">
+  	<xs:annotation>
+  	  <xs:documentation>
+The set of checks against HTTP Metadata  	  
+  	  </xs:documentation>
+  	</xs:annotation>
+    <xs:all>
+	    <xs:element name="utf8XmlCheck" type="xs:boolean" minOccurs="0">
+	      <xs:annotation>
+	        <xs:documentation>
+
+Check that all user supplied data conforms to utf-8 and uses
+only the xml 1.0 subset of utf-8.  This mainly excludes characters
+between code points 0 to 31 (except tab, carriage-return and
+linefeed).  For the case of query parameters and paths the
+code must handle % escaped data.
+
+	        </xs:documentation>
+	      </xs:annotation>
+	    </xs:element>
+
+      <xs:element name="methods" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+
+List those methods which should be accepted in requests.  Other methods will
+cause the message to be considered a content attack.
+
+The http input server can be configured via the Management Console to use http
+method to filter out requests.  However, when the input server does this the
+workflow program has no control over the handling of violations.
+
+          </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="method" type="cap:HttpMethodEnumeration" minOccurs="1" maxOccurs="unbounded"/>
+	  </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="path" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+
+The path part of the url. A length of zero means no path is allowed (even "/" by itself).
+
+The path regex is anchored at the start of the string, but not at the end.
+
+          </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+
+            <xs:element name="regex" type="cap:RegEx" minOccurs="0"/>
+          </xs:sequence>
+          <xs:attribute name="maxLengthBytes" type="xs:nonNegativeInteger" use="optional"/>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="protocolVersions" minOccurs="0">
+        <xs:complexType>
+          <xs:annotation>
+            <xs:documentation>
+
+There are only two supported protocols: HTTP/1.0 and HTTP/1.1.  HTTPS is not considered a distinct protocol.
+
+            </xs:documentation>
+          </xs:annotation>
+          <xs:sequence>
+            <xs:element name="protocolVersion" type="cap:HttpProtocolVersionEnumeration" minOccurs="1" maxOccurs="2"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="queryParameters" type="cap:QueryParameterRestrictions" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+
+Constraints on query parameters (part of URI).
+
+	  </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+
+      <xs:element name="headers" type="cap:HttpHeaderRestrictions" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+
+Constraints on HTTP headers          
+
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+
+      <xs:element name="contentTypes" minOccurs="0">
+         <xs:annotation>
+           <xs:documentation>
+
+Constraints on the values of the Content-Type header.
+
+           </xs:documentation>
+         </xs:annotation>
+         <xs:complexType>
+           <xs:sequence>
+             <xs:element name="contentType" type="cap:NoWhitespace" minOccurs="1" maxOccurs="unbounded"/>
+           </xs:sequence>
+         </xs:complexType>
+      </xs:element>
+
+      <xs:element name="clientAddress" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+
+A list of netMasks and domain names which should be allowed or forbidden to send requests.
+
+          </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:all>
+             <xs:element name="ipAddressCheck" type="cap:IpAddressCheck" minOccurs="0"/>
+          </xs:all>
+        </xs:complexType>
+      </xs:element>
+
+      <!-- ssl common name check is planned, but not currently supported -->
+      <!--  <xs:element name="ssl" type="cap:Ssl" minOccurs="0" /> -->
+
+    </xs:all>
+
+    <xs:attribute name="enabled" type="xs:boolean" use="required"/>
+
+  </xs:complexType>
+  
+  <xs:complexType name="Ssl">
+    <xs:all>
+      <xs:element name="commonNames" type="cap:CommonNames" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="CommonNames">
+    <xs:sequence>
+      <xs:element name="commonName" type="xs:token" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="HttpMethodEnumeration">
+    <xs:annotation>
+      <xs:documentation>
+
+The enumeration of known HTTP methods. The CONNECT method is not supported by SOAE.
+
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="cap:NoWhitespace">
+      <xs:enumeration value="POST"/>
+      <xs:enumeration value="GET"/>
+      <xs:enumeration value="PUT"/>
+      <xs:enumeration value="DELETE"/> 
+      <xs:enumeration value="HEAD"/> 
+      <xs:enumeration value="TRACE"/> 
+      <xs:enumeration value="OPTIONS"/> 
+
+      <!-- PATCH method defined in RFC 5789 -->
+      <xs:enumeration value="PATCH"/> 
+
+     </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="HttpProtocolVersionEnumeration">
+    <xs:restriction base="cap:NoWhitespace">
+       <xs:enumeration value="HTTP/1.0"/>
+       <xs:enumeration value="HTTP/1.1"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:complexType name="QueryParameterRestrictions">
+ 
+    <!--  
+                                                In Url     Not in Url    In Url
+            Condition                         Deny=false   Deny=false   Deny=true
+	===================================   ==========   ==========  ===========
+	query parameter listed and required       test       fail        test  
+	query parameter listed and optional       test       test        test  
+	query parameter not listed                ok         ok          fail
+
+        Key to table:
+
+  	  ok:   The query parameter is valid if it passes the general length tests.
+
+	  test: The query parameter is valid if it passes the parameter specific 
+		regex and length tests.
+
+          fail: The query parameter is not valid.
+
+     -->
+     
+     <xs:annotation>
+       <xs:documentation>
+         <table>
+           <tr>
+             <td>Conition</td><td>In Url<br/>Deny=false</td><td>Not in Url<br/>Deny=false</td><td>In Url<br/>Deny=true</td>
+           </tr>
+           <tr><td>query parameter listed and required</td><td>test</td><td>fail</td><td>test</td></tr>
+           <tr><td>query parameter listed and optional</td><td>test</td><td>test</td><td>test</td></tr>
+           <tr><td>query parameter not listed</td><td>ok</td><td>ok</td><td>fail</td></tr>
+	     </table>
+
+        Key to table:
+		<ol>
+		<li>ok - the query parameter is valid if it passed the general length tests</li>
+		<li>test - rge query parameter is valid if it passes the parameter specific regex and length tests</li>
+		<li>fail - the query parameter is not valid</li>
+		</ol>
+       </xs:documentation>
+     </xs:annotation>
+
+    <xs:sequence>
+       <xs:element name="queryParameter" type="cap:QueryParameter" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+
+    <xs:attribute name="maxTotalCount" type="xs:nonNegativeInteger" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+
+Limits the total number of query parameters.        
+
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="maxNameLengthBytes" type="xs:nonNegativeInteger" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+
+This is the "general" length limit. This limits the length of any query parameter
+name which is not listed as a required or optional query paramter.        
+
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="maxValueLengthBytes" type="xs:nonNegativeInteger" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+
+This is the "general length limit".
+
+This limits the length of all query parameter values which do not have an
+explicit length limit. If a query parameter is listed and does not have 
+a value length limit set, then this limit applies.  This limit also applies to query
+parameters which are neither required nor optional (if "deny others" is
+false or omitted).
+
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="rejectQueryParametersWithNoEqualsSign" type="xs:boolean" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+
+Provide a mechanism to exclude requests with no equals sign: ?abc&amp;cde      
+This applies to all query parameters, whether listed or not listed.  
+
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    
+    <xs:attribute name="rejectQueryParametersWithNoValue" type="xs:boolean" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+
+Provide a mechanism to exclude requests with no value: ?abc=&amp;cde=        
+This applies to all query parameters, whether listed or not listed.  
+
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="denyOthers" type="xs:boolean" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+
+We use "deny others" rather than "allow others" so that when
+it is omitted it falls back into allowing any query parameter.        
+
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+  </xs:complexType>
+  
+  <xs:complexType name="HttpHeaderRestrictions">
+
+    <xs:sequence>
+       <xs:element name="header" type="cap:HttpHeader" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+
+    <xs:attribute name="maxTotalCount" type="xs:nonNegativeInteger" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+
+Limits the total number of headers.        
+
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="maxNameLengthBytes" type="xs:nonNegativeInteger" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+
+This is the "general length limit" for individual header names.
+
+This limits the length of individual header names which are not listed as
+required or optional.        
+
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="maxValueLengthBytes" type="xs:nonNegativeInteger" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+
+This is the "general length limit" for individual header values.
+
+This limits the length of all header values which do not have an
+explicit length limit. If a header is listed and does not have 
+a value length limit set this limit applies.  This limit also applies to
+headers which are neither required nor optional.        
+
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+  </xs:complexType>
+
+  <xs:complexType name="QueryParameter">
+     <xs:sequence>
+       <xs:element name="regex" type="cap:RegEx" minOccurs="0">
+         <xs:annotation>
+           <xs:documentation>
+
+The optional query parameter value restriction           
+
+This query parameter value regex is anchored at the start of the string,
+but not at the end.
+
+           </xs:documentation>
+         </xs:annotation>
+       </xs:element>
+     </xs:sequence>
+     <xs:attribute name="name" type="cap:NoWhitespace" use="required">
+       <xs:annotation>
+         <xs:documentation>
+
+The name of the query parameter         
+
+         </xs:documentation>
+       </xs:annotation>
+     </xs:attribute>
+
+     <xs:attribute name="required" type="xs:boolean" use="required">
+       <xs:annotation>
+         <xs:documentation>
+
+If <code>true</code> then the query parameter is required. Otherwise it is optional         
+
+         </xs:documentation>
+       </xs:annotation>
+     </xs:attribute>
+
+     <xs:attribute name="maxValueLengthBytes" type="xs:nonNegativeInteger" use="optional">
+       <xs:annotation>
+         <xs:documentation>
+
+The optional maximum value length restriction         
+
+         </xs:documentation>
+       </xs:annotation>
+     </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="HttpHeader">
+     <xs:sequence>
+       <xs:element name="regex" type="cap:RegEx" minOccurs="0">
+         <xs:annotation>
+           <xs:documentation>
+
+This http header value regex is anchored at the start of the string,
+but not at the end.
+
+The optional header value restriction. The regex should be applied not only 
+to the proper <i>value</i> of the header but also to its parameters. For 
+instance, the Content-Type header in the raw request may look like:
+<p/>
+<code>
+Content-Type: text/xml; charset="utf-8"
+</code>
+<p/>
+This is being parsed into the following structure:
+<p/>
+<code>
+
+&lt;header name="content-type"&gt;
+  &lt;field&gt;
+    &lt;value&gt;text/xml&lt;/field&gt;
+    &lt;param name="charset"&gt;utf-8&lt;param&gt;
+  &lt;/field&gt;
+&lt;/header&gt;
+</code>
+However the regex could look like: .*charset=.?utf-8.*
+
+See the description of http header in metadataCommon.xsd for an example.
+
+           </xs:documentation>
+         </xs:annotation>
+       </xs:element>
+     </xs:sequence>
+
+     <xs:attribute name="name" type="cap:NoWhitespace" use="required">
+       <xs:annotation>
+         <xs:documentation>
+
+The name of the header         
+
+         </xs:documentation>
+       </xs:annotation>
+     </xs:attribute>
+     <xs:attribute name="maxValueLengthBytes" type="xs:nonNegativeInteger" use="optional">
+       <xs:annotation>
+         <xs:documentation>
+
+The maximum allowed length of the value (including the length of parameters)         
+
+         </xs:documentation>
+       </xs:annotation>
+     </xs:attribute>
+     <xs:attribute name="required" type="xs:boolean" use="required">
+       <xs:annotation>
+         <xs:documentation>
+
+If true then the header is required         
+
+         </xs:documentation>
+       </xs:annotation>
+     </xs:attribute>
+  </xs:complexType>
+
+  <xs:simpleType name="NumericIpAddress">
+    <xs:annotation>
+      <xs:documentation>
+
+Description for an ipV4 numeric ip address (e.g. 111.22.3.255).
+This does not enforce that each decimal value must be between 0 and 255.
+
+Description for an ipV6 numeric ip address (e.g. f0:e0:d0::10:1.2.3.4)
+
+This is a sanity check only.
+
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:restriction base="xs:token">
+      <xs:pattern value="(\d){1,3}\.(\d){1,3}\.(\d){1,3}\.(\d){1,3}"/> 
+      <xs:pattern value="[0-9a-fA-F:]*(:((\d){1,3}\.(\d){1,3}\.(\d){1,3}\.(\d){1,3}))?"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- ======================================================================== -->
+
+  <!--
+
+      Description of Xml Limits
+      =========================
+
+      tag length
+            The number of bytes in the element local names, attribute local name,
+            and processing instruction target names.  Does not include prefixes.
+
+      namespace prefix length
+            The number of bytes in the prefix of a namespace declaration.
+            The minimum size for the limit on a namespace prefix is 3 because
+            of the pre-defined "xml" namespace.
+
+      namespace uri length
+            The number of bytes in the uri of a namespace declaration.
+            The minimum size for the limit on a namespace uri is 36 because
+            of the pre-defined "xml" namespace.
+
+      attribute length
+            The number of bytes in an attribute value (does not apply to namespace
+            declaration uri).  This is after line end normalization (i.e. replacing
+            \r\n with \n.
+           
+      content length
+            Length of all adjacent character data and CDATA section items. All
+            adjacent character data and CDATA constitute a single item.
+
+      comment length
+            Does not include the leading and trailing punctuation. 
+
+      pi length
+            Does not include the length of the target (covered by "tag").
+
+      attributes per element
+            Does not include namespace declarations, which are counted separately. 
+
+      open elements
+            The number of element for which start tags have been processed, but
+            not end tags.
+
+      open namespace declarations
+            The number of namespace declarations which are active.
+            Does not include the pre-defined xml namespace or the empty namespace.
+      
+      pi
+            The number of processing instructions 
+
+      children per element
+            The number of immediate children for any element.
+  -->
+  <xs:complexType name="XmlLimitCheck">
+    <xs:all>
+      <xs:element name="contentLength" default="1000000" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="999999999"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="commentLength" default="10000" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="999999999"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="attributeValueLength" default="1024" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="999999999"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="piLength" default="0" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="999999999"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="tagLength" default="256" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="1"/>
+            <xs:maxInclusive value="9999"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="namespaceUriLength" default="256" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="36"/>
+            <xs:maxInclusive value="9999"/>
+            <!-- minimum based on the pre-defined "xml" namespace uri -->
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="namespacePrefixLength" default="16" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="3"/>
+            <xs:maxInclusive value="9999"/>
+            <!-- minimum based on pre-defined "xml" namespace prefix -->
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="childrenPerElement" default="1000" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="999999"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="attributesPerElement" default="64" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="999999"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="openElements" default="64" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="1"/>
+            <xs:maxInclusive value="999999"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="openNamespaces" default="128" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="1"/>
+            <xs:maxInclusive value="999999"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="pi" default="0" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="999999999"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:all>
+  </xs:complexType>
+
+
+  <xs:complexType name="JsonCheck">
+    <xs:all>
+
+      <xs:element name="stringLength" default="1000000" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="999999999"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+
+      <xs:element name="numberLength" default="32" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="1"/>
+            <xs:maxInclusive value="32"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+
+      <xs:element name="memberNameLength" default="256" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="1"/>
+            <xs:maxInclusive value="9999"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+
+      <xs:element name="membersPerObject" default="1000" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="999999"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+
+      <xs:element name="itemsPerArray" default="1000" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="999999"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+
+      <xs:element name="openItems" default="64" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="1"/>
+            <xs:maxInclusive value="999999"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+
+     <xs:element name="nonXmlCharactersForbidden" default="0" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="1"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+
+     <!-- Member names must be xml 1.0 ncnames. 
+          This excludes zero length member names.  -->
+
+     <xs:element name="nonXmlMemberNamesForbidden" default="0" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="1"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+
+     <!-- Member names may be arbitrary unicode.
+          This excludes zero length member names.  -->
+
+     <xs:element name="zeroLengthMemberNamesForbidden" default="0" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="1"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+
+     <!-- Member names must be composed on non-control characters of ascii.
+          This excludes zero length member names. -->
+
+     <xs:element name="nonAsciiSubsetMemberNamesForbidden" default="0" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedInt">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="1"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+
+    </xs:all>
+  </xs:complexType>
+
+</xs:schema>

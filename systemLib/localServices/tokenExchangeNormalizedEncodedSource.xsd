@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema  
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+  xmlns:nes="http://www.intel.com/soae/localService/tokenExchange/normalizedEncodedSource-2013a/" 
+  targetNamespace="http://www.intel.com/soae/localService/tokenExchange/normalizedEncodedSource-2013a/" elementFormDefault="qualified">
+
+ <xs:element name="normalizedEncodedSource" type="nes:NormalizedEncodedSource">
+   <xs:annotation> 
+     <xs:documentation>
+
+	Describes the output of the extension function soae-xf:normalizeValidateEncode().
+
+        If the data domain type is credit card number (creditCardNumber), then for compatibility
+        with older implementations, an older format is used to encode the source.
+        The result is equivalent to using these (deprecated) extension functions:
+
+           $normalizedEncodedSource/nes:normalizedSource =
+		 soae-xf:normalize-and-validate-pan(policy, source) 
+
+           $normalizedEncodedSource/nes:encodedSource = 
+                soae-xf:encode-block-encoded-alphanumeric-string($normalizedEncodedSource/normalizedSource)
+
+        For all other data domain types:
+
+           $normalizedEncodedSource/nes:normalizedSource = source 
+           $normalizedEncodedSource/nes:encodedSource = source
+
+     </xs:documentation>
+   </xs:annotation> 
+ </xs:element> 
+
+<xs:complexType name="NormalizedEncodedSource"> 
+   <xs:sequence>
+     <xs:element name="normalizedSource" type="xs:string"/>
+     <xs:element name="encodedSource" type="xs:string"/>
+    </xs:sequence>
+</xs:complexType> 
+
+</xs:schema>

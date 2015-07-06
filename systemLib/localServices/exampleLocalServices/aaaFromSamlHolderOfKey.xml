@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <nameFromSamlAuthentication>
+        <signatureInfo>
+          <signatureAcceptMethods><rsaWithSha1/></signatureAcceptMethods>
+          <digestAcceptMethod><sha1></sha1></digestAcceptMethod>
+          <canonicalAcceptMethod><C14N_exclusive/></canonicalAcceptMethod>
+          <authenticationPolicy>demo-saml-authentication-policy</authenticationPolicy>
+        </signatureInfo>
+        <encryptionInfo>
+          <decryptkeyInfo>
+            <symmetric>
+              <outOfBandSymmetricKey>
+                <securityConfig>demo-secret</securityConfig>
+              </outOfBandSymmetricKey>
+            </symmetric>
+          </decryptkeyInfo>
+          <acceptableDataEncryptionMethods aes128="true"></acceptableDataEncryptionMethods>
+          <recipient>some-made-up-url</recipient>
+        </encryptionInfo>
+        <requiredSamlEntitiesAndValues>
+          <SubjectConfirmationMethod>urn:oasis:names:tc:SAML:1.1:cm:holder-of-key</SubjectConfirmationMethod>
+          <expectedHolderOfKeyKeyInfo>X509SubjectName</expectedHolderOfKeyKeyInfo>
+          <clientCredentialSource>peerCertificateFromSsl</clientCredentialSource>
+          <NotBeforeAndNotOnOrAfter>onlyCheckSubjectConfirmationDataElements</NotBeforeAndNotOnOrAfter>
+          <Audience type="anyURI">
+            <staticValue>foobar</staticValue>
+          </Audience>
+          <Recipient type="anyURI">
+            <inputFromWorkflow>expected recipient</inputFromWorkflow>
+          </Recipient>
+          <checkUniqueness>true</checkUniqueness>
+        </requiredSamlEntitiesAndValues>
+        <extractMostSpecificPartOfName>true</extractMostSpecificPartOfName>
+      </nameFromSamlAuthentication>
+    </extractIdentity>
+  </identityProcessing>
+  <resourceProcessing>
+    <extractResource>
+      <requestUriFromHttpOperation></requestUriFromHttpOperation>
+    </extractResource>
+    <authorizeResource>
+      <samlAssertionAuthorization>
+        <mustMatchAllNameValues>
+          <Authorization-Decision-Attrib>Permit</Authorization-Decision-Attrib>
+          <Authorization-Resource-Attrib>
+            <useExtractedResource>internal-name:use-extracted-resource</useExtractedResource>
+          </Authorization-Resource-Attrib>
+          <Authorization-Action type="string">
+            <staticValue>read</staticValue>
+          </Authorization-Action>
+          <AttributeStatement-Attribute-AttributeValue type="string">
+            <inputFromWorkflow>sssssssssssssss</inputFromWorkflow>
+          </AttributeStatement-Attribute-AttributeValue>
+        </mustMatchAllNameValues>
+      </samlAssertionAuthorization>
+    </authorizeResource>
+  </resourceProcessing>
+</aaa:aaaPolicy>

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.intel.com/soae/logSchema-2007a.xsd" targetNamespace="http://www.intel.com/soae/logSchema-2007a.xsd">
+	<xs:include schemaLocation="transactionLogBody.xsd"/>
+	<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+	<!-- Root transation log element                                         -->
+	<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+	<xs:element name="log">
+		<xs:annotation>
+			<xs:documentation>Transaction Log root element</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="Log">
+					<xs:sequence>
+						<xs:element name="logEntry" type="TransactionLogEntry" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

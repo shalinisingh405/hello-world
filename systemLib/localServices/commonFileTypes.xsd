@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="urn:soae.intel.com/file" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:soae.intel.com/file" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:complexType name="FileAttributesType">
+		<xs:sequence>
+			<xs:element name="extension" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="type" use="required">
+			<xs:annotation>
+				<xs:documentation>The type of the resource: file or directory.</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:enumeration value="dir"/>
+					<xs:enumeration value="file"/>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="size">
+			<xs:annotation>
+				<xs:documentation>Size of the resource.  Absence means SFTP did not report this value.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="accessTime" type="xs:unsignedInt">
+			<xs:annotation>
+				<xs:documentation>Access time measured in seconds from epoc.  Absence means SFTP did not report the value</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="modTime" type="xs:unsignedInt">
+			<xs:annotation>
+				<xs:documentation>Modify time measured in seconds from epoc.  Absence means SFTP did not report the value</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="canRead" type="xs:boolean">
+			<xs:annotation>
+				<xs:documentation>Flag indicating whether or not the user has read access to the resource.  Absence means the server did not report this attribute.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="canWrite" type="xs:boolean">
+			<xs:annotation>
+				<xs:documentation>Flag indicating whether or not the user has write access to the resource.  Absence means the server did not report this attribute.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+</xs:schema>

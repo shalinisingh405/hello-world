@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:intel-esg="http://www.intel.com/soae/localServices/REST/" xmlns:md="http://www.intel.com/soae/protocolMetadata-2007a.xsd" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:tns="http://www.intel.com/soae/localService/oauth/token" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="AccessTokenRequest" targetNamespace="http://www.intel.com/soae/localService/oauth/token">
+  <wsdl:message name="AccessTokenRequestRequest">
+    <wsdl:part name="grant_type" type="xsd:string"/>
+    <wsdl:part name="code" type="xsd:string"/>
+    <wsdl:part name="redirect_uri" type="xsd:string"/>
+    <wsdl:part name="username" type="xsd:string"/>
+    <wsdl:part name="password" type="xsd:string"/>
+    <wsdl:part name="scope" type="xsd:string"/>
+    <wsdl:part name="assertion_type" type="xsd:string"/>
+    <wsdl:part name="assertion" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="AccessTokenRequestResponse">
+    <wsdl:part name="body" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:portType name="AccessTokenRequest">
+    <wsdl:operation name="invoke">
+      <wsdl:input message="tns:AccessTokenRequestRequest"/>
+      <wsdl:output message="tns:AccessTokenRequestResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="AccessTokenRequestBinding" type="tns:AccessTokenRequest">
+    <http:binding verb="POST"/>
+    <wsdl:operation name="invoke">
+      <http:operation location="/token"/>
+      <wsdl:input>
+        <http:urlEncoded intel-esg:optional="code redirect_uri username password scope assertion_type assertion"/>
+        <mime:content type="application/x-www-form-urlencoded"/>
+        <intel-esg:parameterMapping>
+          <intel-esg:mapEntry name="grant_type" part="grant_type"/>
+          <intel-esg:mapEntry name="code" part="code"/>
+          <intel-esg:mapEntry name="redirect_uri" part="redirect_uri"/>
+          <intel-esg:mapEntry name="username" part="username"/>
+          <intel-esg:mapEntry name="password" part="password"/>
+          <intel-esg:mapEntry name="scope" part="scope"/>
+          <intel-esg:mapEntry name="assertion_type" part="assertion_type"/>
+          <intel-esg:mapEntry name="assertion" part="assertion"/>
+        </intel-esg:parameterMapping>
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="body" type="application/json"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="AccessTokenRequestService">
+    <wsdl:port binding="tns:AccessTokenRequestBinding" name="AccessTokenRequestPort">
+      <http:address location="https://localhost:8080"/>
+    </wsdl:port>
+  </wsdl:service>
+  <plnk:partnerLinkType name="AccessTokenRequestPartnerLinkType">
+    <plnk:role name="service" portType="tns:AccessTokenRequest"/>
+  </plnk:partnerLinkType>
+</wsdl:definitions>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd"
+               oauthVersion="OAuth2-draft-22" samlVersion="2.0">
+  <identityProcessing>
+    <extractIdentity>
+      <nameFromOAuthAuthorizationRequest>
+        <flowType>AuthorizationCode</flowType>
+        <authorizationCodeRequestType>grantRequest</authorizationCodeRequestType>
+        <roleBeingChecked>resource_owner</roleBeingChecked>
+        <scopeChecking>
+          <scopeRequired>false</scopeRequired>
+        </scopeChecking>
+        <resourceOwnerSource>name_only_from_workflow</resourceOwnerSource>
+      </nameFromOAuthAuthorizationRequest>
+    </extractIdentity>
+    <mapIdentity>
+      <createOAuthGrant>
+        <grantInfrastructure>
+          <authorizationServer type="anyURI">
+            <staticValue>www.shared.communication.authorization.server</staticValue>
+          </authorizationServer>
+          <scope type="string">
+            <inputFromWorkflow>workflow variable</inputFromWorkflow>
+          </scope>
+          <signatureInfo>
+            <signatureKeyPair>
+              <security-config-package>key-pair-to-sign-grant</security-config-package>
+            </signatureKeyPair>
+          </signatureInfo>
+        </grantInfrastructure>
+        <grantExpirationTime>45</grantExpirationTime>
+      </createOAuthGrant>
+    </mapIdentity>
+  </identityProcessing>
+</aaa:aaaPolicy>

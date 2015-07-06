@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:soae-fault="http://www.intel.com/soae/bpelFault-2009a/" 
+           targetNamespace="http://www.intel.com/soae/bpelFault-2009a/" 
+           elementFormDefault="unqualified">
+
+  <xs:include schemaLocation="soaeBpelFault.xsd" />
+
+  <!-- ========================================================================
+
+    Defines the soae bpel faults that can by miscellaneous extension functions.
+    
+    ======================================================================== -->
+
+  <xs:element name="parseUrlFault" type="soae-fault:ParseUrlFault"/>
+
+  <xs:complexType name="ParseUrlFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+
+                <!-- Three error conditions 
+
+                   1. Reference to path segment which does not exits
+			elements: url + path + segment information
+
+		   2. Request said component must be present and it is
+		      not present in the url.
+			elements: url + component name
+
+		   3. Request said path must not contain //, /./, or /../
+		      but it does.
+			elements: url only
+		-->
+
+                <xs:element name="url" type="xs:string"/>
+                <xs:choice minOccurs="0" maxOccurs="1">
+                  <xs:sequence>
+                    <xs:element name="path" type="xs:string"/>
+                    <xs:element name="segment" type="xs:string"/>
+                  </xs:sequence>
+                  <xs:element name="component-name" type="xs:string" />
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="transcodeStringFault" type="soae-fault:TranscodeStringFault"/>
+
+  <xs:complexType name="TranscodeStringFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="operation" type="xs:string"/>
+                <xs:element name="desc" type="xs:string"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="xmlParseStringExFault" type="soae-fault:XmlParseStringExFault">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Parsing XML string failure</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:complexType name="XmlParseStringExFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="char-encoding" type="xs:string"/>
+                <xs:element name="binary-encoding" type="xs:string"/>
+                <xs:element name="desc" type="xs:string"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="getRotatingEncryptionSettingFault" type="soae-fault:GetRotatingEncryptionSettingFault"/>
+
+  <xs:complexType name="GetRotatingEncryptionSettingFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="securityObjectName" type="xs:string"/>
+                <xs:element name="id" type="xs:string"/>
+                <xs:element name="function" type="xs:string"/>
+                <xs:element name="desc" type="xs:string"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="decodeBlockEncodedAlphanumericStringFault" type="soae-fault:DecodeBlockEncodedAlphanumericStringFault">
+    <xs:annotation>
+	  <xs:documentation>Failure with decoding compressed alphanumeric string</xs:documentation>
+	</xs:annotation>
+  </xs:element>
+  
+  <xs:complexType name="DecodeBlockEncodedAlphanumericStringFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="desc" type="xs:string"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="encodeBlockEncodedAlphanumericStringFault" type="soae-fault:EncodeBlockEncodedAlphanumericStringFault">
+    <xs:annotation>
+	  <xs:documentation>Failure with compressing alphanumeric string</xs:documentation>
+	</xs:annotation>
+  </xs:element>
+
+  <xs:complexType name="EncodeBlockEncodedAlphanumericStringFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="desc" type="xs:string"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="chooseBooleanFault" type="soae-fault:ChooseBooleanFault">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Choose one alternative based on a boolean value associated with that alternative</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:complexType name="ChooseBooleanFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details" type="xs:string" minOccurs="0" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Present only if the user has supplied a message string as the last (optional) argument</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+
+  <xs:element name="getHttpMetadataHeaderStringFault" type="soae-fault:GetHttpMetadataHeaderStringFault"/>
+
+  <xs:complexType name="GetHttpMetadataHeaderStringFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="desc" type="xs:string"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+</xs:schema>

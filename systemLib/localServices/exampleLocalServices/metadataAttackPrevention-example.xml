@@ -1,0 +1,90 @@
+<metadataAttackPreventionPolicy
+   xmlns="http://www.intel.com/soae/localService/contentAttackPreventionDefinition-2007a/" >
+  <httpMetadataAttackPreventionPolicy>
+
+    <utf8XmlCheck>true</utf8XmlCheck>
+
+    <methods>
+      <method>GET</method>
+      <method>POST</method>
+    </methods>
+
+    <path lengthBytes="128" >
+      <regex>regex-for-path</regex>
+    </path>
+
+    <responseCodes>
+      <responseCode>200</responseCode>
+      <responseCode>404</responseCode>
+      <responseCode>5xx</responseCode>
+    </responseCodes>
+
+    <protocolVersions>
+      <protocolVersion>HTTP/1.0</protocolVersion>
+      <protocolVersion>HTTP/1.1</protocolVersion>
+    </protocolVersions>
+
+    <queryParameters
+        maxTotalCount="10"
+	maxTotalLengthBytes="2000"
+	maxNameLengthBytes="8"
+	maxValueLengthBytes="256"
+	minNameLengthBytes="1" 
+	denyOthers="true" >
+
+      <queryParameter
+          name="customer-id"
+	  maxValueLengthBytes="32"
+	  required="true" >
+	  <regex>[0-9]*</regex>
+      </queryParameter>
+
+      <queryParameter
+          name="lifetime"
+	  maxValueLengthBytes="32"
+	  required="true" >
+	  <regex>[:0-9]*</regex>
+      </queryParameter>
+
+      <queryParameter
+          name="selection-filter"
+	  maxValueLengthBytes="1024"
+	  required="false" >
+      </queryParameter>
+
+     </queryParameters>
+
+    <headers
+        maxTotalCount="20"
+	maxTotalLengthBytes="10000"
+	maxNameLengthBytes="24"
+	maxValueLengthBytes="256" >
+
+      <header
+          name="session-id"
+	  maxValueLengthBytes="124"
+	  required="false" >
+	<regex>[A-Z]*</regex>
+      </header>
+
+      <header
+          name="x-server"
+	  maxValueLengthBytes="124"
+	  required="false" >
+      </header>
+     
+    </headers>
+
+    <contentTypes>
+       <contentType>text/plain</contentType>
+       <contentType>text/xml</contentType>
+    </contentTypes>
+ 
+    <ipAddresses>
+      <ipAddress address="10.230.0.0" significantBits="16" />
+      <ipAddress address="9.128.0.0" significantBits="9" />
+    </ipAddresses>
+
+  </httpMetadataAttackPreventionPolicy>
+
+</metadataAttackPreventionPolicy>

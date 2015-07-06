@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <certificateAttributeFromSecurityHeader extractMostSpecificComponentFromSubjectName="true">fullCertificate</certificateAttributeFromSecurityHeader>
+    </extractIdentity>
+    <authenticateIdentity>
+      <ldapAuthentication>
+        <distinguishedNamePrefix>uid=</distinguishedNamePrefix>
+        <distinguishedNamePostfix></distinguishedNamePostfix>
+      </ldapAuthentication>
+    </authenticateIdentity>
+  </identityProcessing>
+  <resourceProcessing>
+    <authorizeResource>
+      <samlAttributeQuery>
+        <attributeQueryRequest>
+          <v2dot0>
+            <NameID-Format-Attribute type="string">
+              <staticValue>urn:oasis:names:tc:SAML:2.0:nameid-format:unspecified</staticValue>
+            </NameID-Format-Attribute>
+            <NameID type="string">
+              <automaticallyGenerated>
+                <distinguishedNamePrefix></distinguishedNamePrefix>
+                <distinguishedNamePostfix></distinguishedNamePostfix>
+                <generatedInternalWorkflowParameter>Authentication-Subject-NameIdentifier-Use-Extracted</generatedInternalWorkflowParameter>
+              </automaticallyGenerated>
+              <encryptID>true</encryptID>
+            </NameID>
+            <Attribute>
+              <Name-attribute type="string">
+                <staticValue>us:gov:ficc:bae:2008-01:BAESpecVer</staticValue>
+              </Name-attribute>
+              <NameFormat-attribute>urn:oasis:names:tc:SAML:2.0:attrname-format:basic</NameFormat-attribute>
+              <AttributeValue type="anyType">
+                <staticValue>
+                  &lt;auto-generated_for_wildcard&gt;&lt;/auto-generated_for_wildcard&gt;
+                </staticValue>
+              </AttributeValue>
+            </Attribute>
+            <Attribute>
+              <Name-attribute type="string">
+                <staticValue>photo</staticValue>
+              </Name-attribute>
+              <NameFormat-attribute>urn:oasis:names:tc:SAML:2.0:attrname-format:basic</NameFormat-attribute>
+            </Attribute>
+            <Attribute>
+              <Name-attribute type="string">
+                <staticValue>nc:PersonSexCode</staticValue>
+              </Name-attribute>
+            </Attribute>
+            <Attribute>
+              <Name-attribute type="string">
+                <staticValue>us:gov:ficc:bae:2008-01:CardExpirationDate</staticValue>
+              </Name-attribute>
+              <NameFormat-attribute>urn:oasis:names:tc:SAML:2.0:attrname-format:basic</NameFormat-attribute>
+            </Attribute>
+            <Attribute>
+              <Name-attribute type="string">
+                <staticValue>us:gov:ficc:bae:2008-01: CardStatus</staticValue>
+              </Name-attribute>
+              <NameFormat-attribute>urn:oasis:names:tc:SAML:2.0:attrname-format:basic</NameFormat-attribute>
+            </Attribute>
+            <Attribute>
+              <Name-attribute type="string">
+                <staticValue>us:gov:ficc:bae:2008-01:USCitizenship</staticValue>
+              </Name-attribute>
+              <NameFormat-attribute>urn:oasis:names:tc:SAML:2.0:attrname-format:basic</NameFormat-attribute>
+              <encryptAttribute>false</encryptAttribute>
+            </Attribute>
+            <Attribute>
+              <Name-attribute type="string">
+                <staticValue>us:gov:ficc:bae:2008-01:ClearingAgency</staticValue>
+              </Name-attribute>
+              <NameFormat-attribute>urn:oasis:names:tc:SAML:2.0:attrname-format:basic</NameFormat-attribute>
+              <encryptAttribute>true</encryptAttribute>
+            </Attribute>
+          </v2dot0>
+        </attributeQueryRequest>
+        <verifyAttributeQueryResponseAssertion>
+          <signatureInfo>
+            <signatureAcceptMethods><rsaWithSha256/></signatureAcceptMethods>
+            <digestAcceptMethod><sha1></sha1></digestAcceptMethod>
+            <canonicalAcceptMethod><C14N_exclusive></C14N_exclusive></canonicalAcceptMethod>
+            <authenticationPolicy>demo-authentication-policy</authenticationPolicy>
+          </signatureInfo>
+          <encryptionInfo>
+            <decryptkeyInfo>
+              <x509>
+                <acceptableKeyTransportMethods rsaOaep="true"></acceptableKeyTransportMethods>
+                <keyPair>
+                  <securityConfig>demo-key-pair</securityConfig>
+                </keyPair>
+              </x509>
+            </decryptkeyInfo>
+            <acceptableDataEncryptionMethods aes256="true" aes192="true" aes128="true" des3="false" arc4="false"></acceptableDataEncryptionMethods>
+          </encryptionInfo>
+          <requiredSamlEntitiesAndValues>
+            <Issuer>wwwwwwwwww</Issuer>
+            <NotBeforeAndNotOnOrAfter>checkBothConditionsAndSubjectConfirmationDataElements</NotBeforeAndNotOnOrAfter>
+          </requiredSamlEntitiesAndValues>
+        </verifyAttributeQueryResponseAssertion>
+        <checkAttributes>
+          <mustMatchAllNameValues>
+            <Attribute-Name-Attrib type="string">
+              <staticValue>wwww</staticValue>
+            </Attribute-Name-Attrib>
+            <AttributeStatement-Attribute-NameValue-Pair>
+              <Attribute-Name-Attrib type="string">
+                <staticValue>us:gov:ficc:bae:2008-01:BAESpecVer</staticValue>
+              </Attribute-Name-Attrib>
+              <AttributeStatement-Attribute-AttributeValue type="string">
+                <staticValue>1.0</staticValue>
+              </AttributeStatement-Attribute-AttributeValue>
+            </AttributeStatement-Attribute-NameValue-Pair>
+            <AttributeStatement-Attribute-NameValue-Pair>
+              <Attribute-Name-Attrib type="string">
+                <staticValue>us:gov:ficc:bae:2008-01:USCitizenship</staticValue>
+              </Attribute-Name-Attrib>
+              <AttributeStatement-Attribute-AttributeValue type="string">
+                <staticValue>true</staticValue>
+              </AttributeStatement-Attribute-AttributeValue>
+            </AttributeStatement-Attribute-NameValue-Pair>
+          </mustMatchAllNameValues>
+        </checkAttributes>
+      </samlAttributeQuery>
+     </authorizeResource>
+  </resourceProcessing>
+</aaa:aaaPolicy>

@@ -1,0 +1,13 @@
+<message xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd"
+         xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing">
+  <protocol>file</protocol>
+  <fileMessage>
+    <destination>
+      <invocationAgentName>IA-1</invocationAgentName>
+    </destination>
+    <transport>
+      <!-- destination file name in configured directory -->
+      <file>XXXXXX.xml</file>
+    </transport>
+  </fileMessage>
+</message>

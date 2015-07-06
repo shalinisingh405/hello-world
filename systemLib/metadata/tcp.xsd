@@ -1,0 +1,46 @@
+<!-- edited with XMLSpy v2007 sp2 (http://www.altova.com) by WADE L POZIOMBKA (INTEL CORPORATION) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd" targetNamespace="http://www.intel.com/soae/protocolMetadata-2007a.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified" blockDefault="#all">
+	<xs:import namespace="http://schemas.xmlsoap.org/ws/2004/08/addressing" schemaLocation="../importedSchemas/wsa-2004-08.xsd"/>
+	<xs:include schemaLocation="metadataCommon.xsd"/>
+	<!-- =============================================================================== -->
+	<!--  input & output servers types: Raw TCP Protocol (TCP)                           -->
+	<!-- =============================================================================== -->
+	<!--  TCP protocol header: root element  -->
+	<xs:element name="tcpMessage">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:choice>
+					<xs:element name="source" type="TcpSource"/>
+					<xs:element name="destination" type="TcpDestination"/>
+				</xs:choice>
+				<xs:element name="transport" type="TcpTransport" minOccurs="0"/>
+				<!-- specific message related data -->
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<!--  source element  -->
+	<xs:complexType name="TcpSource">
+		<xs:sequence>
+			<xs:element name="inputServerName" type="NonEmptyString"/>
+			<xs:element name="sslReceived" type="SslReceived" minOccurs="0"/>
+			<!-- only supported when protocol=tcps -->
+		</xs:sequence>
+	</xs:complexType>
+	<!--  destination element  -->
+	<xs:complexType name="TcpDestination">
+		<xs:sequence>
+			<xs:element name="invocationAgentName" type="NonEmptyString"/>
+			<xs:element name="sslSend" type="SslSend" minOccurs="0"/>
+			<!-- only supported when protocol=tcps -->
+		</xs:sequence>
+	</xs:complexType>
+	<!-- transport element  -->
+	<xs:complexType name="TcpTransport">
+		<xs:sequence>
+			<xs:element name="localPort" type="xs:unsignedShort" minOccurs="0"/>
+			<!-- Local port that we receive TCP messages on -->
+			<xs:element name="protocolType" type="NonEmptyString" minOccurs="0"/>
+			<!-- protocol type (delimited, stringHeader, etc.) -->
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd" 
+               writeTransactionLog="true" soapVersion="1.2">
+  <identityProcessing>
+    <extractIdentity>
+      <x509CertificateFromSecurityHeader actor="foobar">fullCertificate</x509CertificateFromSecurityHeader>
+    </extractIdentity>
+    <mapIdentity>
+      <createUsernameToken>
+        <keyFormat>
+          <passwordText></passwordText>
+          <usernamePasswordSource>
+            <securityConfig>provisedUsernamePasswordObjectName</securityConfig>
+          </usernamePasswordSource>
+        </keyFormat>
+      </createUsernameToken>
+    </mapIdentity>
+  </identityProcessing>
+</aaa:aaaPolicy>

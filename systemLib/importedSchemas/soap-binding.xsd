@@ -1,0 +1,62 @@
+<schema xmlns='http://www.w3.org/2001/XMLSchema' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' targetNamespace='http://schemas.xmlsoap.org/wsdl/soap/'>
+  <element name='binding' type='soap:bindingType' />
+  <complexType name='bindingType'>
+    <attribute use='optional' name='transport' type='anyURI' />
+    <attribute use='optional' name='style' type='soap:styleChoice' />
+  </complexType>
+  <simpleType name='styleChoice'>
+    <restriction base='string'>
+      <enumeration value='rpc' />
+      <enumeration value='document' />
+    </restriction>
+  </simpleType>
+  <element name='operation' type='soap:operationType' />
+  <complexType name='operationType'>
+    <attribute use='optional' name='soapAction' type='anyURI' />
+    <attribute use='optional' name='style' type='soap:styleChoice' />
+  </complexType>
+  <element name='body' type='soap:bodyType' />
+  <complexType name='bodyType'>
+    <attribute use='optional' name='encodingStyle' type='anyURI' />
+    <attribute use='optional' name='parts' type='NMTOKENS' />
+    <attribute use='optional' name='use' type='soap:useChoice' />
+    <attribute use='optional' name='namespace' type='anyURI' />
+  </complexType>
+  <simpleType name='useChoice'>
+    <restriction base='string'>
+      <enumeration value='literal' />
+      <enumeration value='encoded' />
+    </restriction>
+  </simpleType>
+  <element name='fault' type='soap:faultType' />
+  <complexType name='faultType'>
+    <complexContent>
+      <restriction base='soap:bodyType'>
+        <attribute use='prohibited' name='parts' type='NMTOKENS' />
+      </restriction>
+    </complexContent>
+  </complexType>
+  <element name='header' type='soap:headerType' />
+  <complexType name='headerType'>
+    <all>
+      <element ref='soap:headerfault' />
+    </all>
+    <attribute use='required' name='message' type='QName' />
+    <attribute use='required' name='parts' type='NMTOKENS' />
+    <attribute use='required' name='use' type='soap:useChoice' />
+    <attribute use='optional' name='encodingStyle' type='anyURI' />
+    <attribute use='optional' name='namespace' type='anyURI' />
+  </complexType>
+  <element name='headerfault' type='soap:headerfaultType' />
+  <complexType name='headerfaultType'>
+    <attribute use='required' name='message' type='QName' />
+    <attribute use='required' name='parts' type='NMTOKENS' />
+    <attribute use='required' name='use' type='soap:useChoice' />
+    <attribute use='optional' name='encodingStyle' type='anyURI' />
+    <attribute use='optional' name='namespace' type='anyURI' />
+  </complexType>
+  <element name='address' type='soap:addressType' />
+  <complexType name='addressType'>
+    <attribute use='required' name='location' type='anyURI' />
+  </complexType>
+</schema>

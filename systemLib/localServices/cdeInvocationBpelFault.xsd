@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:soae-fault="http://www.intel.com/soae/bpelFault-2009a/" 
+           targetNamespace="http://www.intel.com/soae/bpelFault-2009a/" 
+           elementFormDefault="unqualified">
+
+  <xs:include schemaLocation="soaeBpelFault.xsd" />
+
+  <!-- ========================================================================
+
+    Defines the soae bpel faults for complex data exchange functions:
+
+    dt-do-transformation
+
+    dt-split-output-initialize
+    dt-has-more-output
+    dt-is-output-empty
+    dt-get-next-output
+    dt-split-output-finalize
+	
+    
+    ======================================================================== -->
+
+  <xs:element name="complexDataExchangeFault" type="soae-fault:ComplexDataExchangeFault"/>
+
+  <xs:complexType name="ComplexDataExchangeFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+
+				<xs:element name="serviceName" type="xs:string"/>
+
+				<xs:element name="desc" type="xs:string"/>
+
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+</xs:schema>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tivoliAccessManagerRequest xmlns="http://www.intel.com/soae/localService/tivoliAccessManager-2009a/" 
+                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                            xsi:schemaLocation="http://www.intel.com/soae/localService/tivoliAccessManager-2009a/ ../tivoliAccessManager.xsd">
+  <createSessionRequest authorization="false">
+    <credentials>
+      <usernamePassword username="chrisOurQaPerson">QA-password</usernamePassword>
+    </credentials>
+  </createSessionRequest>
+</tivoliAccessManagerRequest>

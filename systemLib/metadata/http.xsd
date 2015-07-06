@@ -1,0 +1,161 @@
+<!-- edited with XMLSpy v2007 sp2 (http://www.altova.com) by WADE L POZIOMBKA (INTEL CORPORATION) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd" targetNamespace="http://www.intel.com/soae/protocolMetadata-2007a.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified" blockDefault="#all">
+	<xs:include schemaLocation="metadataCommon.xsd"/>
+	<!-- =============================================================================== -->
+	<!--  message element: input & output servers                                        -->
+	<!--  input & output servers types: http or https                                    -->
+	<!--  Headers and Query are used by icap.xsd                                         -->
+	<!-- =============================================================================== -->
+	<!--  HTTP protocol header: root element  -->
+	<xs:element name="httpMessage">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="source" type="Source" minOccurs="0"/>
+				<!-- both source and destinations can not occur in the same message -->
+				<xs:element name="destination" type="Destination" minOccurs="0"/>
+				<xs:element name="transport" type="Transport"/>
+                                <xs:element name="connectionId" type="ConnectionId" minOccurs="0" />
+				<!-- specific message related data -->
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<!--  source element  -->
+	<xs:complexType name="Source">
+		<xs:sequence>
+			<xs:element name="inputServerName" type="NonEmptyString"/>
+			<xs:element name="ip" type="NonEmptyString" minOccurs="0"/>
+			<!-- Ip address that we receive request on -->
+			<xs:element name="port" type="xs:unsignedShort"/>
+			<!-- Port that we receive request on -->
+			<xs:element name="sslReceived" type="SslReceived" minOccurs="0"/>
+			<!-- only supported when protocol=https -->
+		</xs:sequence>
+	</xs:complexType>
+	<!--  destination element  -->
+	<xs:complexType name="Destination">
+		<xs:sequence>
+			<xs:element name="invocationAgentName" type="NonEmptyString"/>
+			<xs:element name="sslReceived" type="SslReceived" minOccurs="0"/>
+			<!-- only supported when protocol=https, will be fulfilled by HTTPS IA in the response bound -->
+			<!-- so workflow can check the peer identity of certificate and etc -->
+			<xs:element name="sslSend" type="SslSend" minOccurs="0"/>
+			<!-- only supported when protocol=https, so workflow can specify the security token dynamically? -->
+		</xs:sequence>
+	</xs:complexType>
+	<!-- transport element  -->
+	<xs:complexType name="Transport">
+            <xs:sequence>
+		<xs:choice>
+			<xs:element name="httpRequest" type="HttpRequest"/>
+			<xs:element name="httpResponse" type="HttpResponse"/>
+		</xs:choice>
+
+		<!-- will always be populated by HTTP IS/IA -->
+		<xs:element name="streaming" type="NonEmptyString" minOccurs="0"/>
+
+		<!-- streaming model from client to backend, if present along with
+   		     httpRequest or from server to client if present along with httpResponse,
+		     both in pattern of threadId:clientIP:clientPort
+                -->
+            </xs:sequence>
+	</xs:complexType>
+	<!-- http elements  -->
+	<xs:complexType name="HttpRequest">
+		<xs:sequence>
+			<xs:element name="method" type="NonEmptyString" minOccurs="0"/>
+			<!--
+
+If characters are % encoded then the sequence of encoded bytes must be
+a valid utf-8 sequence.
+
+The only valid xml 1.0 characters less than space (decimal 32) are
+tab, linefeed, and carriage return.  All other characters less than 32
+(including zero) will be accepted when they are percent encoded even
+though they do not represent valid xml characters.
+
+If a percent encoded byte is < 32 or is 127 (DEL) then the percent
+escaped string is copied without change to the input document (as "%"
+hexDigit hexDigit - three bytes and three separate characters).  The
+special handling of 127 (DEL) is based on aesthetic considerations and
+not on limitations of xml.
+
+If a percent encoded byte is >= 128 then it (and the % encoded bytes
+which follow) are checked to make sure they encode a valid utf-8
+character. The utf-8 character is written to the input document as a
+single multibyte character using the utf-8 encoding of that character
+(not the percent encoded string).
+
+If a percent encoded byte is 37 decimal ("%") or 127 decimal (DEL)
+then the % encoded string is written without change to the input
+document (as "%" hexDigit hexDigit - three bytes and three separate
+characters).  If a percent encoded byte is between 32 and 127
+inclusive (excluding 37 decimal and 127 decimal), then it is converted
+to the corresponding ascii character and written to the input document
+(a single byte and a single character).
+
+-->
+			<xs:element name="uri" type="xs:anyURI" minOccurs="0"/>
+			<xs:element name="version" type="HttpVersion" minOccurs="0"/>
+			<xs:element name="query" type="Query" minOccurs="0"/>
+			<xs:element name="headers" type="Headers" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="HttpResponse">
+		<xs:sequence>
+			<xs:element name="version" type="HttpVersion"/>
+			<xs:element name="status" type="NonEmptyString"/>
+			<xs:element name="reason" type="NonEmptyString" minOccurs="0"/>
+			<xs:element name="headers" type="Headers" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="HttpVersion">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="HTTP_10"/>
+			<xs:enumeration value="HTTP_11"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="Headers">
+		<xs:sequence>
+			<xs:element name="header" type="Header" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Query">
+		<xs:choice>
+			<xs:element name="value" type="xs:string"/>
+			<xs:element name="param" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="name" type="xs:string" use="required"/>
+							<xs:attribute name="nameOnly" type="TrueFalseEnum" use="optional"/>
+						</xs:extension>
+						<!-- oddball cases coverage
+							  1) ?wsdl will be translated into <param name="wsdl" nameOnly="true"/>
+							  2) ?bugid= will be translated into <param name="bugid"/>
+							-->
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:choice>
+		<xs:attribute name="hexHexDecoded" type="xs:boolean"/>
+		<!-- For query data:
+
+             When true:
+
+  	       1). IS has already translated the hex encoded data into raw data.
+               2). IA should translate it back to hexhex encoding before forwarding.
+
+             Default value is true for both value and param elements.
+
+             For http input IS always creates param elements in raw form.
+
+             It might be set false for some other reason (for example, as a result of the
+             workflow extension function update-http-metadata).  In this case, IA would
+             not consider the data as hexhex encoded even though it "looks" like a hexhex
+             encoded value because it happens to contain percent signs followed by hex
+             characters.
+
+          -->
+	</xs:complexType>
+
+</xs:schema>

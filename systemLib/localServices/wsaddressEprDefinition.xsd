@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:soae="http://www.intel.com/soae/wsdl/wsdl11-2007a/" 
+           xmlns:wed="http://www.intel.com/soae/localService/wsaddressingEprDefinition-2007a/" 
+           xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" 
+		   targetNamespace="http://www.intel.com/soae/localService/wsaddressingEprDefinition-2007a/"
+		   elementFormDefault="qualified">
+  <!--
+    <xs:import namespace="http://schemas.xmlsoap.org/ws/2004/08/addressing"/> 
+    The relative reference is because our firewall denies our validator the ability to access the official schema locations
+  -->
+  <xs:import namespace="http://schemas.xmlsoap.org/ws/2004/08/addressing" schemaLocation="../importedSchemas/wsa-2004-08.xsd"/>
+  <!-- ======================================================================================================= -->
+  <!--  WS-Addressing Endpoint Reference (EPR) Definition (WED) Schema                                         -->
+  <!--  This schema defines XML document that developer/administrator uses to resolve XPath expression defined -->
+  <!-- in XED routing document to a target endpoint reference (EPR)                                            -->
+  <!-- ======================================================================================================= -->
+  <xs:element name="endpointReferences" type="wed:EndpointReferences"/>
+  <xs:complexType name="EndpointReferences">
+    <xs:annotation>
+      <xs:documentation>
+        Resolve all Endpoint references associated with XPath Expression Definition (XED) counter-part
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element ref="wsa:EndpointReference" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            There should be one EndpointReference for each match definied in the assocaited XPath Expression Definition (XED)
+            document. The association is via a cbr:name attribute definited in http://www.intel.com/soae/wsdl/wsdl11-2007a/
+            schema.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="endpointReferenceGroup" minOccurs="0" maxOccurs="unbounded" >
+        <xs:annotation>
+          <xs:documentation>
+
+            An endPointReferenceGroup creates an alias for a list of end point references. 
+            When multiple groups are matched by the xpath expression each group is expanded
+            and duplicate references to end point names are eliminated.
+
+            The names of endpoint groups and endpoint reference must be unique in the scope 
+            of this file in order to avoid ambiguity in a references from other files.  In other
+            words, an endpoint groupa and an endpoint reference may not have the same name.
+
+            At this time, it is not possible for an endpoint group to be defined in terms of
+	    other endpoint groups.
+
+            We have chosen to force all end point references to be defined before endpoint
+            groups in order to avoid forward references.  We may want to relax this requirement
+            if groups can be defined in terms of other groups.  In this one would have to avoid
+            circular references.
+
+            It is possible to create duplicates if an endpoint reference has multiple entries
+            with different names in this file.
+
+          </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+           <xs:sequence minOccurs="0" maxOccurs="unbounded" >
+              <xs:element name="EPRReference" >
+                <xs:complexType>
+                  <xs:attribute name="ref" type="xs:NCName" use="required" />
+                </xs:complexType>
+              </xs:element>
+           </xs:sequence>
+           <xs:attribute name="name" type="xs:NCName" use="required" />
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:NCName" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          name must match be the sameas its corresponding XPath Expression Definition (XED) counter-part
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="deploymentState" type="wed:DeploymentState" default="default">
+      <xs:annotation>
+        <xs:documentation>
+          This attribute is intented to only be utilized within a wsa:EndpointReference element within an application WED document.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:simpleType name="DeploymentState">
+    <xs:annotation>
+      <xs:documentation>
+        default: example name chosen by Service Designer 
+        previous: name inherited from previous version of this adf file
+        final: name approved by admin and can only be changed by an admin (not Service Designer)
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="default"/>
+      <xs:enumeration value="previous-app"/>
+      <xs:enumeration value="final"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

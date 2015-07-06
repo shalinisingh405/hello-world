@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema  
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+  xmlns:tkx="http://www.intel.com/soae/localService/tokenExchange-2010a/" 
+  targetNamespace="http://www.intel.com/soae/localService/tokenExchange-2010a/" elementFormDefault="qualified">
+  <xs:element name="tokenExchangePolicy" type="tkx:TokenExchangePolicy">
+    <xs:unique name="uniqueDomainId">
+      <xs:annotation>
+        <xs:documentation>Ensure that all domainId values are unique.</xs:documentation>
+      </xs:annotation>
+      <xs:selector xpath="domainInstance"/>
+      <xs:field xpath="domainId"/>
+    </xs:unique>
+  </xs:element>
+  <xs:complexType name="TokenExchangePolicy">
+    <xs:sequence>
+      <xs:element name="description" type="xs:string"/>
+      <xs:element name="domainInstance" type="tkx:DomainInstanceType" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            This structure contains all of the information that is needed to fully process a data domain instance.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="tokenTarget" type="tkx:TokenTarget"/>
+      <xs:element name="tokenEncryption" type="tkx:TokenEncryption" minOccurs="0"/>
+      <xs:element name="secureVault" type="tkx:SecureVault" minOccurs="0">
+        <!-- Constraint: If absent then use default values built into soae. -->
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="tokenToDataOnly" type="xs:boolean" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation>If true that policy can only be used to convert token back into original data.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="DomainInstanceType">
+    <xs:sequence>
+      <xs:element name="tokenScheme" type="tkx:TokenScheme"/>
+      <xs:element ref="tkx:creditCards" minOccurs="0">
+        <!-- constraint: ONLY PRESENT if (data domain type == creditCardNumber) -->
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="domainId" type="xs:NMTOKEN" use="required">
+      <xs:annotation>
+        <xs:documentation>Uniquely identifies a data domain instance. Will be reference from one or more target rules.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="domainInstanceDesc" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>Optional application description of this domain instance.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="TokenScheme">
+    <xs:sequence>
+      <xs:element name="dataDomain" type="tkx:DataDomainType"/>
+      <xs:element name="tokenRules" type="tkx:TokenRules"/>
+      <xs:element name="tokenFormat" type="tkx:TokenFormat" minOccurs="0"/>
+      <xs:element name="multiuse" type="tkx:Multiuse"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="DataType">
+    <xs:annotation>
+      <xs:documentation>Identifies input characteristics of target data.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="creditCardNumber">
+        <xs:annotation>
+          <xs:documentation>
+            12 through 19 digit Personal Account Number used for credit transactions. 
+            The last digit is usually but not required to be a Luhn Checksum digit.
+            
+            Matches are checked against a table that describes credit card numbers that are 
+            supported by the site.  The table can be edited using Service Designer.
+            
+            The table is based on a prefix in the credit card number
+            For example, numbers starting with "14" can have one rule
+            and numbers starting with "2" can have a different rule.
+            
+            This is described by the "creditCards" element of this schema.
+            
+            The rule specifies the prefix, the number of digits expected,
+            and whether there is a luhn digit.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="legacyUpperCaseDecimal">
+        <xs:annotation>
+          <xs:documentation>
+            A string consisting of upper case Latin characters and decimal digits. Lax characters are restricted to 
+            space, dash, colon, etc.
+            It detail semantics are identical to pan type of Other in the R3.2, R3.3, R3.4, R4.5 and R5.1.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="laxUpperCaseDecimalPreserving">
+        <xs:annotation>
+          <xs:documentation>
+            A string consisting of upper case Latin characters and decimal digits in which the upper case characters 
+            remain upper case characters and decimal digits remain decimal digits in the generated token.
+            Characters that are not upper case Latin or decimal digits will be mapped through tokenization without change, i.e.,
+            lax character processing.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="laxUpperCaseLowerCaseDecimalPreserving">
+        <xs:annotation>
+          <xs:documentation> 
+            A string consisting of upper and lower case Latin characters and decimal digits in which the upper case characters 
+            remain upper case characters, the lower case characters remain lower case and decimal digits remain decimal digits
+            in the generated token.
+            Characters that are not upper or lower case Latin or decimal digits will be mapped through tokenization without change, 
+            i.e., lax character processing.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="laxLowerCaseDecimalPreserving">
+        <xs:annotation>
+          <xs:documentation>
+            A string consisting of lower case Latin characters and decimal digits in which the lower case characters 
+            remain lower case characters and decimal digits remain decimal digits in the generated token.
+            Characters that are not lower case Latin or decimal digits will be mapped through tokenization without change, i.e.,
+            lax character processing.
+          </xs:documentation>
+          <xs:appinfo>This was "Other" in the original token exchange policy</xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="emailAddress">
+        <xs:annotation>
+          <xs:appinfo>
+            Will basically be performing a strictUpperCaseLowerCaseDecimalPreserving tokenization with lax character processing.
+            By using radnomization tokenization mechanism, we can support tokenization of input with a single character in the 
+            local and domain component of the email address.
+            
+            Embedding of a cluster identifier within the tokenized result proposes a special problem because critical character 
+            that may break the semantics of a valid email address can occur anywhere with an email address. For example, the "@" 
+            character separating the local-part and domain name or the balanced left and right paranthesis in a comment could 
+            start or end in a field to be overwritten. If a cluster identifier decimal digit is to be embedded within a tokenized 
+            email address we would need to make its location dynamic. We would have to find the first characters that are upper 
+            case, lower case or a decimal digit to be overwritten with the cluster ID.
+            
+            Note: 1) Does not make sense to support preserve head and trail characters of input data being tokenized.
+                  2) Does not make sense to support any for of header substitution string.
+                  3) While it is possible to support some form of cluster ID if the email address is long enough. There 
+                     are legal email address that can NOT support embedding a cluster ID within the tokenized data
+                     because they are too short. Therefore, would not support cluster ID with email address.
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="socialSecurityNumber">
+        <xs:annotation>
+          <xs:documentation>
+            Nine digit decimal number of the form AAA-GG-SSSS, where AAA is the area code, GG is the group identifier, and SSSS is 
+            the serial number. Will be treated as a lax decimal number so that any embedded delimiter characters such as "-" or space
+            will be preserverd. Additionally, restriction on legal values for the AAA, GG and SSSS portions will be enforced:
+            1) Area number is between 001 - 665, 667 - 749, 772 - 899 allowed. 
+               Area numbers == "000", "750" thru "772", "900" thru "999" not allowed. 
+            2) Group number == "00" not allowed. 
+            3) Serial number == "0000" not allowed.
+          </xs:documentation>
+          <xs:appinfo>
+            Will perform a cycle walking approach where we will perform encryption/decryption until the specified restrictions are met.
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="laxDecimal">
+        <xs:annotation>
+          <xs:documentation>
+            Arbitrary lax decimal number. Only defined because credit card numbers are restricted to be between 12 through 19 digits 
+            long. This allows for larger or smaller decimal numbers to be tokenized.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="printableASCII">
+        <xs:annotation>
+          <xs:documentation>
+            This data domain includes the following characters: 
+              " !\"#$%&amp;'()*+,-./0123456789:;&gt;=&lt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~".
+            See basic Latin unicode letter, number and special characters. Note: space, double quote and backslash characters 
+            supported. Not included are newlines, tab, carriage return, NUL, BEL, etc.
+            
+            Note: special care must be used by the application when using this domain type because it can create unintended 
+            sub-strings within the tokenized data. For example, greater than"&gt;" or less than characters "&lt;" within the value 
+            of an XML document, or the the postfix string that is being used to identify the end of a sting with regex.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="base64PlusEqual">
+        <xs:annotation>
+          <xs:documentation>
+            Alphabet includes the following characters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/="
+            Could be used to tokenize the tweak within an encrypted key/tweak information structure.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ClusterId">
+    <xs:annotation>
+      <xs:documentation>
+        startOffset counts from 0: 
+        
+        startOffset=0 and from=left is the first character
+        startOffset=0 and from=right it is the last chararacter
+        
+        If width=2 then the startOffset must allow for two digits to
+        fit within the token. For example, if from="right" AND width=2
+        then the minimum value of startOffset is 1.
+        
+        When from="left" then the cluster-id must not overlap the
+        header preserve or header substitute string.  So, for example,
+        if from="left" and headerPreserve=4 then startOffset must
+        be &gt;= 4 (startOffset starts at 0).
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="width" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:int">
+          <xs:minInclusive value="1"/>
+          <xs:maxInclusive value="2"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="startOffset" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:int">
+          <xs:minInclusive value="0"/>
+          <xs:maxInclusive value="99"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="from" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="left"/>
+          <xs:enumeration value="right"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="PreserveHeaderTrailer">
+    <xs:attribute name="headerPreserve" type="xs:int"/>
+    <xs:attribute name="trailerPreserve" type="xs:int"/>
+    <xs:attribute name="headerSubstitutionFromWorkFlow" type="xs:string" use="optional" fixed="header-substitution-string">
+      <xs:annotation>
+        <xs:appinfo>
+          The string value is what I expect SD action builder to prompt the application developer with to enter the desired information.
+          I see no reason that this needs to be parameterized/configurable by the policy editor application developer.
+          I am not using a simple boolean flag here if at some future date that we need to support more fields to be configurable when the 
+          token exchange policy is bound to an action or if multiple information will need to ba passed into one or more extension functions
+          via name/value pairs.
+          If this attribute is not present then the headerSubstitute attribute should be populated by the application developer.
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="headerSubstitute" type="xs:string" use="optional">
+      <!-- constraint: 1) ONLY ALLOWED if (headerSubstitutionFromWorkflow is not POPULATED)
+                       2) ERROR "Length of defined header substitution string greater than space being preserved"
+                          if ((populated) && (length_of_substitution_string > headerPreserve)
+      -->
+    </xs:attribute>
+    <!-- The number of characters at the start of the PAN to
+         preserve when creating the token.  For instance a
+         customer may want the token to preserve the codes
+         related to the credit card issuer.
+         
+         When headerPreserve and headerSubstitute are both
+         specified, some of the the preserved header characters
+         will be overwritten by the headerSubstitute characters.
+         In this case, headerPreserve makes sense only if it is
+         larger than the headerSubstitute length.
+         
+         If the cluster id option is selected, this field must
+         not overlap the cluster id field.
+    -->
+    <!-- The number of characters at the end of the PAN to
+         preserve when creating the token.  For instance a
+         customer may want to preserve the last 4 digits of
+         account number when creating the token.
+         
+         If the cluster id option is selected, this field must
+         not overlap the cluster id field.
+    -->
+    <!-- A prefix which replaces a corresponding number of
+         characters at the start of the token.  Some customers
+         want to make it easy for staff to distinguish a PAN from
+         a token by starting every token with (for example) "99".
+         
+         When headerPreserve and headerSubstitute are both
+         specified, some of the the preserved header characters
+         will be overwritten by the headerSubstitute characters.
+         In this case, headerPreserve makes sense only if it is
+         larger than the headerSubstitute length.
+         
+         If the cluster id option is selected, this field must
+         not overlap the cluster id field.
+    -->
+  </xs:complexType>
+  <xs:complexType name="TokenFormat">
+    <xs:choice>
+      <xs:element name="ccnFormat" type="tkx:CcnTokenFormat">
+        <!-- constraint: ONLY ALLOWED if (data domain type == creditCardNumber) -->
+      </xs:element>
+      <xs:element name="variableLengthToken" type="tkx:VariableLengthTokenInfo">
+        <!-- constraint: ONLY ALLOWED if (data domain type == (laxUpperCaseDecimalPreserving OR
+                                                               laxUpperCaseLowerCaseDecimalPreserving OR
+                                                               laxLowerCaseDecimalPreserving OR
+                                                               laxDecimal OR printableASCII OR base64PlusEqual OR
+                                                               emailAddress
+                                                              )
+        -->
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+  <xs:complexType name="TokenRules">
+    <xs:sequence>
+      <xs:element name="preserveHeaderTrailer" type="tkx:PreserveHeaderTrailer" minOccurs="0">
+        <!-- constraint: ONLY PRESENT if (data domain type == (creditCardNumber OR 
+                                                               legacyUpperCaseDecimal OR
+                                                               laxUpperCaseDecimalPreserving OR
+                                                               laxUpperCaseLowerCaseDecimalPreserving OR
+                                                               laxLowerCaseDecimalPreserving OR
+                                                               laxDecimal OR 
+                                                               printableASCII OR 
+                                                               base64PlusEqual
+                                                              )
+                                         )
+        -->
+      </xs:element>
+      <xs:element name="clusterId" type="tkx:ClusterId" minOccurs="0">
+        <!-- constraint: If the cluster id option is selected, these sub-fields must not overlap 
+                         the headerPreserve, trailerPreserve, or headerSubstitute fields.
+        -->
+        <!-- constraint: ONLY ALLOWED if (data domain type == (creditCardNumber OR 
+                                                               legacyUpperCaseDecimal OR 
+                                                               laxUpperCaseDecimalPreserving OR
+                                                               laxUpperCaseLowerCaseDecimalPreserving OR
+                                                               laxLowerCaseDecimalPreserving OR 
+                                                               laxDecimal OR
+                                                               printableASCII OR 
+                                                               base64PlusEqual
+                                                              )
+                                         )
+        -->
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="TokenEncryption">
+    <xs:sequence>
+      <xs:element name="rotatingEncryptionSettings" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="DataDomainType">
+    <xs:attribute name="type" type="tkx:DataType" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="CcnTokenFormat">
+    <xs:attribute name="validLuhnDigit" type="xs:boolean" use="optional"/>
+  </xs:complexType>
+  <xs:complexType name="VariableLengthTokenInfo">
+    <xs:attribute name="maximumTokenLength" use="optional" default="32">
+      <xs:annotation>
+        <xs:documentation>
+          Note: selecting too small of a length depending upon the number of unique characters will affect the 
+          maximum number of tokens that could be generated. For example, a 6 character alphanumeric string could 
+          support 56,800,235,584 unique token values while a 6 character decimal string could only support 
+          1,000,000 tokens.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:unsignedInt">
+          <xs:minInclusive value="6"/>
+          <xs:maxInclusive value="8192"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="TokenTarget">
+    <xs:choice minOccurs="0">
+      <!-- Contraint: WARNING "No targets defined in policy, this is only legal if policy will only be used for bulk tokenization" 
+                      if (TokenTarget choice is not defined) 
+      -->
+      <xs:element ref="tkx:xpathExpressions"/>
+      <xs:element ref="tkx:regularExpressions"/>
+    </xs:choice>
+    <xs:attribute name="inputDataType" type="xs:QName" use="optional"/>
+    <!-- This is the element (complex type ?) of the document. 
+         In general, this is only useful for xpath based selection.
+         For regex based selection, the input data type will always
+         be derived from xs:string.
+    -->
+  </xs:complexType>
+  <xs:complexType name="Multiuse">
+    <xs:attribute name="enabled" type="xs:boolean" use="required"/>
+    <xs:attribute name="timeToLive">
+      <xs:simpleType>
+        <xs:restriction base="xs:long">
+          <xs:minInclusive value="-1"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <!-- When enabled=false this treats the timeToLive (reuse duration)
+         as 0 regardless of the value specified in that attribute.
+         It provides a mechanism to disable multiuse while retaining
+         the settings for when it is once again enabled.
+    -->
+    <!-- Units are seconds.
+         The "timeToLive" is a misnomer.  This actually describes how
+         long a token is eligible for reuse (multiuse).  A more
+         accurate name would be "reuseDuration".
+         
+         A value of 0 implies no reuse. A token is used only once.
+         
+         A value of -1 implies that it will be reused forever.
+         
+         Values greater than 0 have the obvious meaning.
+    -->
+  </xs:complexType>
+  <xs:complexType name="SecureVault">
+    <xs:choice>
+      <xs:element name="jdbcSourceJndiName" type="xs:string"/>
+      <xs:element name="onboard">
+        <xs:complexType>
+          <xs:all>
+            <xs:element name="keyspace" type="xs:string"/>
+            <!-- Default replication factor is 3. -->
+            <xs:element name="defaultReplicationFactor" minOccurs="0">
+              <xs:simpleType>
+                <xs:restriction base="xs:int">
+                  <xs:minInclusive value="1"/>
+                  <xs:maxInclusive value="15"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+          </xs:all>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+  <xs:element name="xpathExpressions">
+    <xs:complexType>
+      <xs:sequence minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="xpathExpression" type="tkx:XpathExpression"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="XpathExpression">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attributeGroup ref="tkx:DomainIdType"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="regularExpressions">
+    <xs:complexType>
+      <xs:sequence minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="regularExpression" type="tkx:RegEx"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="RegEx">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attributeGroup ref="tkx:DomainIdType"/>
+      </xs:extension>
+    </xs:simpleContent>
+    <!-- A pcre based regular expression -->
+  </xs:complexType>
+  <xs:attributeGroup name="DomainIdType">
+    <xs:attribute name="domainId" type="xs:NMTOKEN" use="required">
+      <xs:annotation>
+        <xs:appinfo>A data domain instance previously defined in this policy instance.</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="desc" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>A description which can be used in messages.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:attributeGroup>
+  <xs:element name="creditCards">
+    <xs:complexType>
+      <xs:sequence minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="creditCard" type="tkx:CreditCard"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="CreditCard">
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="startPrefix" type="xs:string" use="required"/>
+    <xs:attribute name="endPrefix" type="xs:string" use="required"/>
+    <xs:attribute name="check" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="luhn"/>
+          <xs:enumeration value="none"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="digits" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:integer">
+          <xs:minInclusive value="12"/>
+          <xs:maxInclusive value="19"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <!-- Name or description of the credit card issuer (e.g. "Visa Electron").
+         The same name may be used multiple times in this list.
+    -->
+    <!-- A credit card issuer may use a range of prefixes.  For example:
+         One range of MasterCard numbers begins with 51, 52, 53, 54, or 55.
+         This would be expressed as: startPrefix="51" endPrefix="55".
+         
+         One range of Discover numbers begin with 644 through 649.
+         This would be expressed as: startPrefix="644" endPrefix="649".
+         
+         The startPrefix and the endPrefix must have the same length
+         and the startPrefix must be less than the endPrefix.
+    -->
+    <!-- At this time, only one check digit (validation) algorithm 
+         is supported: luhn (ISO/IEC 7812).
+    -->
+  </xs:complexType>
+</xs:schema>

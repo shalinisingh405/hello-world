@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions 
+    targetNamespace="http://www.intel.com/soae/bpelFault-2009a/"
+    xmlns:tns="http://www.intel.com/soae/bpelFault-2009a/"
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap11="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:md="http://www.intel.com/soae/protocolMetadata-2007a.xsd">
+  
+    <wsdl:types>
+      <xsd:schema>
+        <xsd:import schemaLocation="../metadata/http.xsd" namespace="http://www.intel.com/soae/protocolMetadata-2007a.xsd"/>
+      </xsd:schema>
+    </wsdl:types>
+  
+  <wsdl:message name="HttpRedirection">
+    <wsdl:part name="code" type="xsd:string"/>
+    <wsdl:part name="reason" type="xsd:string"/>
+    <wsdl:part name="location" type="xsd:string"/>
+    <wsdl:part name="date" type="xsd:string"/>
+  </wsdl:message>
+
+  <wsdl:message name="HttpClientError">
+    <wsdl:part name="code" type="xsd:string"/>
+    <wsdl:part name="reason" type="xsd:string"/>
+    <wsdl:part name="wwwAuthenticate" type="xsd:string"/>
+    <wsdl:part name="proxyAuthenticate" type="xsd:string"/>
+    <wsdl:part name="allow" type="xsd:string"/>
+    <wsdl:part name="contentRange" type="xsd:string"/>
+  </wsdl:message>
+  
+  <wsdl:message name="HttpInternalServerError">
+    <wsdl:part name="code" type="xsd:string"/>
+    <wsdl:part name="reason" type="xsd:string"/>
+    <wsdl:part name="retryAfter" type="xsd:string"/>
+  </wsdl:message>
+
+</wsdl:definitions>

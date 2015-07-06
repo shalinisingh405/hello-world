@@ -1,0 +1,46 @@
+  <xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' blockDefault='#all' elementFormDefault="qualified" attributeFormDefault="unqualified"
+             xmlns='http://www.intel.com/soae/protocolMetadata-2007a.xsd' targetNamespace='http://www.intel.com/soae/protocolMetadata-2007a.xsd'>
+
+    <xs:include schemaLocation='metadataCommon.xsd'/>
+             
+    <!-- =============================================================================== -->
+    <!--  message element: file input & output servers                                    -->
+    <!-- =============================================================================== -->
+    <!--  file protocol header: root element  -->
+    <xs:element name='fileMessage'>
+      <xs:complexType>
+        <xs:sequence>
+          <xs:choice maxOccurs='1'>
+            <xs:element name='source' type='fileSource'/>
+            <xs:element name='destination' type='fileDestination'/>
+          </xs:choice>
+          <xs:element name='transport' type='fileTransport' minOccurs='0' maxOccurs='1'/>  <!-- specific message related data -->
+        </xs:sequence>
+      </xs:complexType>
+    </xs:element>
+
+    <!--  source element  -->
+    <xs:complexType name='fileSource'>
+      <xs:sequence>
+        <xs:element name='inputServerName' type='NonEmptyString'/>
+      </xs:sequence>
+    </xs:complexType>
+
+    <!--  destination element  -->
+    <xs:complexType name='fileDestination'>
+      <xs:sequence maxOccurs='1'>
+        <xs:element name='invocationAgentName' type='NonEmptyString'/>
+      </xs:sequence>
+    </xs:complexType>
+
+    <!-- transport element  -->
+    <xs:complexType name='fileTransport'>
+      <xs:sequence>
+        <!-- We suppose that metadata may contain only a few parameters. Others will be taken from the standard config -->
+        <xs:element name='path' type='NonEmptyString' minOccurs="0" maxOccurs="1"/>
+        <xs:element name='file' type='NonEmptyString' minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+
+  </xs:schema>
+

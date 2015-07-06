@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wssec:webServiceSecurityDefinition usage="createSecurityToken" name="DeptOfVeteransAdmin-XSPA-Example" 
+        samlVersion="2.0" bindingType="REST" tokenType="saml"
+        xmlns:wssec="http://www.intel.com/soae/localService/wssecDefinition-2007a/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+        xsi:schemaLocation="http://www.intel.com/soae/localService/wssecDefinition-2007a/ ../wssecDefinition.xsd">
+  <createSamlAssertion>
+    <assertionInfo>
+      <v2dot0Info>
+        <generalAssertionInfo>
+          <Issuer type="string">
+            <staticValue>Some-configured-name-to-identify-issuer</staticValue>
+          </Issuer>
+        </generalAssertionInfo>
+        <Subject>
+          <NameID type="string">
+            <staticValue>cn=x,org=xxx</staticValue>
+          </NameID>
+          <SubjectConfirmation>
+            <Method>urn:oasis:names:tc:SAML:2.0:cm:holder-of-key</Method>
+            <confirmationKeyInfo type="string">
+              <holderOfKeyKeyInfoType>X509Certificate</holderOfKeyKeyInfoType>
+              <holderOfKeyKeyInfoType>X509SubjectName</holderOfKeyKeyInfoType>
+              <holderOfKeyKeyInfoType>RSAKeyValue</holderOfKeyKeyInfoType>
+              <holderOfKeyKeyInfoType>X509SKI</holderOfKeyKeyInfoType>
+              <clientCredentialSource>bstFromVerifyOperation</clientCredentialSource>
+              <importedClientCredential>internal:importedClientCredential</importedClientCredential>
+            </confirmationKeyInfo>
+          </SubjectConfirmation>
+        </Subject>
+        <AttributeStatement>
+          <Attribute>
+            <Name-attribute type="string">
+              <staticValue>urn:oasis:names:tc:SAML:2.0:profiles:attribute:XPSA:subject</staticValue>
+            </Name-attribute>
+            <NameFormat-attribute>urn:oasis:names:tc:SAML:2.0:attrname-format:uri</NameFormat-attribute>
+            <AttributeValue type="anyType">
+              <!-- Doctor, Bob -->
+              <inputFromWorkflow>Subject</inputFromWorkflow>
+            </AttributeValue>
+          </Attribute>
+          <Attribute>
+            <Name-attribute type="string">
+              <staticValue>urn:oasis:names:tc:SAML:2.0:profiles:attribute:XPSA:purposeofuse</staticValue>
+            </Name-attribute>
+            <NameFormat-attribute>urn:oasis:names:tc:SAML:2.0:attrname-format:uri</NameFormat-attribute>
+            <AttributeValue type="anyType">
+              <staticValue>&lt;saml:AttributeValue xsi:type="http://www.w3.org/2001/XMLSchema#string"&gt;Healthcare Access&lt;/saml:AttributeValue&gt;</staticValue>
+            </AttributeValue>
+          </Attribute>
+          <Attribute>
+            <Name-attribute type="string">
+              <staticValue>urn:oasis:names:tc:SAML:2.0:profiles:attribute:XPSA:role</staticValue>
+            </Name-attribute>
+            <NameFormat-attribute>urn:oasis:names:tc:SAML:2.0:attrname-format:uri</NameFormat-attribute>
+            <AttributeValue type="anyType">
+              <!-- Physician -->
+              <inputFromWorkflow>Role</inputFromWorkflow>
+            </AttributeValue>
+          </Attribute>          
+          <Attribute>
+            <Name-attribute type="string">
+              <staticValue>urn:oasis:names:tc:SAML:2.0:profiles:attribute:XPSA:organization</staticValue>
+            </Name-attribute>
+            <NameFormat-attribute>urn:oasis:names:tc:SAML:2.0:attrname-format:uri</NameFormat-attribute>
+            <AttributeValue type="anyType">
+              <!-- County Hospital -->
+              <inputFromWorkflow>Organization</inputFromWorkflow>
+            </AttributeValue>
+          </Attribute>
+          <Attribute>
+            <Name-attribute type="string">
+              <staticValue>urn:oasis:names:tc:SAML:2.0:profiles:attribute:XPSA:resource:name</staticValue>
+            </Name-attribute>
+            <NameFormat-attribute>urn:oasis:names:tc:SAML:2.0:attrname-format:uri</NameFormat-attribute>
+            <AttributeValue type="anyType">
+              <!-- John Doe -->
+              <inputFromWorkflow>patient-name</inputFromWorkflow>
+            </AttributeValue>
+          </Attribute>
+          <Attribute>
+            <Name-attribute type="string">
+              <staticValue>urn:oasis:names:tc:SAML:2.0:profiles:attribute:XPSA:resource:patientid</staticValue>
+            </Name-attribute>
+            <NameFormat-attribute>urn:oasis:names:tc:SAML:2.0:attrname-format:uri</NameFormat-attribute>
+            <AttributeValue type="anyType">
+              <!-- 1000011 -->
+              <inputFromWorkflow>patient-ID</inputFromWorkflow>
+            </AttributeValue>
+          </Attribute>
+          <Attribute>
+            <Name-attribute type="string">
+              <staticValue>urn:oasis:names:tc:SAML:2.0:profiles:attribute:XPSA:action</staticValue>
+            </Name-attribute>
+            <NameFormat-attribute>urn:oasis:names:tc:SAML:2.0:attrname-format:uri</NameFormat-attribute>
+            <AttributeValue type="anyType">
+              <staticValue>&lt;saml:AttributeValue xsi:type="http://www.w3.org/2001/XMLSchema#string"&gt;Read&lt;/saml:AttributeValue&gt;</staticValue>
+            </AttributeValue>
+          </Attribute>
+        </AttributeStatement>
+      </v2dot0Info>
+    </assertionInfo>
+    <outputBindingInfo>
+      <exportDestination>to-HTTP-Authorization-saml2-bearer</exportDestination>
+      <deflate>true</deflate>
+      <base64Encode>true</base64Encode>
+    </outputBindingInfo>
+  </createSamlAssertion>
+</wssec:webServiceSecurityDefinition>

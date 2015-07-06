@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://www.intel.com/soae/localService/timer-2010a/" 
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" 
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+    xmlns:soae="http://www.intel.com/soae/wsdl/wsdl11-2007a/"	
+    xmlns:timer="http://www.intel.com/soae/localService/timer-2010a/">
+    
+    <plnk:partnerLinkType name="TimerPlinkType">
+        <plnk:role name="TimerManager" portType="timer:TimerPortType"/>
+    </plnk:partnerLinkType>
+    
+    <wsdl:types xmlns:xsd="http://www.w3.org/2001/XMLSchema" >
+        <xsd:schema elementFormDefault="qualified" 
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+            targetNamespace="http://www.intel.com/soae/localService/timer-2010a/">
+            <xsd:element name="go"/>
+        </xsd:schema>
+    </wsdl:types>
+    
+    <wsdl:message name="GoMessage">
+        <wsdl:part name="body" element="timer:go"/>
+    </wsdl:message>
+    
+    <wsdl:portType name="TimerPortType">
+        <wsdl:operation name="go">
+            <wsdl:input message="timer:GoMessage"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    
+    <wsdl:binding name="TimerBinding" type="timer:TimerPortType">
+        <soae:binding transport="http://www.intel.com/soae/transport/timer"/>
+        <wsdl:operation name="go">
+            <wsdl:input>
+                <soae:content part="body" type="text/xml"/>
+            </wsdl:input>
+        </wsdl:operation>
+    </wsdl:binding>
+    
+    <wsdl:service name="TimerService">
+        <wsdl:port name="TimerServicePort" binding="timer:TimerBinding">
+            <soae:address location="timer://schedulerName?timeTrigger=60"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

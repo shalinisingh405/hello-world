@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:intel-esg="http://www.intel.com/soae/localServices/REST/" xmlns:md="http://www.intel.com/soae/protocolMetadata-2007a.xsd" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:tns="http://www.intel.com/soae/localService/oauth/authorize" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="AuthorizationRequest" targetNamespace="http://www.intel.com/soae/localService/oauth/authorize">
+  <wsdl:message name="AuthorizationRequestRequest">
+    <wsdl:part name="response_type" type="xsd:string"/>
+    <wsdl:part name="client_id" type="xsd:string"/>
+    <wsdl:part name="redirect_uri" type="xsd:string"/>
+    <wsdl:part name="scope" type="xsd:string"/>
+    <wsdl:part name="state" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="AuthorizationRequestResponse"/>
+  <wsdl:portType name="AuthorizationRequest">
+    <wsdl:operation name="invoke">
+      <wsdl:input message="tns:AuthorizationRequestRequest"/>
+      <wsdl:output message="tns:AuthorizationRequestResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="AuthorizationRequestBinding" type="tns:AuthorizationRequest">
+    <http:binding verb="POST"/>
+    <wsdl:operation name="invoke">
+      <http:operation location="/authorize"/>
+      <wsdl:input>
+        <http:urlEncoded intel-esg:optional="redirect_uri scope state"/>
+        <mime:content type="application/x-www-form-urlencoded"/>
+        <intel-esg:parameterMapping>
+          <intel-esg:mapEntry name="response_type" part="response_type"/>
+          <intel-esg:mapEntry name="client_id" part="client_id"/>
+          <intel-esg:mapEntry name="redirect_uri" part="redirect_uri"/>
+          <intel-esg:mapEntry name="scope" part="scope"/>
+          <intel-esg:mapEntry name="state" part="state"/>
+        </intel-esg:parameterMapping>
+      </wsdl:input>
+      <wsdl:output/>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="AuthorizationRequestService">
+    <wsdl:port binding="tns:AuthorizationRequestBinding" name="AuthorizationRequestPort">
+      <http:address location="https://localhost:8080"/>
+    </wsdl:port>
+  </wsdl:service>
+  <plnk:partnerLinkType name="AuthorizationRequestPartnerLinkType">
+    <plnk:role name="service" portType="tns:AuthorizationRequest"/>
+  </plnk:partnerLinkType>
+</wsdl:definitions>

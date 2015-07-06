@@ -1,0 +1,16 @@
+  <xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'  blockDefault='#all' elementFormDefault="qualified" attributeFormDefault="unqualified"
+             xmlns:wsa='http://schemas.xmlsoap.org/ws/2004/08/addressing'  
+             xmlns='http://www.intel.com/soae/protocolMetadata-2007a.xsd' targetNamespace='http://www.intel.com/soae/protocolMetadata-2007a.xsd'>
+             
+    <xs:include schemaLocation='metadataCommon.xsd'/>
+ 
+    <xs:element name='mimeHeaders'>
+      <xs:complexType>
+        <xs:choice>
+          <xs:element name='header' type='Header' maxOccurs='unbounded'/>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+
+  </xs:schema>
+

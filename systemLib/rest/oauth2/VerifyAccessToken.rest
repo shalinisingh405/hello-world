@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:intel-esg="http://www.intel.com/soae/localServices/REST/" xmlns:md="http://www.intel.com/soae/protocolMetadata-2007a.xsd" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:tns="http://www.intel.com/soae/localService/oauth-revocation/verifyaccesstoken" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="VerifyAccessToken" targetNamespace="http://www.intel.com/soae/localService/oauth-revocation/verifyaccesstoken">
+  <wsdl:message name="VerifyAccessTokenRequest">
+    <wsdl:part name="body" type="xsd:anyType"/>
+  </wsdl:message>
+  <wsdl:message name="VerifyAccessTokenResponse">
+    <wsdl:part name="body" type="xsd:anyType"/>
+  </wsdl:message>
+  <wsdl:portType name="VerifyAccessToken">
+    <wsdl:operation name="invoke">
+      <wsdl:input message="tns:VerifyAccessTokenRequest"/>
+      <wsdl:output message="tns:VerifyAccessTokenResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="VerifyAccessTokenBinding" type="tns:VerifyAccessToken">
+    <http:binding verb="POST"/>
+    <wsdl:operation name="invoke">
+      <http:operation location="/verifyAccessToken"/>
+      <wsdl:input>
+        <mime:content part="body" type="application/json"/>
+        <intel-esg:parameterMapping/>
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="body" type="application/json"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="VerifyAccessTokenService">
+    <wsdl:port binding="tns:VerifyAccessTokenBinding" name="VerifyAccessTokenPort">
+      <http:address location="http://localhost:8080"/>
+    </wsdl:port>
+  </wsdl:service>
+  <plnk:partnerLinkType name="VerifyAccessTokenPartnerLinkType">
+    <plnk:role name="service" portType="tns:VerifyAccessToken"/>
+  </plnk:partnerLinkType>
+</wsdl:definitions>

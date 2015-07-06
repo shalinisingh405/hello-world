@@ -1,0 +1,13 @@
+<message xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd">
+  <protocol>axis2</protocol>
+  <axis2Message>
+    <destination>
+      <!-- application defined invocation agent name to process this request -->
+      <invocationAgentName>invocationAgent1</invocationAgentName>
+    </destination>
+    <transport>
+      <!-- SOAP Action to be invoked -->
+      <soapAction>SoapActionUri</soapAction>
+    </transport>
+  </axis2Message>
+</message>

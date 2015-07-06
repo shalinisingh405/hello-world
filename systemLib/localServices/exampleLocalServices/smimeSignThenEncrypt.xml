@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<smime:smimePolicy xmlns:smime="http://www.intel.com/soae/localService/smimeDefinition-2007a/" 
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                   xsi:schemaLocation="http://www.intel.com/soae/localService/smimeDefinition-2007a/ ../smime.xsd">
+  <signThenEncrypt>
+    <sign>
+      <signatureAlgorithm>RSA</signatureAlgorithm>
+      <digestAlgorithm>SHA1</digestAlgorithm>
+      <keyPair>demo-public-private-key-pair</keyPair>
+    </sign>
+    <encrypt>
+      <keyEncryptionAlgorithm>RSA</keyEncryptionAlgorithm>
+      <bulkEncryptionAlgorithm>AES128</bulkEncryptionAlgorithm>
+      <recipientCertificate>
+        <fromSecurityConfig>demo-certificate</fromSecurityConfig>
+      </recipientCertificate>
+    </encrypt>
+  </signThenEncrypt>
+</smime:smimePolicy>

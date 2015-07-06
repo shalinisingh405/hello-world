@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd"
+               oauthVersion="OAuth2-draft-22" samlVersion="2.0">
+  <identityProcessing>
+    <extractIdentity>
+      <nameFromOAuthAuthorizationRequest>
+        <flowType>AuthorizationCode</flowType>
+        <authorizationCodeRequestType>accessTokenRequest</authorizationCodeRequestType>
+        <roleBeingChecked>resource_owner</roleBeingChecked>
+        <scopeChecking>
+          <scopeRequired>false</scopeRequired>
+        </scopeChecking>
+        <grant>
+          <authorizationServer type="anyURI">
+            <staticValue>www.storephotos.example.com</staticValue>
+          </authorizationServer>
+          <verificationInfo>
+            <authenticationPolicy>policy-to-validate-grant-saml-assertion</authenticationPolicy>
+          </verificationInfo>
+        </grant>
+      </nameFromOAuthAuthorizationRequest>
+    </extractIdentity>
+    <mapIdentity>
+      <createToken>
+        <createOAuthAccessTokenResponse>
+          <accessTokenType>Oauth</accessTokenType>
+          <expirationDelta type="unsignedInt">
+            <inputFromWorkflow>int:expirationDelta</inputFromWorkflow>
+          </expirationDelta>
+          <scope type="string">
+            <useExtractedScope></useExtractedScope>
+          </scope>
+        </createOAuthAccessTokenResponse>
+        <jsonWebToken>
+          <tokenContent>
+            <issuer>www.storephotos.example.com authorization server</issuer>
+            <subject type="string">
+              <automaticallyGenerated>
+                <distinguishedNamePrefix></distinguishedNamePrefix>
+                <distinguishedNamePostfix></distinguishedNamePostfix>
+                <generatedInternalWorkflowParameter>Authentication-Subject-NameIdentifier-Use-Extracted
+                </generatedInternalWorkflowParameter>
+              </automaticallyGenerated>
+            </subject>
+            <audience type="string">
+              <staticValue>www.storephotos.example.com resource server</staticValue>
+            </audience>
+            <claim>
+              <name>peerThumbprint</name>
+              <value type="string">
+                <inputFromWorkflow>app:client_sha1_thumbprint_from_tls_establishment</inputFromWorkflow>
+              </value>
+            </claim>
+          </tokenContent>
+          <jsonSignInfo>
+            <jsonGenerateSignatureAlgorithm>hmacWithSha256</jsonGenerateSignatureAlgorithm>
+            <jsonSymmetricKey>
+              <security-config-package>configurated-shared-symmetric-key</security-config-package>
+            </jsonSymmetricKey>
+          </jsonSignInfo>
+        </jsonWebToken>
+      </createToken>
+    </mapIdentity>
+  </identityProcessing>  
+</aaa:aaaPolicy>

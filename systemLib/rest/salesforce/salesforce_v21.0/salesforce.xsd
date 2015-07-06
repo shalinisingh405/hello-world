@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+            targetNamespace="http://www.intel.com/soae/rest/salesforce"
+            xmlns:tns="http://www.intel.com/soae/rest/salesforce"
+            elementFormDefault="unqualified">
+  <!-- Though Salesforce returns XML data without any namespaces we cannot afford this
+       to avoid name collisions. The solution is to provide complex types with unqualified 
+       elements -->
+  
+   <xsd:complexType name="Versions">
+      <xsd:sequence>
+        <xsd:element name="Version">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="label" type="xsd:string"/>
+              <xsd:element name="url" type="xsd:string"/>
+              <xsd:element name="version" type="xsd:string"/>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+   </xsd:complexType>
+  
+    <xsd:complexType name="urls">
+      <xsd:sequence>
+        <xsd:element name="sobjects" type="xsd:string"/>
+        <xsd:element name="search" type="xsd:string"/>
+        <xsd:element name="query" type="xsd:string"/>
+        <xsd:element name="recent" type="xsd:string"/>
+      </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="DescribeGlobal">
+      <xsd:sequence>
+        <xsd:element name="encoding" type="xsd:string"/>
+        <xsd:element name="maxBatchSize" type="xsd:integer"/>
+        <xsd:element name="sobjects" type="tns:SObject" minOccurs="0" maxOccurs="unbounded"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  
+    <xsd:complexType name="SObject">
+      <xsd:sequence>
+        <xsd:element name="activateable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="createable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="custom" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="customSetting" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="deletable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="deprecatedAndHidden" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="feedEnabled" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="keyPrefix" type="xsd:string" minOccurs="0"/>
+        <xsd:element name="label" type="xsd:string" minOccurs="0"/>
+        <xsd:element name="labelPlural" type="xsd:string" minOccurs="0"/>
+        <xsd:element name="layoutable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="mergeable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="name" type="xsd:string" minOccurs="0"/>
+        <xsd:element name="queryable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="replicateable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="retrieveale" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="searchable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="triggerable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="undeletable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="updateable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="urls">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="sobject" type="xsd:string"/>
+              <xsd:element name="describe" type="xsd:string"/>
+              <xsd:element name="rowTemplate" type="xsd:string"/>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="SObjectMetadata">
+      <xsd:sequence>
+        <xsd:element name="objectDescribe" type="tns:SObject"/>
+        <xsd:element name="recentItems" type="tns:Item" minOccurs="0" maxOccurs="unbounded"/> 
+      </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="FieldMetadata">
+      <xsd:sequence>
+        <xsd:element name="activateable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="createable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="childRelationships" minOccurs="0" maxOccurs="unbounded">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="cascadeDelete" type="xsd:boolean"/>
+              <xsd:element name="childSObject" type="xsd:string"/>
+              <xsd:element name="deprecatedAndHidden" type="xsd:boolean"/>
+              <xsd:element name="field" type="xsd:string"/>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+        <xsd:element name="custom" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="customSetting" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="deletable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="deprecatedAndHidden" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="feedEnabled" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="fields" minOccurs="0" maxOccurs="unbounded">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="autoNumber" type="xsd:boolean" minOccurs="0"/>
+              <xsd:element name="byteLength" type="xsd:integer" minOccurs="0"/>
+              <xsd:element name="calculated" type="xsd:boolean" minOccurs="0"/>
+              <xsd:element name="caseSensitive" type="xsd:boolean" minOccurs="0"/>
+              <xsd:element name="createable" type="xsd:boolean" minOccurs="0"/>
+              <xsd:element name="custom" type="xsd:boolean" minOccurs="0"/>
+              <xsd:element name="defaultedOnCreate" type="xsd:boolean" minOccurs="0"/>
+              <xsd:element name="deprecatedAndHidden" type="xsd:boolean" minOccurs="0"/>
+              <xsd:element name="digits" type="xsd:integer" minOccurs="0"/>
+              <xsd:element name="filterable" type="xsd:boolean" minOccurs="0"/>
+              <xsd:element name="groupable" type="xsd:boolean" minOccurs="0"/>
+              <xsd:element name="isLookup" type="xsd:boolean" minOccurs="0"/>
+              <xsd:element name="label" type="xsd:string" minOccurs="0"/>
+              <xsd:element name="length" type="xsd:integer" minOccurs="0"/>
+              <xsd:element name="name" type="xsd:string" minOccurs="0"/>
+              <xsd:element name="nameField" type="xsd:boolean" minOccurs="0"/>
+              <xsd:element name="namePointing" type="xsd:boolean" minOccurs="0"/>
+              <xsd:element name="nillable" type="xsd:boolean" minOccurs="0"/>
+              <xsd:element name="picklistValues" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element name="active" type="xsd:boolean"/>
+                    <xsd:element name="defaultValue" type="xsd:boolean"/>
+                    <xsd:element name="label" type="xsd:string"/>
+                    <xsd:element name="value" type="xsd:string"/>
+                  </xsd:sequence>
+                </xsd:complexType>
+              </xsd:element>
+              <xsd:element name="precision" type="xsd:boolean" minOccurs="0"/>
+              <xsd:element name="restrictedPickList" type="xsd:boolean" minOccurs="0"/>
+              <xsd:element name="scale" type="xsd:integer" minOccurs="0"/>
+              <xsd:element name="soapType" type="xsd:string" minOccurs="0"/>
+              <xsd:element name="sortable" type="xsd:boolean" minOccurs="0"/>
+              <xsd:element name="type" type="xsd:string" minOccurs="0"/>
+              <xsd:element name="unique" type="xsd:boolean" minOccurs="0"/>
+              <xsd:element name="updateable" type="xsd:boolean" minOccurs="0"/>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+        <xsd:element name="keyPrefix" type="xsd:string" minOccurs="0"/>
+        <xsd:element name="label" type="xsd:string" minOccurs="0"/>
+        <xsd:element name="labelPlural" type="xsd:string" minOccurs="0"/>
+        <xsd:element name="layoutable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="mergeable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="name" type="xsd:string" minOccurs="0"/>
+        <xsd:element name="queryable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="recordTypeInfos" minOccurs="0">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="available" type="xsd:boolean"/>
+              <xsd:element name="defaultRecordTypeMapping" type="xsd:boolean"/>
+              <xsd:element name="name" type="xsd:string"/>
+              <xsd:element name="recordTypeId" type="xsd:string"/>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+        <xsd:element name="replicateable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="retrieveale" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="searchable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="triggerable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="undeletable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="updateable" type="xsd:boolean" minOccurs="0"/>
+        <xsd:element name="urls">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="uiEditTemplate" type="xsd:string"/>
+              <xsd:element name="sobject" type="xsd:string"/>
+              <xsd:element name="uiDetailTemplate" type="xsd:string"/>
+              <xsd:element name="describe" type="xsd:string"/>
+              <xsd:element name="rowTemplate" type="xsd:string"/>
+              <xsd:element name="uiNewRecord" type="xsd:string"/>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="Item" mixed="false">
+      <xsd:sequence>
+        <xsd:element name="Id" type="xsd:string"/>
+        <xsd:any minOccurs="0" maxOccurs="unbounded"/>
+      </xsd:sequence>
+      <xsd:attribute name="type" type="xsd:string"/>
+      <xsd:attribute name="url" type="xsd:string"/>
+    </xsd:complexType>
+    
+    <xsd:complexType name="CreateRecordResult">
+      <xsd:sequence>
+        <xsd:element name="id" type="xsd:string"/>
+        <xsd:element name="success" type="xsd:boolean"/>
+      </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="QueryResult">
+      <xsd:sequence>
+        <xsd:element name="done" type="xsd:boolean"/>
+        <xsd:element name="records" minOccurs="0" maxOccurs="unbounded">
+          <xsd:complexType mixed="false">
+            <xsd:sequence>
+              <xsd:any minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+            <xsd:attribute name="type" type="xsd:string"/>
+            <xsd:attribute name="url" type="xsd:string"/>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="SearchResults">
+      <xsd:sequence>
+        <xsd:element name="SearchResult" minOccurs="0" maxOccurs="unbounded">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="Id" type="xsd:string"/>
+            </xsd:sequence>
+            <xsd:attribute name="type" type="xsd:string"/>
+            <xsd:attribute name="url" type="xsd:string"/>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="Errors">
+      <xsd:sequence>
+      	<xsd:element name="Error">
+      	  <xsd:complexType>
+      	    <xsd:sequence>
+	          <xsd:element name="errorCode" type="xsd:string"/>
+	          <xsd:element name="message" type="xsd:string"/>
+      	    </xsd:sequence>
+      	  </xsd:complexType>
+      	</xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="OAuth">
+      <xsd:sequence>
+        <xsd:element name="id" type="xsd:string"/>
+        <xsd:element name="issued_at" type="xsd:long"/>
+        <xsd:element name="instance_url" type="xsd:string"/>
+        <xsd:element name="signature" type="xsd:base64Binary"/>
+        <xsd:element name="access_token" type="xsd:string"/>
+      </xsd:sequence>        
+    </xsd:complexType>
+</xsd:schema>

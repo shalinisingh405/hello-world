@@ -1,0 +1,16 @@
+<message xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd"
+         xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing">
+  <!-- In this example, an Invocation agent is utilizing FTP -->
+  <!-- This is indicated in the following protocol element -->
+  <protocol>ftp</protocol>
+  <ftpMessage>
+    <destination>
+      <!-- application defined invocation agent name to process this request -->
+      <invocationAgentName>IA-1</invocationAgentName>
+    </destination>
+    <transport>
+      <!-- destination file name -->
+      <file>XXXXXX.xml</file>
+    </transport>
+  </ftpMessage>
+</message>

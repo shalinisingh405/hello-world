@@ -1,0 +1,55 @@
+<contentAttackPreventionPolicy
+  xmlns="http://www.intel.com/soae/localService/contentAttackPreventionDefinition-2007a/" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:schemaLocation="http://www.intel.com/soae/localService/contentAttackPreventionDefinition-2007a/ ../contentAttackPrevention.xsd"
+>
+  
+  <badContentAction>
+    <writeTransactionLog>true</writeTransactionLog>
+    <reject>true</reject>
+  </badContentAction>
+
+  <filter>
+    <checkComments>true</checkComments>
+  </filter>
+
+  <inspection>
+
+    <sqlCheck>true</sqlCheck>
+    <xpathCheck>true</xpathCheck>
+    <forbidDTD>true</forbidDTD>
+    
+
+    <forbiddenRegExSet>
+      <forbiddenRegEx desc="shell escapes">.*[&apos;&quot;\\].*</forbiddenRegEx>
+      <forbiddenRegEx desc="grouping characters">.*[\[\{\}\]\)].*</forbiddenRegEx>
+    </forbiddenRegExSet>
+
+    <requiredRegExSet>
+      <requiredRegEx desc="basic latin characters">[\p{IsBasicLatin}]*</requiredRegEx>
+    </requiredRegExSet>
+
+    <forbiddenWordSet caseBlind="true" >
+      <word>classified</word>
+      <word>top-secret</word>
+      <word>secret</word>
+    </forbiddenWordSet>
+
+    <xmlLimitCheck>
+          <tagLength>64</tagLength>
+          <namespaceUriLength>256</namespaceUriLength>
+          <namespacePrefixLength>16</namespacePrefixLength>
+          <attributeValueLength>128</attributeValueLength>
+          <contentLength>1000000</contentLength>
+          <commentLength>100000</commentLength>
+          <piLength>0</piLength>
+          <pi>0</pi>
+          <attributesPerElement>64</attributesPerElement>
+          <openElements>16</openElements>
+          <openNamespaces>64</openNamespaces>
+          <childrenPerElement>1024</childrenPerElement>
+    </xmlLimitCheck>
+
+</inspection>
+
+</contentAttackPreventionPolicy>

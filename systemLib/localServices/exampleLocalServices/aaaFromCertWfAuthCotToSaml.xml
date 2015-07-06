@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ..\aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <x509CertificateFromWorkflow extractMostSpecificComponentFromSubjectName="true">subjectName</x509CertificateFromWorkflow>
+    </extractIdentity>
+    <authenticateIdentity>
+      <checkX509CerticateChainOfTrust>
+        <authenticationPolicy>demo-wssecurity-authentication-policy</authenticationPolicy>
+      </checkX509CerticateChainOfTrust>
+    </authenticateIdentity>
+    <mapIdentity>
+      <createSamlAssertion>
+        <assertionInfo>
+          <v1dotxInfo>
+            <generalAssertionInfo>
+              <Issuer type="string">
+                <staticValue>Intel SOAE proxy</staticValue>
+              </Issuer>
+            </generalAssertionInfo>
+            <AuthenticationStatement>
+              <Subject-NameIdentifier type="string">
+                <automaticallyGenerated>
+                  <distinguishedNamePrefix></distinguishedNamePrefix>
+                  <distinguishedNamePostfix>.company.us</distinguishedNamePostfix>
+                  <generatedInternalWorkflowParameter>Authentication-Subject-NameIdentifier-Use-Extracted</generatedInternalWorkflowParameter>
+                </automaticallyGenerated>
+              </Subject-NameIdentifier>
+              <Subject-NameIdentifier-Format-Attribute>urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName</Subject-NameIdentifier-Format-Attribute>
+              <AuthenticationMethod-Attribute>urn:oasis:names:tc:SAML:1.0:am:X509-PKI</AuthenticationMethod-Attribute>
+              <Subject-SubjectConfirmation>
+                <Method>urn:oasis:names:tc:SAML:1.1:cm:sender-vouches</Method>
+              </Subject-SubjectConfirmation>
+              <SubjectLocality-IPAddress-Attribute type="string">
+                <use-incoming-client-ip-address>internal-name:client-ip-address-from-incoming-metadata</use-incoming-client-ip-address>
+              </SubjectLocality-IPAddress-Attribute>
+            </AuthenticationStatement>
+          </v1dotxInfo>
+        </assertionInfo>
+      </createSamlAssertion>
+    </mapIdentity>
+  </identityProcessing>
+</aaa:aaaPolicy>

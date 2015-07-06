@@ -1,0 +1,27 @@
+  <message xmlns='http://www.intel.com/soae/protocolMetadata-2007a.xsd'
+           xmlns:addext="http://www.intel.com/soae/ws-addressing/addressing-2008a/" 
+           xmlns:wsa='http://schemas.xmlsoap.org/ws/2004/08/addressing'>
+    <!-- In this example, a mime attachment will be internally handled by WFL process -->
+    <!-- This is indicated in the following protocol element being set to mime -->
+    <protocol>mime</protocol>
+    <mimeHeaders>
+      <!-- elements to be added to MIME attachment header with their associated value -->
+      <header name="Content-Id">
+        <!-- Each attachment should be uniquely identified with a unique CID -->
+        <field>
+          <value>foobar</value>
+        </field>
+      </header>
+      <header name="Content-Type">
+        <field>
+          <value>text/xml; charset=UTF-8</value>
+        </field>
+      </header>
+      <header name="Content-Transfer-Encoding">
+        <field>
+          <value>8bit</value>
+        </field>
+      </header>
+    </mimeHeaders>
+  </message>
+

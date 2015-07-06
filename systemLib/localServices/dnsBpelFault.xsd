@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:soae-fault="http://www.intel.com/soae/bpelFault-2009a/" 
+           targetNamespace="http://www.intel.com/soae/bpelFault-2009a/" 
+           elementFormDefault="unqualified">
+
+  <xs:include schemaLocation="soaeBpelFault.xsd" />
+
+  <!-- ========================================================================
+
+    Defines the soae bpel faults for dns related functions:
+
+        get-address-by-host
+	get-host-by-address
+	validate-address-range
+	validate-host-domain 
+    
+    ======================================================================== -->
+
+  <xs:element name="getAddressByHostFault" type="soae-fault:GetAddressByHostFault"/>
+
+  <xs:complexType name="GetAddressByHostFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+
+                <!-- The ip address from the extension function call. -->
+				<xs:element name="address" type="xs:string"/>
+
+				<xs:element name="desc" type="xs:string"/>
+
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="getHostByAddressFault" type="soae-fault:GetHostByAddressFault"/>
+
+  <xs:complexType name="GetHostByAddressFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+
+                <!-- The ip address from the extension function call. -->
+				<xs:element name="address" type="xs:string"/>
+
+				<xs:element name="desc" type="xs:string"/>
+
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="validateAddressRangeFault" type="soae-fault:ValidateAddressRangeFault"/>
+
+  <xs:complexType name="ValidateAddressRangeFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+
+                <!-- The ip address from the extension function call. -->
+                <xs:element name="address" type="xs:string"/>
+
+                <!-- The netmask restriction from the extension function call. -->
+				<xs:element name="restriction" type="xs:string"/>
+
+				<xs:element name="desc" type="xs:string"/>
+
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="validateHostDomainFault" type="soae-fault:ValidateHostDomainFault"/>
+
+  <xs:complexType name="ValidateHostDomainFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+              <xs:sequence>
+
+                <!-- The ip address from the extension function call. -->
+
+                <xs:element name="address" type="xs:string"/>
+
+                <!-- The domain name restriction from the extension function call. -->
+
+				<xs:element name="restriction" type="xs:string"/>
+
+				<xs:element name="desc" type="xs:string"/>
+
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+</xs:schema>

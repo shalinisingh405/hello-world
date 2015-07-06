@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema 
+  xmlns="http://www.w3.org/2001/XMLSchema" 
+  xmlns:revoc="http://www.intel.com/soae/localService/oauth-revocation/" 
+  targetNamespace="http://www.intel.com/soae/localService/oauth-revocation/">
+  
+    <complexType name="ErrorResponseType">
+      <sequence>
+        <element name="error" type="string" minOccurs="0"/>
+      </sequence>
+    </complexType>
+  
+  
+    <complexType name="VerifyAccessTokenRequestType">
+      <sequence>
+        <element name="tokenId" type="string"/>
+        <element name="clientId" type="string"/>
+      </sequence>
+    </complexType> 
+  
+    <complexType name="VerifyAccessTokenResponseType">
+      <sequence>
+        <element name="tokenStatus">
+          <simpleType>
+            <restriction base="string">
+              <enumeration value="valid"/>
+              <enumeration value="revoked"/>
+            </restriction>
+          </simpleType>
+        </element>
+      </sequence>
+    </complexType>
+    
+    <complexType name="VerifyRefreshTokenRequestType">
+      <sequence>
+        <element name="tokenId" type="string"/>
+        <element name="clientId" type="string"/>
+      </sequence>
+    </complexType> 
+  
+    <complexType name="VerifyRefreshTokenResponseType">
+      <sequence>
+        <element name="tokenStatus">
+          <simpleType>
+            <restriction base="string">
+              <enumeration value="valid"/>
+              <enumeration value="revoked"/>
+            </restriction>
+          </simpleType>
+        </element>
+      </sequence>
+    </complexType>
+    
+    <complexType name="RegisterAccessTokenRequestType">
+      <sequence>
+        <element name="accessTokenId" type="string"/>
+        <element name="accessTokenExpirationTime" type="dateTime"/>
+        <element name="accessTokenScope" type="string"/>
+        <element name="refreshTokenId" type="string" minOccurs="0"/>
+        <element name="refreshTokenExpirationTime" type="dateTime" minOccurs="0"/>
+        <element name="refreshTokenScope" type="string" minOccurs="0"/>
+        <element name="resourceOwner" type="string" minOccurs="0"/>
+        <element name="clientId" type="string"/>
+        <element name="redirectURI" type="string" minOccurs="0"/>
+      </sequence>
+    </complexType> 
+  
+    <complexType name="RegisterAccessTokenResponseType">
+      <sequence>
+        <element name="status">
+          <simpleType>
+            <restriction base="string">
+              <enumeration value="ok"/>
+            </restriction>
+          </simpleType>
+        </element>
+      </sequence>
+    </complexType>
+    
+</schema>

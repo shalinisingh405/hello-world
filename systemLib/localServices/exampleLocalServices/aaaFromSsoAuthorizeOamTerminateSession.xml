@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ..\aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <ssoFromCookie><cookieName>xyz</cookieName></ssoFromCookie>
+    </extractIdentity>
+    <mapIdentity>
+      <createUsernameToken>
+        <keyFormat>
+          <passwordText></passwordText>
+          <usernamePasswordSource>
+            <securityConfig>fixed-proxy-username-password</securityConfig>
+          </usernamePasswordSource>
+        </keyFormat>
+      </createUsernameToken>
+    </mapIdentity>
+  </identityProcessing>
+  <resourceProcessing>
+    <extractResource>
+      <requestUriFromHttpOperation><component>path</component><index>-1</index></requestUriFromHttpOperation>
+    </extractResource>
+    <authorizeResource>
+      <oracleAccessManagerAuthorization>
+        <resource type="anyURI">
+          <use-extracted-resource></use-extracted-resource>
+        </resource>
+        <method>Post</method>
+        <ssoOptions>
+          <terminateSession>true</terminateSession>
+        </ssoOptions>
+      </oracleAccessManagerAuthorization>
+    </authorizeResource>
+  </resourceProcessing>
+</aaa:aaaPolicy>

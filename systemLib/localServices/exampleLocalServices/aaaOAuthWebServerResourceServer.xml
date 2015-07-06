@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <tokenFromHttpOauthAuthorization>
+        <tokenType>Oauth</tokenType>
+        <jsonTokenInfo>
+          <jsonVerifyInfo>
+            <jsonAcceptSignatureAlgorithm><hmacWithSha256/><hmacWithSha384/><hmacWithSha512/></jsonAcceptSignatureAlgorithm>
+            <jsonSymmetricKey>
+              <securityObjectNameFromIncomingToken></securityObjectNameFromIncomingToken>
+            </jsonSymmetricKey>
+            <authenticationPolicy>symmetric-key-authentication-policy</authenticationPolicy>
+          </jsonVerifyInfo>
+        </jsonTokenInfo>
+        <specialExceptionHandling>
+          <typeFailureResponse>401-Unauthorized</typeFailureResponse>
+          <realm type="anyURI">
+            <staticValue>www.storephotos.example.com</staticValue>
+          </realm>
+        </specialExceptionHandling>
+      </tokenFromHttpOauthAuthorization>
+    </extractIdentity>
+  </identityProcessing>
+  <resourceProcessing>
+    <extractResource>
+      <requestUriFromHttpOperation></requestUriFromHttpOperation>
+    </extractResource>
+    <authorizeResource>
+      <oauthAccessTokenAuthorization>
+        <scopeResourceRule>
+          <scopeMatch>all-photos</scopeMatch>
+          <resourceMatch>get-everything</resourceMatch>
+        </scopeResourceRule>
+        <scopeResourceRule>
+          <scopeMatch>all-photos</scopeMatch>
+          <resourceMatch>photo-*</resourceMatch>
+        </scopeResourceRule>
+        <scopeResourceRule>
+          <scopeMatch>%r</scopeMatch>
+          <resourceMatch>%r</resourceMatch>
+        </scopeResourceRule>
+      </oauthAccessTokenAuthorization>
+    </authorizeResource>
+  </resourceProcessing>
+</aaa:aaaPolicy>

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2007 sp2 (http://www.altova.com) by WADE L POZIOMBKA (INTEL CORPORATION) -->
+<xs:schema xmlns="urn:soae.intel.com/xa/transaction" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:soae.intel.com/xa/transaction" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:element name="beginRequest">
+		<xs:annotation>
+			<xs:documentation>Begin XA Transaction request element</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:attribute name="transactionTimeout">
+				<xs:simpleType>
+					<xs:restriction base="xs:unsignedInt">
+						<xs:minExclusive value="0"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="beginResponse">
+		<xs:annotation>
+			<xs:documentation>Begin XA Transaction response element</xs:documentation>
+		</xs:annotation>
+		<xs:complexType/>
+	</xs:element>
+	<xs:element name="commitRequest">
+		<xs:annotation>
+			<xs:documentation>Commit XA Transaction request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType/>
+	</xs:element>
+	<xs:element name="commitResponse">
+		<xs:annotation>
+			<xs:documentation>Commit XA Transaction response</xs:documentation>
+		</xs:annotation>
+		<xs:complexType/>
+	</xs:element>
+	<xs:element name="rollbackRequest">
+		<xs:annotation>
+			<xs:documentation>Rollback XA Transaction request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType/>
+	</xs:element>
+	<xs:element name="rollbackResponse">
+		<xs:annotation>
+			<xs:documentation>Rollback XA Transaction response</xs:documentation>
+		</xs:annotation>
+		<xs:complexType/>
+	</xs:element>
+	<xs:element name="statusRequest">
+		<xs:annotation>
+			<xs:documentation>Get XA Transaction status request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType/>
+	</xs:element>
+	<xs:element name="statusResponse">
+		<xs:annotation>
+			<xs:documentation>Get XA Transaction status response</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:attribute name="status" use="required">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="STATUS_ACTIVE"/>
+						<xs:enumeration value="STATUS_COMMITTED"/>
+						<xs:enumeration value="STATUS_COMMITTING"/>
+						<xs:enumeration value="STATUS_MARKED_ROLLBACK"/>
+						<xs:enumeration value="STATUS_NO_TRANSACTION"/>
+						<xs:enumeration value="STATUS_PREPARED"/>
+						<xs:enumeration value="STATUS_PREPARING"/>
+						<xs:enumeration value="STATUS_ROLLEDBACK"/>
+						<xs:enumeration value="STATUS_ROLLING_BACK"/>
+						<xs:enumeration value="STATUS_UNKNOWN"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="suspendRequest">
+		<xs:annotation>
+			<xs:documentation>Suspend XA Transaction request.  Suspends the current transaction if there is one.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType/>
+	</xs:element>
+	<xs:element name="suspendResponse">
+		<xs:annotation>
+			<xs:documentation>Suspend XA Transaction response. </xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:attribute name="xaTransactionID">
+				<xs:annotation>
+					<xs:documentation>This attribute may be absent when there is no current transaction.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="resumeRequest">
+		<xs:annotation>
+			<xs:documentation>Resume previously suspended XA Transaction request.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:attribute name="xaTransactionID" use="required">
+				<xs:annotation>
+					<xs:documentation>This attribute is required to resume the specified transaction.  This value is obtained from a prior call to suspend (returned in suspendResponse)</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="1"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="resumeResponse">
+		<xs:annotation>
+			<xs:documentation>Resume previously suspended XA Transaction response.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType/>
+	</xs:element>
+	<xs:element name="setRollbackOnlyRequest">
+		<xs:annotation>
+			<xs:documentation>Sets the current XA Transaction state to rollback only.  The only permissble termination is rollback.</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="setRollbackOnlyResponse">
+		<xs:annotation>
+			<xs:documentation>Sets the current XA Transaction state to rollback only.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType/>
+	</xs:element>
+	<xs:element name="fault">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">XA Transaction failure</xs:documentation>
+	    </xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="message">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="1"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="stackTrace" type="xs:string" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

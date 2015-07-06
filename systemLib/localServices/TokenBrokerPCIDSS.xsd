@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="urn:pcidss.tokenbroker.esg.intel.com" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:pcidss.tokenbroker.esg.intel.com" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:complexType name="panType">
+    <xs:simpleContent>
+      <xs:extension base="xs:base64Binary">
+        <xs:attribute name="encryptionSettingsID" use="required">
+          <xs:annotation>
+            <xs:documentation>This is the unique identifer for encryption settings used to encrypt this PAN.</xs:documentation>
+          </xs:annotation>
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:length value="36"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:simpleType name="tokenType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="19"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="tokenTypeWithVersion">
+    <xs:simpleContent>
+	  <xs:extension base="tokenType">
+	    <xs:attribute name="tokenVersion" type="xs:integer" use="optional"/>
+	  </xs:extension>
+	</xs:simpleContent>
+  </xs:complexType>
+  <xs:simpleType name="getCodeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="OK"/>
+      <xs:enumeration value="NotFound"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="PutTokenRequest">
+    <xs:annotation>
+      <xs:documentation>On-board Database</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="token" type="tokenType"/>
+        <xs:element name="pan" type="panType"/>
+        <xs:element name="prevPan" type="panType" minOccurs="0"/>
+		<xs:element name="tokenVersion" type="xs:integer" minOccurs="0"/> 
+      </xs:sequence>
+      <xs:attribute name="timeToLiveMins" type="xs:unsignedShort"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PutTokenReply">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="token" type="tokenType"/>
+      </xs:sequence>
+      <xs:attribute name="code" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="OK"/>
+            <xs:enumeration value="Duplicate"/>
+            <xs:enumeration value="Reuse">
+              <xs:annotation>
+                <xs:documentation>Means the token returned has the same PAN as in the request.  That is, a multi-use token has been reused.</xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetPanByTokenRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="token" type="tokenType"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetPanByTokenReply">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="pan" type="panType" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute name="code" type="getCodeType" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetTokensByPanRequest">
+    <xs:annotation>
+      <xs:documentation>Returns tokens for the given PAN.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="pan" type="panType"/>
+        <xs:element name="prevPan" type="panType" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute name="limit" use="required">
+        <xs:annotation>
+          <xs:documentation>Limits the number of tokens to be returned.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:unsignedShort">
+            <xs:minInclusive value="1"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetTokensByPanReply">
+    <xs:annotation>
+      <xs:documentation>Get Tokens for a PAN Reply</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="token" type="tokenTypeWithVersion" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="code" type="getCodeType" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DeleteRequest">
+    <xs:annotation>
+      <xs:documentation>Delete entry by token or PAN Request</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:choice>
+        <xs:element name="token" type="tokenType"/>
+        <xs:sequence>
+          <xs:element name="pan" type="panType"/>
+          <xs:element name="prevPan" type="panType" minOccurs="0"/>
+        </xs:sequence>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DeleteReply">
+    <xs:annotation>
+      <xs:documentation>Delete entry by token or PAN reply</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="code" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="OK"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

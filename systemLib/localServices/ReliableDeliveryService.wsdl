@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:soae="http://www.intel.com/soae/wsdl/wsdl11-2007a/" xmlns:tns="http://www.intel.com/soae/localService/ReliableDelivery-2009a/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd1="http://www.intel.com/soae/localService/ReliableDelivery-2009a/" name="ReliableDeliveryService" targetNamespace="http://www.intel.com/soae/localService/ReliableDelivery-2009a/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+	<plnk:partnerLinkType name="ReliableDeliveryServicePartnerLinkType">
+		<plnk:role name="ReliableDeliveryServiceProvider" portType="tns:ReliableDeliveryPortType"/>
+	</plnk:partnerLinkType>
+	<wsdl:types>
+		<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" >
+			<xsd:import namespace="http://www.intel.com/soae/localService/ReliableDelivery-2009a/" schemaLocation="ReliableDeliveryService.xsd"/>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="ResponseMessage">
+		<wsdl:part element="xsd1:response" name="body"/>
+	</wsdl:message>
+	<wsdl:message name="StartRequestMessage">
+		<wsdl:part element="xsd1:startRequest" name="body"/>
+	</wsdl:message>
+	<wsdl:message name="CheckPointRequestMessage">
+		<wsdl:part element="xsd1:checkpointRequest" name="body"/>
+	</wsdl:message>
+	<wsdl:message name="FinishRequestMessage">
+		<wsdl:part element="xsd1:finishRequest" name="body"/>
+	</wsdl:message>
+	<wsdl:message name="RetryRequestMessage">
+		<wsdl:part element="xsd1:reliableMessage" name="body"/>
+	</wsdl:message>
+	<wsdl:portType name="ReliableDeliveryPortType">
+		<wsdl:operation name="start">
+			<wsdl:input message="tns:StartRequestMessage"/>
+			<wsdl:output message="tns:ResponseMessage"/>
+		</wsdl:operation>
+		<wsdl:operation name="checkpoint">
+			<wsdl:input message="tns:CheckPointRequestMessage"/>
+			<wsdl:output message="tns:ResponseMessage"/>
+		</wsdl:operation>
+		<wsdl:operation name="finish">
+			<wsdl:input message="tns:FinishRequestMessage"/>
+			<wsdl:output message="tns:ResponseMessage"/>
+		</wsdl:operation>
+		<wsdl:operation name="retry">
+			<wsdl:input message="tns:RetryRequestMessage"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="ReliableDeliveryBinding" type="tns:ReliableDeliveryPortType">
+		<soae:binding transport="http://www.intel.com/soae/transport/ReliableDelivery"/>
+		<wsdl:operation name="start">
+			<wsdl:input>
+				<soae:content part="body" type="text/xml"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soae:content part="body" type="text/xml"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="checkpoint">
+			<wsdl:input>
+				<soae:content part="body" type="text/xml"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soae:content part="body" type="text/xml"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="finish">
+			<wsdl:input>
+				<soae:content part="body" type="text/xml"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soae:content part="body" type="text/xml"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="retry">
+			<wsdl:input>
+				<soae:content part="body" type="text/xml"/>
+			</wsdl:input>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="ReliableDeliveryService">
+		<wsdl:port binding="tns:ReliableDeliveryBinding" name="ReliableDeliveryPort">
+			<soae:address location="soae-reliable://service?jdbc=jdbc/datasourceName&amp;messageType=msgType&amp;appName=appName&amp;"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

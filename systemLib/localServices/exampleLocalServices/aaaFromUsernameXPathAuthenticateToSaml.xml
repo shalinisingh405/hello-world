@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+            xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd" 
+            writeTransactionLog="false" samlVersion="2.0" wssecVersion="2002-07" soapVersion="1.1">
+  <identityProcessing>
+    <extractIdentity>
+      <usernameFromSecurityHeader/>
+    </extractIdentity>
+    <authenticateIdentity>
+      <xpath/>
+    </authenticateIdentity>
+    <mapIdentity removeExtractedIdentity="true">
+      <createSamlAssertion>
+        <assertionInfo>
+          <v2dot0Info>
+            <generalAssertionInfo>
+              <Issuer type="string">
+                <staticValue>configure-for-issuer-we-want-to-be</staticValue>
+              </Issuer>
+            </generalAssertionInfo>
+            <Subject>
+              <NameID-Format-Attribute type="string">
+                <staticValue>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</staticValue>
+              </NameID-Format-Attribute>
+              <NameID type="string">
+                <automaticallyGenerated>
+                  <distinguishedNamePrefix>uid=</distinguishedNamePrefix>
+                  <distinguishedNamePostfix>,dn=customApplicationAuthentication</distinguishedNamePostfix>
+                  <generatedInternalWorkflowParameter>Authentication-Subject-NameIdentifier-Use-Extracted</generatedInternalWorkflowParameter>
+                </automaticallyGenerated>
+              </NameID>
+              <SubjectConfirmation>
+                <Method>urn:oasis:names:tc:SAML:2.0:cm:bearer</Method>
+              </SubjectConfirmation>
+            </Subject>
+            <AuthnStatement>
+              <SubjectLocality-Address-Attribute type="string">
+                <use-incoming-client-ip-address>internal-name:client-ip-address-from-incoming-metadata</use-incoming-client-ip-address>
+              </SubjectLocality-Address-Attribute>
+              <AuthnContext-AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified</AuthnContext-AuthnContextClassRef>
+            </AuthnStatement>
+          </v2dot0Info>
+        </assertionInfo>
+        <signatureInfo>
+          <signatureGenerationMethod>rsaWithSha1</signatureGenerationMethod>
+          <digestGenerationMethod>sha1</digestGenerationMethod>
+          <canonicalGenerationMethod>C14N_exclusive</canonicalGenerationMethod>
+          <keyPair>
+            <security-config-package>demo-public-private-keypair</security-config-package>
+          </keyPair>
+        </signatureInfo>
+      </createSamlAssertion>
+    </mapIdentity>
+  </identityProcessing>
+</aaa:aaaPolicy>

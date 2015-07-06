@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:intel-esg="http://www.intel.com/soae/localServices/REST/" xmlns:md="http://www.intel.com/soae/protocolMetadata-2007a.xsd" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:tns="http://www.intel.com/soae/rest/salesforce/fields" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="Salesforce_Fields" targetNamespace="http://www.intel.com/soae/rest/salesforce/fields">
+  <wsdl:message name="Salesforce_FieldsRequest">
+    <wsdl:part name="record" type="xsd:string"/>
+    <wsdl:part name="fields" type="xsd:string"/>
+    <wsdl:part intel-esg:fixed="application/xml" name="accept" type="xsd:anyType" intel-esg:type="md:Header"/>
+  </wsdl:message>
+  <wsdl:message name="Salesforce_FieldsResponse">
+    <wsdl:part name="body" type="xsd:anyType" intel-esg:type="xsd:anyType"/>
+  </wsdl:message>
+  <wsdl:portType name="Salesforce_Fields">
+    <wsdl:operation name="invoke">
+      <wsdl:input message="tns:Salesforce_FieldsRequest"/>
+      <wsdl:output message="tns:Salesforce_FieldsResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="Salesforce_FieldsBinding" type="tns:Salesforce_Fields">
+    <http:binding verb="GET"/>
+    <wsdl:operation name="invoke">
+      <http:operation location="(record)"/>
+      <wsdl:input>
+        <http:urlEncoded/>
+        <http:urlReplacement/>
+        <intel-esg:httpHeaders>
+          <intel-esg:header name="accept" part="accept"/>
+        </intel-esg:httpHeaders>
+      </wsdl:input>
+      <wsdl:output>
+        <mime:content part="body" type="application/xml"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Salesforce_FieldsService">
+    <wsdl:port binding="tns:Salesforce_FieldsBinding" name="Salesforce_FieldsPort">
+      <http:address location="https://na1.salesforce.com"/>
+    </wsdl:port>
+  </wsdl:service>
+  <plnk:partnerLinkType name="Salesforce_FieldsPartnerLinkType">
+    <plnk:role name="service" portType="tns:Salesforce_Fields"/>
+  </plnk:partnerLinkType>
+</wsdl:definitions>

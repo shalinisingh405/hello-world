@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd" 
+               writeTransactionLog="false">
+  <identityProcessing>
+    <extractIdentity>
+      <certificateFromPeerSsl>subjectName</certificateFromPeerSsl>
+    </extractIdentity>
+    <authenticateIdentity>
+      <ldapAuthentication>
+        <distinguishedNamePrefix>sn=</distinguishedNamePrefix>
+        <distinguishedNamePostfix>,dn=com</distinguishedNamePostfix>
+        <resultAttrName>Password</resultAttrName>
+      </ldapAuthentication>
+    </authenticateIdentity>
+    <mapIdentity>
+      <createHttpBasicAuthentication>
+        <usernamePasswordSource>
+          <securityConfig>soaeProxyUsernamePasswordSecurityObjectName</securityConfig>
+        </usernamePasswordSource>
+      </createHttpBasicAuthentication>
+    </mapIdentity>
+  </identityProcessing>
+</aaa:aaaPolicy>

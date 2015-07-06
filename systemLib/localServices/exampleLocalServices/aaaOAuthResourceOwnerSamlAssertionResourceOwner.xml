@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd"
+               oauthVersion="OAuth2-draft-22" samlVersion="2.0">
+  <identityProcessing>
+    <extractIdentity>
+      <nameFromOAuthAuthorizationRequest>
+        <flowType>ResourceOwnerPasswordCredential</flowType>
+        <authorizationCodeRequestType>accessTokenRequest</authorizationCodeRequestType>
+        <roleBeingChecked>resource_owner</roleBeingChecked>
+        <scopeChecking>
+          <scopeRequired>true</scopeRequired>
+          <acceptableScopes type="string">
+            <staticValue>all-photos</staticValue>
+          </acceptableScopes>
+          <acceptableScopes type="string">
+            <staticValue>selected-photos*</staticValue>
+          </acceptableScopes>
+        </scopeChecking>
+        <resourceOwnerSource>SAML_assertion_from_HTTP_request_body_parameters</resourceOwnerSource>
+        <resourceOwnerAssertion>
+          <signatureInfo>
+            <signatureAcceptMethods><rsaWithSha256/></signatureAcceptMethods>
+            <digestAcceptMethod><sha256/><sha512/></digestAcceptMethod>
+            <canonicalAcceptMethod><C14N_exclusive/></canonicalAcceptMethod>
+            <authenticationPolicy>security-config-name-to-verify-SAML-embedded-signature</authenticationPolicy>
+          </signatureInfo>
+          <requiredSamlEntitiesAndValues>
+            <Issuer>www.storephotos.example.com authorization server</Issuer>
+            <SubjectConfirmationMethod>urn:oasis:names:tc:SAML:2.0:cm:bearer</SubjectConfirmationMethod>
+            <NotBeforeAndNotOnOrAfter>checkBothConditionsAndSubjectConfirmationDataElements</NotBeforeAndNotOnOrAfter>
+            <Audience type="anyURI">
+              <staticValue>www.storephotos.example.com</staticValue>
+            </Audience>
+            <Recipient type="anyURI">
+              <staticValue>www.storephotos.example.com</staticValue>
+            </Recipient>
+          </requiredSamlEntitiesAndValues>
+        </resourceOwnerAssertion>
+      </nameFromOAuthAuthorizationRequest>
+    </extractIdentity>
+    <mapIdentity>
+      <createSamlAssertion>
+        <assertionInfo>
+          <v2dot0Info>
+            <generalAssertionInfo>
+              <Issuer type="string">
+                <staticValue>authorization server ABC</staticValue>
+              </Issuer>
+              <maxExpirationTime type="unsignedInt">
+                <staticValue>18000</staticValue>
+              </maxExpirationTime>
+            </generalAssertionInfo>
+            <Subject>
+              <NameID-Format-Attribute type="string">
+                <staticValue>urn:oasis:names:tc:SAML:2.0:nameid-format:unspecified</staticValue>
+              </NameID-Format-Attribute>
+              <NameID type="string">
+                <automaticallyGenerated>
+                  <distinguishedNamePrefix></distinguishedNamePrefix>
+                  <distinguishedNamePostfix></distinguishedNamePostfix>
+                  <generatedInternalWorkflowParameter>Authentication-Subject-NameIdentifier-Use-Extracted</generatedInternalWorkflowParameter>
+                </automaticallyGenerated>
+              </NameID>
+              <SubjectConfirmation>
+                <Method>urn:oasis:names:tc:SAML:2.0:cm:bearer</Method>
+              </SubjectConfirmation>
+            </Subject>
+            <Conditions>
+              <AudienceRestriction-Audience type="anyURI">
+                <staticValue>resource server ABC</staticValue>
+              </AudienceRestriction-Audience>
+            </Conditions>
+            <AuthnStatement>
+              <AuthnContext-AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified</AuthnContext-AuthnContextClassRef>
+            </AuthnStatement>
+            <AttributeStatement>
+              <Attribute>
+                <Name-attribute type="string">
+                  <staticValue>approved-scope</staticValue>
+                </Name-attribute>
+                <AttributeValue type="anyType">
+                  <inputFromWorkflow>app:requested-scope</inputFromWorkflow>
+                </AttributeValue>
+              </Attribute>
+              <Attribute>
+                <Name-attribute type="string">
+                  <staticValue>client</staticValue>
+                </Name-attribute>
+                <AttributeValue type="anyType">
+                  <inputFromWorkflow>app:clientId</inputFromWorkflow>
+                </AttributeValue>
+              </Attribute>
+            </AttributeStatement>
+          </v2dot0Info>
+        </assertionInfo>
+        <outputBindingInfo>
+          <exportDestination>to-OAuth2-Access-Token-Response</exportDestination>
+          <accessTokenResponseSpecificInfo>
+            <accessTokenType>Bearer</accessTokenType>
+            <expirationDelta type="unsignedInt">
+              <staticValue>18000</staticValue>
+            </expirationDelta>
+            <scope type="string">
+              <useExtractedScope/>
+            </scope>
+          </accessTokenResponseSpecificInfo>
+        </outputBindingInfo>
+      </createSamlAssertion>
+    </mapIdentity>
+  </identityProcessing>
+</aaa:aaaPolicy>

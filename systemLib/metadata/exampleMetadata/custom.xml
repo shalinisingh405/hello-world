@@ -1,0 +1,22 @@
+<message xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd"
+         xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+         xmlns:abc="http://some-application-magic-namespace">
+  <!-- In this example, an Invocation agent is passing content to a custom service -->
+  <!-- This is indicated in the following protocol element -->
+  <protocol>customService</protocol>
+  <!-- Being a custom service defined by the application, there are no real restrictions
+       upon what the application can be passing to it in its metadata. Only the 
+       encapsulating customMessage element is required. It can contain source or destination,
+       and optional transport and additionalInfo elements whose type is defined as 
+       allowing anyType.
+  -->
+  <customMessage>
+    <destination>
+      <magicXyz>some-magic-string-of-data</magicXyz>
+    </destination>
+    <transport>
+      <path>/nfs/pb/home/user-xyz/incoming</path>
+      <abc:what magicAttribute="whatever the application want">some-more-magic-data</abc:what>
+    </transport>
+  </customMessage>
+</message>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:soae-fault="http://www.intel.com/soae/bpelFault-2009a/" 
+           targetNamespace="http://www.intel.com/soae/bpelFault-2009a/" 
+           elementFormDefault="unqualified">
+
+  <xs:include schemaLocation="soaeBpelFault.xsd" />
+
+  <!-- ========================================================================
+
+    Defines the soae bpel faults that can be generated when loading resources.
+    
+    ======================================================================== -->
+
+  <xs:element name="resourceFault" type="soae-fault:ResourceFault">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Internal failure when reading policy file</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:complexType name="ResourceFault">
+    <xs:complexContent>
+      <xs:restriction base="soae-fault:Fault">
+        <xs:sequence>
+          <xs:group ref="soae-fault:foundation"/>
+          <xs:element name="details">
+            <xs:complexType>
+   
+              <xs:all>
+
+                <xs:element name="resourceType" minOccurs="0" >
+                  <xs:simpleType>
+ 	            <xs:restriction base="xs:token" >
+                      <xs:enumeration value="CAP-policy" />
+                      <xs:enumeration value="schema" />
+                      <xs:enumeration value="ip-address-lookup" />
+                      <xs:enumeration value="ip-address-reverse-lookup" />
+                      <xs:enumeration value="unknown" />
+                    </xs:restriction>
+                  </xs:simpleType>
+                </xs:element>
+
+                <xs:element name="resource" minOccurs="0" type="xs:string" />
+
+                <xs:element name="requestingSubsytem" minOccurs="0" >
+                  <xs:simpleType>
+	            <xs:restriction base="xs:token" >
+                      <xs:enumeration value="ContentAttackPrevention" />
+                      <xs:enumeration value="dns" />
+                    </xs:restriction>
+                  </xs:simpleType>
+                </xs:element>
+
+                <xs:element name="extensionFunction" minOccurs="0" >
+                  <xs:simpleType>
+	            <xs:restriction base="xs:token" >
+                      <xs:enumeration value="content-attack-prevention-ex" />
+                      <xs:enumeration value="get-virus-checks" />
+                      <xs:enumeration value="is-virus-check-requested" />
+                      <xs:enumeration value="get-host-by-address" />
+                      <xs:enumeration value="get-address-by-host" />
+                      <xs:enumeration value="validate-address-range" />
+                      <xs:enumeration value="validate-host-domain" />
+                    </xs:restriction>
+                  </xs:simpleType>
+                </xs:element>
+
+		<xs:element name="faultEnum" minOccurs="0" >
+                  <xs:simpleType>
+                    <xs:restriction base="xs:token" >
+
+                      <!-- A load failure occurs when a resource reference
+                           appears to be valid, but the resource cannot be
+                           retrieved or loaded.  For instance a resource
+                           which is supposed to be loaded via http but the
+                           server returns "404 / Not Found".
+                      -->
+
+                      <xs:enumeration value="load-failure" />
+
+                      <!-- A compilature failure occurs when a resource reference
+                           is valid and the resource (file) can be loaded, but
+                           it cannot be processed.  It might be malformed (e.g.
+                           invalid xml), fail schema validation, be zero length,
+                           etc.
+                      -->
+
+                      <xs:enumeration value="compilation-failure" />
+
+                      <!-- A network failure occurs when the low-level I/O
+                           routine report a failure.  For instance, packet
+                           loss, dns problem, etc.
+                      -->
+
+                      <xs:enumeration value="network-failure" />
+
+                      <!-- An undefined resource error occurs when a resource
+                           is reference but it has not been properly defined
+                           or configured.  This is usually not a configuration
+                           error, but an error in computing run-time values
+                           of some parameter.  For example, a reference to
+                           policy "xyz" when it should have been "xyz.cap".
+                      -->
+
+                      <xs:enumeration value="undefined-resource-failure" />
+
+                    </xs:restriction>
+                  </xs:simpleType>
+                </xs:element>
+
+		<xs:element name="desc" type="xs:string" />
+
+              </xs:all>
+
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+</xs:schema>

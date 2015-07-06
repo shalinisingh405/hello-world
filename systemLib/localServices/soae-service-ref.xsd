@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This schema contains a description of what is legal for an SOAE service-ref assignment.
+    The primary intention is to simplify dynamic endpoint assignment 
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" 
+           xmlns:sref="http://docs.oasis-open.org/wsbpel/2.0/serviceref" 
+           xmlns:addext="http://www.intel.com/soae/ws-addressing/addressing-2008a/" 
+           xmlns:soaesref="http://www.intel.com/soae/service-ref-2008a/" 
+           targetNamespace="http://www.intel.com/soae/service-ref-2008a/" 
+           elementFormDefault="qualified" blockDefault="#all">
+  <xs:import namespace="http://docs.oasis-open.org/wsbpel/2.0/serviceref" schemaLocation="../importedSchemas/ws-bpel_serviceref.xsd"/>
+  <xs:import namespace="http://schemas.xmlsoap.org/ws/2004/08/addressing" schemaLocation="../importedSchemas/wsa-2004-08.xsd"/>
+  <!-- developer can SOAE service-ref epr element with any elements defined in our private extensions -->
+  <xs:import namespace="http://www.intel.com/soae/ws-addressing/addressing-2008a/" schemaLocation="../localServices/ws-addressing-ext.xsd"/>
+  <!-- ============================================================================================== -->
+  <!--  The following elements & attributes define what is a legal SOAE service-ref assignment        -->
+  <!-- ============================================================================================== -->
+  <xs:element name="service-ref" type="sref:ServiceRefType"/>
+  <xs:element name="epr" type="wsa:EndpointReferenceType">
+    <xs:annotation>
+      <xs:documentation>
+        WS-Addressing Endpoint Reference.
+        If this element is absent or empty, then all addressing must be derived from the provisioned (static) values of 
+        invocation agent or input server.
+        When associated with input server incoming request, source IP adress and port is record here.
+        When associated with invocation agent, destination IP-address and port are recorded here.
+        This can also contain information related to establishing a websocket connection by the IA.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+</xs:schema>

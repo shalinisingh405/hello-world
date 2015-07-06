@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd"
+               oauthVersion="OAuth2-draft-22" samlVersion="2.0">
+  <identityProcessing>
+    <extractIdentity>
+      <nameFromOAuthAuthorizationRequest>
+        <flowType>RefreshToken</flowType>
+        <authorizationCodeRequestType>accessTokenRequest</authorizationCodeRequestType>
+        <roleBeingChecked>resource_owner</roleBeingChecked>
+        <scopeChecking>
+          <scopeRequired>true</scopeRequired>
+          <subsetOfRefreshToken>true</subsetOfRefreshToken>
+        </scopeChecking>
+        <refreshToken>
+          <authorizationServer type="anyURI">
+            <staticValue>www.shared.authorization.server.com</staticValue>
+          </authorizationServer>
+          <verificationInfo>
+            <authenticationPolicy>security-config-authentication-policy</authenticationPolicy>
+          </verificationInfo>
+          <checkUniqueness>false</checkUniqueness>
+        </refreshToken>
+      </nameFromOAuthAuthorizationRequest>
+    </extractIdentity>
+    <mapIdentity>
+      <createToken>
+        <createOAuthAccessTokenResponse>
+          <accessTokenType>Oauth</accessTokenType>
+          <expirationDelta type="unsignedInt">
+            <staticValue>94608000</staticValue>
+          </expirationDelta>
+        </createOAuthAccessTokenResponse>
+        <jsonWebToken>
+          <tokenContent>
+            <issuer>www.shared.authorization.server.com</issuer>
+            <subject type="string">
+              <automaticallyGenerated>
+                <distinguishedNamePrefix></distinguishedNamePrefix>
+                <distinguishedNamePostfix></distinguishedNamePostfix>
+                <generatedInternalWorkflowParameter>Authentication-Subject-NameIdentifier-Use-Extracted
+                </generatedInternalWorkflowParameter>
+              </automaticallyGenerated>
+            </subject>
+            <audience type="string">
+              <inputFromWorkflow>application-workflow-variable</inputFromWorkflow>
+            </audience>
+          </tokenContent>
+          <jsonSignInfo>
+            <jsonGenerateSignatureAlgorithm>hmacWithSha256</jsonGenerateSignatureAlgorithm>
+            <jsonSymmetricKey>
+              <security-config-package>configurated-shared-symmetric-key</security-config-package>
+            </jsonSymmetricKey>
+          </jsonSignInfo>
+        </jsonWebToken>
+      </createToken>
+    </mapIdentity>
+  </identityProcessing>
+</aaa:aaaPolicy>

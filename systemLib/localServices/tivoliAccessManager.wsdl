@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+                  xmlns:soae="http://www.intel.com/soae/wsdl/wsdl11-2007a/"
+                  xmlns:tns="http://www.intel.com/soae/localService/tivoliAccessManager-2009a/"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:xsd1="http://www.intel.com/soae/localService/tivoliAccessManager-2009a/"
+                  name="invokeTivoliAccessManager"
+                  targetNamespace="http://www.intel.com/soae/localService/tivoliAccessManager-2009a/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+  <plnk:partnerLinkType name="TivoliAccessManagerServicePartnerLinkType">
+    <plnk:role name="TivoliAccessManagerServiceProvider" portType="tns:TivoliAccessManagerPortType"/>
+  </plnk:partnerLinkType>
+  <wsdl:types>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                targetNamespace="http://www.intel.com/soae/localService/tivoliAccessManager-2009a/schema">
+      <xsd:import namespace="http://www.intel.com/soae/localService/tivoliAccessManager-2009a/" 
+                  schemaLocation="tivoliAccessManager.xsd"/>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="TivoliAccessManagerRequest">
+    <wsdl:part element="xsd1:tivoliAccessManagerRequest" name="body"/>
+  </wsdl:message>
+  <wsdl:message name="TivoliAccessManagerResponse">
+    <wsdl:part element="xsd1:tivoliAccessManagerResponse" name="body"/>
+  </wsdl:message>
+
+  <wsdl:portType name="TivoliAccessManagerPortType">
+    <wsdl:operation name="tivoliAccessManagerOperation">
+      <wsdl:input message="tns:TivoliAccessManagerRequest"/>
+      <wsdl:output message="tns:TivoliAccessManagerResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  
+  <wsdl:binding name="TivoliAccessManagerBinding" type="tns:TivoliAccessManagerPortType">
+    <soae:binding transport="http://www.intel.com/soae/transport/tivoliAccessManager"/>
+    <wsdl:operation name="tivoliAccessManagerOperation">
+      <wsdl:input>
+        <soae:content part="body" type="text/xml"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soae:content part="body" type="text/xml"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  
+  <wsdl:service name="TivoliAccessManagerService">
+    <wsdl:port binding="tns:TivoliAccessManagerBinding" name="TivoliAccessManagerPort">
+      <soae:address location="tivoliam:///opt/IBM_TAM_ADK/PolicyDirector/PDPerm.properties"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

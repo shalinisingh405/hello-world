@@ -1,0 +1,25 @@
+  <message xmlns='http://www.intel.com/soae/protocolMetadata-2007a.xsd'
+           xmlns:wsa='http://schemas.xmlsoap.org/ws/2004/08/addressing'>
+    <protocol>https</protocol>
+    <httpMessage>
+      <source>
+        <inputServerName>MyInputServer</inputServerName>
+        <ip>244.128.23.225</ip>
+        <port>80</port>
+      </source>
+      <transport>
+        <httpResponse>
+          <version>HTTP_11</version>
+          <status>200</status>
+          <reason>OK</reason>
+          <headers>
+            <header name="foo">
+              <field>
+                <value>bar</value>
+              </field>
+            </header>
+          </headers>
+        </httpResponse>
+      </transport>
+    </httpMessage>
+  </message>

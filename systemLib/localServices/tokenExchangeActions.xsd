@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema 
+  xmlns="http://www.w3.org/2001/XMLSchema" 
+  targetNamespace="http://www.intel.com/soae/localServices/tokenExchange-2010a/actions" 
+  xmlns:tns="http://www.intel.com/soae/localServices/tokenExchange-2010a/actions" 
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+  
+  <complexType name="TokenExchangeManagementActionResult">
+    <annotation>
+      <documentation xml:lang="en">
+The type of the result of the TokenExchangeManagement action. Since this action may perform several operations
+the result type is the union of the result types of each action.      
+      </documentation>
+    </annotation>
+    <choice>
+      <element name="success">
+        <annotation>
+          <documentation xml:lang="en">
+Result of DeleteEntry (by PAN or by Token): the number of entries deleted with the delete operation.           
+          </documentation>
+        </annotation>
+		<simpleType>
+		  <restriction base="boolean">
+		    <pattern value="true|1"/>
+		  </restriction>
+		</simpleType>
+      </element>
+      <element name="token">
+        <annotation>
+          <documentation xml:lang="en">
+Result of GenerateTokenByPAN: the token associated to the given PAN and reuse indication
+          </documentation>
+        </annotation>
+		<complexType>
+		  <simpleContent>
+		    <extension base="string">
+			  <attribute name="reuse" type="boolean"/>
+			</extension>
+		  </simpleContent>
+		</complexType>
+      </element>
+      <element name="tokens">
+        <annotation>
+          <documentation xml:lang="en">
+Result of GetTokenByPAN: the list of tokens associated to the given PAN. There might be multiple tokens if policy has multiuse="false"
+          </documentation>
+        </annotation>
+        <complexType>
+          <sequence>
+            <element name="token" type="string" minOccurs="0" maxOccurs="unbounded"/>
+	      </sequence>
+	    </complexType>
+      </element>
+      <element name="PAN" type="string">
+        <annotation>
+          <documentation xml:lang="en">
+Result of GetPANByToken: the PAN associated to the given Token          
+          </documentation>
+        </annotation>
+      </element>
+    </choice>
+  </complexType>
+  
+</schema>

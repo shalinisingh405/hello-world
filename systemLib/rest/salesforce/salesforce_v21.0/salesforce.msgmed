@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<msgmed:messageMediationPolicy xmlns:msgmed="http://www.intel.com/soae/localService/messageMediationPolicy-2009a/">
+  <msgmed:httpRequestMetadataMediationPolicy>
+    <msgmed:headers>
+      <msgmed:headersToAdd>
+        <msgmed:item name="authorization">
+          <msgmed:inputFromWorkflow>http:oauth_token</msgmed:inputFromWorkflow>
+        </msgmed:item>
+      </msgmed:headersToAdd>
+    </msgmed:headers>
+  </msgmed:httpRequestMetadataMediationPolicy>
+</msgmed:messageMediationPolicy>

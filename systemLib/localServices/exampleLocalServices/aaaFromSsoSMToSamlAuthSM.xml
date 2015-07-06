@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ..\aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <ssoFromCookie><cookieName>SMSESSION</cookieName></ssoFromCookie>
+    </extractIdentity>
+    <authenticateIdentity>
+      <siteMinderAuthentication>
+        <resource type="anyURI">
+          <use-extracted-resource>internal-name:AuthorizationResource</use-extracted-resource>
+        </resource>
+        <action>Get</action>
+      </siteMinderAuthentication>
+    </authenticateIdentity>
+    <mapIdentity>
+      <createSamlAssertion>
+        <assertionInfo>
+          <v2dot0Info>
+            <generalAssertionInfo>
+              <Issuer type="string">
+                <staticValue>Road Runner Inc.</staticValue>
+              </Issuer>
+              <skew>10</skew>
+              <maxExpirationTime type="unsignedInt">
+                <staticValue>400</staticValue>
+              </maxExpirationTime>
+              <IssuerFormatAttribute>urn:oasis:names:tc:SAML:2.0:nameid-format:unspecified</IssuerFormatAttribute>
+            </generalAssertionInfo>
+            <Subject>
+              <NameID-Format-Attribute type="string">
+                <staticValue>urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName</staticValue>
+              </NameID-Format-Attribute>
+              <NameID type="string">
+                <automaticallyGenerated>
+                  <distinguishedNamePrefix></distinguishedNamePrefix>
+                  <distinguishedNamePostfix></distinguishedNamePostfix>
+                  <generatedInternalWorkflowParameter>Authentication-Subject-NameIdentifier-Use-RetrievedSso-UserDN</generatedInternalWorkflowParameter>
+                </automaticallyGenerated>
+              </NameID>
+              <SubjectConfirmation>
+                <Method>urn:oasis:names:tc:SAML:2.0:cm:sender-vouches</Method>
+              </SubjectConfirmation>
+            </Subject>
+            <AuthnStatement>
+              <SubjectLocality-Address-Attribute type="string">
+                <use-retrieved-sso-ip-address></use-retrieved-sso-ip-address>
+              </SubjectLocality-Address-Attribute>
+              <AuthnContext-AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContext-AuthnContextClassRef>
+            </AuthnStatement>
+          </v2dot0Info>
+        </assertionInfo>
+      </createSamlAssertion>
+    </mapIdentity>
+  </identityProcessing>
+  <resourceProcessing>
+    <extractResource>
+      <requestUriFromHttpOperation></requestUriFromHttpOperation>
+    </extractResource>
+    <authorizeResource>
+      <siteMinderAuthorization>
+        <useSiteMinderAuthenticationParametrizations></useSiteMinderAuthenticationParametrizations>
+      </siteMinderAuthorization>
+    </authorizeResource>
+  </resourceProcessing>
+</aaa:aaaPolicy>

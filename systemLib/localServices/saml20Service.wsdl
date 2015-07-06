@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions
+    name="SAML2.0-Service"
+    targetNamespace="http://www.intel.com/soae/localService/saml20-2010a/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:tns="http://www.intel.com/soae/localService/saml20-2010a/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
+    <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+	    Defines SOAP WebService public interface for SAML 2.0 service.
+    </wsdl:documentation>
+    
+    <!-- ParterLinkType Definition -->
+    <plnk:partnerLinkType name="SAML20ServicePartnerLinkType">
+      <plnk:role name="service" portType="tns:SAML20ServicePortType"/>
+    </plnk:partnerLinkType>
+
+    <!-- WSDL Types Section -->
+    <wsdl:types>
+      <xsd:schema 
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        targetNamespace="http://www.intel.com/soae/localService/saml20-2010a/schema">
+	<xsd:import namespace="urn:oasis:names:tc:SAML:2.0:protocol" schemaLocation="../importedSchemas/saml-schema-protocol-2.0.xsd"/>
+      </xsd:schema>
+    </wsdl:types>
+    
+    <!-- WSDL Messages Section -->
+    <wsdl:message name="AttributeQueryRequest">
+      <wsdl:part name="body" element="samlp:AttributeQuery"/>
+    </wsdl:message>
+
+    <wsdl:message name="SAMLResponse">
+      <wsdl:part name="body" element="samlp:Response"/>
+    </wsdl:message>
+
+    <!-- WSDL PortType Section -->
+    <wsdl:portType name="SAML20ServicePortType">
+      <wsdl:operation name="attributeQuery">
+        <wsdl:input message="tns:AttributeQueryRequest"/>
+        <wsdl:output message="tns:SAMLResponse"/>
+      </wsdl:operation>
+    </wsdl:portType>
+	
+    <!-- WSDL Bindings Section -->
+    <wsdl:binding name="SAML20ServiceSOAP11Binding" type="tns:SAML20ServicePortType">
+      <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+      <wsdl:operation name="attributeQuery">
+        <soap:operation soapAction="http://www.oasis-open.org/committees/security"/>
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+      </wsdl:operation>
+    </wsdl:binding>
+	
+    <!-- WSDL Services Section -->
+    <wsdl:service name="SAML20Service">
+      <wsdl:port name="SAML20ServicePort" binding="tns:SAML20ServiceSOAP11Binding">
+        <soap:address location="http://localhost:8080/SAMLService"/>
+      </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

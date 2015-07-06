@@ -1,0 +1,15 @@
+<message xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" 
+         xmlns="http://www.intel.com/soae/protocolMetadata-2007a.xsd">
+  <!-- In this example, an Invocation agent is utilizing MLLP -->
+  <!-- This is indicated in the following protocol element -->
+  <protocol>mllp</protocol>
+  <mllpMessage>
+    <destination>
+      <!-- application defined invocation agent name to process this request -->
+      <invocationAgentName>IA-1</invocationAgentName>
+      <!-- MLLP release version: using release 1, not 2 -->
+      <release>MLLP_R1</release>
+    </destination>
+    <transport/>
+  </mllpMessage>
+</message>

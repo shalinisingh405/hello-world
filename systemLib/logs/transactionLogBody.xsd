@@ -1,0 +1,1103 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns="http://www.intel.com/soae/logSchema-2007a.xsd" 
+           targetNamespace="http://www.intel.com/soae/logSchema-2007a.xsd">
+  <xs:include schemaLocation="logCommon.xsd"/>
+  <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <!-- Following simpleType and complexTypes may be used within a tranasction entry           -->
+  <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <xs:complexType name="CompletionStatus">
+    <xs:annotation>
+      <xs:documentation>Completion Status</xs:documentation>
+    </xs:annotation>
+    <xs:all>
+      <xs:element name="status">
+        <xs:annotation>
+          <xs:documentation>Summary completion status</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="success">
+              <xs:annotation>
+                <xs:documentation>This component processing was successfully completed</xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="fail">
+              <xs:annotation>
+                <xs:documentation>This transaction processing failed</xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="internal-processing-failure">
+              <xs:annotation>
+                <xs:documentation>There was an internal processing failure during this transaction processing</xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="reason" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Detail explanation of the failure</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:all>
+  </xs:complexType>
+  <xs:simpleType name="ComponentType">
+    <xs:annotation>
+      <xs:documentation>Component type that is generating the transaction log message</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="inputServer"/>
+      <xs:enumeration value="invocationAgent"/>
+      <xs:enumeration value="wfl-engine"/>
+      <xs:enumeration value="builtInService"/>
+      <xs:enumeration value="integration-agent"/>
+      <xs:enumeration value="OAM"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- Do we want a name with much more specific component structure, 
+         e.g., bury name structure with ComponentType? 
+         Do we want to have extensibility of component names, e.g., @{any} or xs:any?
+    -->
+  <xs:simpleType name="ComponentName">
+    <xs:annotation>
+      <xs:documentation>Component Name</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="256"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- string populated from ISERV name from AEDF or config -->
+  <xs:simpleType name="InputServer">
+    <xs:annotation>
+      <xs:documentation>Input Server Name</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="64"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- string populated from SERVER name from AEDF or config -->
+  <xs:simpleType name="OutputServer">
+    <xs:annotation>
+      <xs:documentation>Output Server (Invocation Agent) Name</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="64"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- For use by Built-in, Integration Agent and InvocationAgent entries -->
+  <!-- Identifies partnerLink and operation being used in <invoke> activity. -->
+  <!-- Assume that this information will be passed to Integrated Agent in metadata global buffer -->
+  <!-- Populated by WFL process and passed to invocation agents, output servers, and so on to be used in
+         their transaction log generation. -->
+  <!-- If this information is not available the partnerLink and operation will have zero length strings. -->
+  <xs:complexType name="InvokingIdType">
+    <xs:annotation>
+      <xs:documentation>Uniquely identifies invocation within application WFL process</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="partnerlink" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>PartnerLink that is being invoked</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="operation" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>PartnerLink operation that is being invoked</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="lineNumber" type="xs:unsignedInt" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+              Line number within WFL process where invoke was located. 
+              This is intended when performing analaysis/debugging og WFL process
+            </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ProtocolTypeAndBinding">
+    <xs:sequence>
+      <xs:annotation>
+        <xs:documentation>
+            Identifies type of protocol being used and associated external bindings, e.g., ip-address, port number, etc.
+          </xs:documentation>
+      </xs:annotation>
+      <xs:element name="type">
+        <xs:annotation>
+          <xs:documentation>Type of protocol being supported</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="HTTP"/>
+            <xs:enumeration value="HTTPS"/>
+            <xs:enumeration value="WSRM"/>
+            <xs:enumeration value="JMS"/>
+            <xs:enumeration value="SunMQ"/>
+            <xs:enumeration value="ActiveMQ"/>
+            <xs:enumeration value="FTP"/>
+            <xs:enumeration value="FTPS"/>
+            <xs:enumeration value="MLLP"/>
+            <xs:enumeration value="MLLPs"/>
+            <xs:enumeration value="LDAP"/>
+            <xs:enumeration value="LDAPS"/>
+            <xs:enumeration value="SITE_MINDER"/>
+            <xs:enumeration value="TIVOLI_ACCESS_MANAGER"/>
+            <xs:enumeration value="ORACLE_ACCESS_MANAGER"/>
+            <xs:enumeration value="KERBEROS_KDC"/>
+            <xs:enumeration value="CBRLOCAL"/>
+            <xs:enumeration value="AXIS2"/>
+            <xs:enumeration value="SFTP"/>
+            <xs:enumeration value="CUSTOM"/>
+            <xs:enumeration value="RAW_TCP"/>
+            <xs:enumeration value="RAW_TCPS"/>
+            <xs:enumeration value="RELIABLE_DELIVERY"/>
+            <xs:enumeration value="TIMER"/>
+            <xs:enumeration value="IBMMQ"/>
+            <xs:enumeration value="ICAP"/>
+            <!-- WebSocket Protocol, Native uses WS and WSS -->
+            <xs:enumeration value="WS"/>
+            <xs:enumeration value="WSS"/>
+            
+            <!-- InterApp invocation (soae-local), both input server and invocation agent -->
+            <xs:enumeration value="interapp"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="address" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+              Far-end address. 
+              For HTTP/MLLP/FTP/SFTP input servers and invocation agents, this is the source/destination IP-address respectively. 
+              For WS-RM input servers and invocation agents, this is the source/destination IRI respectively.
+              For JMS/SunMQ/ActiveMQ input servers and invocation agents, this is not populated.
+              For LDAP/SiteMinder/OracleAccessManager invocation agents, this is the destination IP-address.
+              For Tivoli Access Manager  invocation agent, this is the destination host name.
+            </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="port" type="xs:unsignedShort" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+              Far-end port number.
+              For HTTP/MLLP/FTP/SFTP input servers and invocation agents, this is the source/destination port number respectively.
+              For WSRM, this element is absent.
+              For JMS/SunMQ/ActiveMQ input servers and invocation agents, this is not populated.
+              For LDAP/SiteMinder/TivoliAccessManager/OracleAccessManager invocation agents, this is the destination port number.
+            </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="url" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+              For HTTP/MLLP/FTP/SFTP input servers and invocation agents, this is the server/client URL respectively.
+              For WSRM input servers and invocation agents, this is the to/from address respectively.
+              For JMS/SunMQ/ActiveMQ input servers and invocation agents, this is the server queue manager host name. 
+              For LDAP/SiteMinder/TivoliAccessManager/OracleAccessManager invocation agents, this is not populated.
+            </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <!-- The following entity can be issued by an application within the WFL engine, Built-in service [or Integration Agent].
+         It allows an application to append any application defined data that they want to the 
+         associated transaction. The exact mechanism used by an application to append an entity 
+         still needs to b e finalized, e.g., XSLT extension function from withn builtInService service, a canned 
+         builtInService service for BEPL.
+    -->
+  <xs:complexType name="User">
+    <xs:annotation>
+      <xs:documentation>Application control information that they have explicitly decide to output to the transaction log</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>Application can put anything embedded elements that they want within our wrapper elements</xs:documentation>
+        </xs:annotation>
+      </xs:any>
+    </xs:sequence>
+    <xs:anyAttribute namespace="##any" processContents="lax">
+      <xs:annotation>
+        <xs:documentation>Application can put anything embedded attributes that they want within our wrapper elements</xs:documentation>
+      </xs:annotation>
+    </xs:anyAttribute>
+  </xs:complexType>
+  <!-- Generated by the associated Input Server -->
+  <xs:complexType name="InputServerSummary">
+    <xs:annotation>
+      <xs:documentation>
+          Input Server summary log entry. 
+          This summarizes the overall transaction being associated with the triggering incoming request.
+        </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="inputServer" type="InputServer"/>
+      <xs:element name="completionStatus" type="CompletionStatus"/>
+      <xs:element name="protocol" type="ProtocolTypeAndBinding"/>
+      <xs:element name="processingLatency" type="Duration">
+        <xs:annotation>
+          <xs:documentation>
+              Total processing latency associated with this transaction from the viewpoint of the requesting client.
+              It includes starts with reception of arrival of the first byte until we either the final byte of a response has been sent or 
+              the input server has been instructed to terminate the incoming client communication session.
+              Note: Additional transaction related processing could have occurred after the input server has completed it processing.
+            </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="requestTime" type="Duration">
+        <xs:annotation>
+          <xs:documentation>
+              Latency associated with receiving a request from the client.
+              Its specific semantic may vary for different protocol types.
+              For HTTP and LDAP, this time starts with the arrival of the first byte of the request being received until the last byte of the 
+              request has been received.
+            </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="requestSize" type="xs:unsignedInt">
+        <xs:annotation>
+          <xs:documentation>Size of the incoming request in bytes</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="responseTime" type="Duration">
+        <xs:annotation>
+          <xs:documentation>
+              Latency associated with sending the response to the client.
+              Its specific semantic may vary for different protocol types.
+              For HTTP and LDAP, this time starts with the first byte of the response being written until the last byte of the response is written.
+              Note: The actual transaction can complete long after the response is sent.
+            </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="responseSize" type="xs:unsignedInt">
+        <xs:annotation>
+          <xs:documentation>Size of the response message in bytes</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="inputServerSpecific" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Hook that allows input server to output any additional information that they consider useful</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+          <xs:anyAttribute namespace="##any" processContents="lax"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="InputServerStart">
+    <xs:annotation>
+      <xs:documentation>Input Server start log entry. This summarizes the overall transaction being associated with the triggering incoming request.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="inputServer" type="InputServer"/>
+      <xs:element name="protocol" type="ProtocolTypeAndBinding"/>
+      <xs:element name="inputServerSpecific" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Hook that allows input server to output any additional information that they consider useful</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+          <xs:anyAttribute namespace="##any" processContents="lax"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <!--
+           For an <invoke> activity for requests sent to external servers (as opposed to Integration Agents).
+           Identifies the time for the response, and other response statistics.
+           Generated by the associated Output Server.
+      -->
+  <xs:complexType name="InvocationAgentSummary">
+    <xs:annotation>
+      <xs:documentation>Summary entry of interaction with external server</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="invocationAgent" type="OutputServer"/>
+      <xs:element name="invokeId" type="InvokingIdType"/>
+      <xs:element name="completionStatus" type="CompletionStatus"/>
+      <xs:element name="protocol" type="ProtocolTypeAndBinding"/>
+      <xs:element name="serverLatency" type="Duration">
+        <xs:annotation>
+          <xs:documentation>
+              Total latency associated with processing this Server request.
+              Timing starts with the arrival of the request from the WFP and terminates with the generation of the invocation agent summary transaction log subentry.
+              If an application is trying to localize the cause of excessive transaction latency, an excessive value here would indicate that this invocation 
+              agent exchange is at fault. 
+              The are two major reasons for this value to be excessive:
+                a) the backend server we are communicating with of the communcation links to it are at fault, or
+                b) we are bottlenecking upon getting reasources to process this request. This second conditon would be indicated by this Invocation Agent 
+                   associated counts indicating resource exhaustion. If there is no internal resource exhaustion, then an administrator or field support
+                   would need to look in more detail at where time is being consummed.
+              Using this values along with the requestTime and responseTime allows you to determine where in the server exchange time is being consumed.
+              Under normal operating conditions, time is consumed in three places:
+                1) sending the request to the backend server: requestTime.
+                2) receiving the actual response from the backend server: responseTime.
+                3) the latency of the backend server.
+                   This latency is equal to the serverLatency - requestTime - responseTime.
+              Normally, the request and response time will be small, which indicates that the backend server or some entity it is interacting with overloaded
+              or having a problem. However, if either the request or response time is large, then it could indicate that either end or intervering system could
+              be misconfigured, overloaded or experencing some problem.
+            </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="requestTime" type="Duration">
+        <xs:annotation>
+          <xs:documentation>
+              Latency associated with sending the request to the backend server.
+              Its specific semantic may vary for different protocol types.
+              For HTTP and LDAP, this time starts with the first byte of the request being written until the last byte of the request is written.
+            </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="requestSize" type="xs:unsignedInt">
+        <xs:annotation>
+          <xs:documentation>Size of the request being sent</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="responseTime" type="Duration">
+        <xs:annotation>
+          <xs:documentation>
+              Latency associated with receiving a response from the backend server.
+              Its specific semantic may vary for different protocol types.
+              For HTTP and LDAP, this time starts with the first byte of the response being received until the last byte of the response has been received.
+            </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="responseSize" type="xs:unsignedInt">
+        <xs:annotation>
+          <xs:documentation>Size of destination response</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <!-- following two xs:elements are MQ specific -->
+      <xs:element name="requestQueue" type="xs:anyURI" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Queue that we are writing our request to</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="responseQueue" type="xs:anyURI" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Queue that we are getting our response from</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="invocationAgentSpecific" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Hook that allows invocation agent to output any additional information that they consider useful</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+          <xs:anyAttribute namespace="##any" processContents="lax"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <!-- Generated by the Output Server -->
+  <xs:complexType name="InvocationAgentStart">
+    <xs:sequence>
+      <xs:element name="invocationAgent" type="OutputServer"/>
+      <xs:element name="invokeId" type="InvokingIdType"/>
+      <xs:element name="protocol" type="ProtocolTypeAndBinding"/>
+      <xs:element name="invocationAgentSpecific" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Hook that allows invocation agent to output any additional information that they consider useful</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+          <xs:anyAttribute namespace="##any" processContents="lax"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <!-- Identify WFL code that we are executing.  This is "static" information and used in many places. -->
+  <xs:complexType name="WflIdType">
+    <xs:annotation>
+      <xs:documentation>Uniguely identify WFL engine processing</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="appl" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Application that is processing request</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="wflProgram" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>The name of the WFL program that is processing request</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="wflBinding" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>The name of the WFL binding as specified in the ASF (Application Specification File).</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="wflInstance" type="WflInstance" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>The ID of the WFL execution instance.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="wflParentInstance" type="WflInstance" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+              The ID of the parent WFL execution instance. A value of "0" indicates that this wflInstance is the initial processing
+              entry point of the transaction. A non "0" value indicates the wflInstance of the parent workflow that invoked 
+              this wflInstance execution instance.
+            </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="lineNumber" type="xs:unsignedInt" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Line number within WFL process of associated with this log message</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="flowLineNumber" type="xs:unsignedInt" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+                          Identifies the line number at which the WFL &lt;flow> or root process was created.
+                          To properly interpret this requires source code for the wfl program.
+            </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <!-- Generated by WFL Processor at the start of processing a message.
+         Intended for VERBOSE log type.
+    -->
+  <xs:complexType name="WflStart">
+    <xs:annotation>
+      <xs:documentation>Identifies when WFL engine started processing this transaction</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="wflId" type="WflIdType"/>
+      <!-- What other information should we be outputting ??? -->
+    </xs:sequence>
+  </xs:complexType>
+  <!-- Similar to <invoke> for external Output Servers or Integration Agents. -->
+  <xs:complexType name="BuiltinName">
+    <xs:annotation>
+      <xs:documentation>Identify Built-in service being invoked</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Name" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Built-in service name</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Step" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Identify step (stage) within multiple stage built-in pipeline</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <!-- Similar to <invoke> for external Output Servers or Integration Agents. -->
+  <xs:complexType name="BuiltinSummary">
+    <xs:annotation>
+      <xs:documentation>Summarizes built-in service execution</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="builtInService" type="BuiltinName"/>
+      <xs:element name="invokeId" type="InvokingIdType"/>
+      <xs:element name="completionStatus" type="CompletionStatus"/>
+      <xs:element name="processingLatency" type="Duration">
+        <xs:annotation>
+          <xs:documentation>CPU usage associated with built-in service</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="builtinSpecific" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Built-in specific information</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+          <xs:anyAttribute namespace="##any" processContents="lax"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <!-- Similar to <invoke> for external Output Servers or Integration Agents. -->
+  <xs:complexType name="BuiltinStart">
+    <xs:annotation>
+      <xs:documentation>Identifies when built-in service started execution</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="builtInService" type="BuiltinName"/>
+      <xs:element name="invokeId" type="InvokingIdType"/>
+      <xs:element name="builtinSpecific" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Built-in specific information</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+          <xs:anyAttribute namespace="##any" processContents="lax"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="AuthenticationAuthorizationAuditStart">
+    <xs:annotation>
+      <xs:documentation>Records/audit information about the start of a AAA action.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="policy" type="PolicyName"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="AuthenticationAuthorizationAuditSummary">
+    <xs:annotation>
+      <xs:documentation>Records/audit information about a successful AAA action.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="policy" type="PolicyName"/>
+      <xs:choice>
+        <xs:sequence>
+          <xs:element name="identity" type="ExtractedIdentity"/>
+          <xs:element name="resource" type="ExtractedResource" minOccurs="0"/>
+        </xs:sequence>
+        <xs:element name="error" type="User"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="PiiStart">
+    <xs:annotation>
+      <xs:documentation>Records/audit information about the start of a PII action.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="policy" type="PolicyName"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="PiiSummary">
+    <xs:annotation>
+      <xs:documentation>Records/audit information about a successful PII action.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="policy" type="PolicyName"/>
+      <xs:choice>
+        <xs:element name="ruleAndMatchesPair" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:annotation>
+                <xs:documentation>Identifies per target rule how many matches were processed.
+                                  Prefix/Postfix string with embedded encrypted key/tweak information.
+                </xs:documentation>
+              </xs:annotation>
+              <xs:element name="rule" type="xs:unsignedInt">
+                <xs:annotation>
+                  <xs:documentation>
+                    Identified the specific encrypting or decrypting target rule that is being matched. 
+                    Valid rule are numbered starting at 1.
+                    
+                    When performing decryption using Prefix/Postfix string with embedded encrypted key/tweak information, 
+                    rule will be populated with a value of zero to indicated that the numberOfMatchesProcessed value is 
+                    for all rules in the original PII encryption.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="numberOfMatchesProcessed" type="xs:unsignedInt"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="error" type="User"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="IntegrationAgentSummary">
+    <xs:annotation>
+      <xs:documentation>Summarizes Integration Agent execution</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="name" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Invoked Integration Agent name</xs:documentation>
+        </xs:annotation>
+        <!-- Integration Agent Name -->
+      </xs:element>
+      <xs:element name="invokeId" type="InvokingIdType"/>
+      <xs:element name="completionStatus" type="CompletionStatus"/>
+      <xs:element name="processingLatency" type="Duration"/>
+      <xs:element name="iaSpecific" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Integration Agent specific information</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+          <xs:anyAttribute namespace="##any" processContents="lax"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="IntegrationAgentStart">
+    <xs:annotation>
+      <xs:documentation>Identifies when Integration Agent started execution</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="name" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Invoked Integration Agent name</xs:documentation>
+        </xs:annotation>
+        <!-- Integration Agent -->
+      </xs:element>
+      <xs:element name="invokeId" type="InvokingIdType"/>
+      <xs:element name="iaSpecific" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Integration Agent specific information</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+          <xs:anyAttribute namespace="##any" processContents="lax"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <!-- Generated by WFL Processor at the end of the WFL process.
+         This is not the point at which the response message is sent, since processing may
+         continue after the response is sent.
+         Intended for INFO log type.
+    -->
+  <xs:complexType name="WflSummary">
+    <xs:annotation>
+      <xs:documentation>Summarizes WorkFlow Language Engine processing</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="wflId" type="WflIdType"/>
+      <xs:element name="completionStatus" type="CompletionStatus"/>
+      <xs:element name="processingLatency" type="Duration">
+        <xs:annotation>
+          <xs:documentation>
+              WFL engine latency consumed by this transaction.
+              This starts with the arrival of the incoming request from the receiving Input Server to the WFL engine and terminates with the completion
+              of processing assocaited with this request. It includes all time that the WFL engine is waiting for Invocation Agent to process an invoke
+              call and the time that the wfl engine is waiting for the Input Server to send a response.
+              It does not include the time that the Input Server is processing the incoming request before the WFL engine gets the request.
+              That time in in the inputServerSummary in the requestTime element.
+            </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="responseTime" type="Duration" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+              Response latency: how long the WFL engine has waited for Invocation Agent invokes to complete and the Input Server to send a response.
+              Subtracting this value from the processinglatency will give the total time consumed by the WFL engine only for this transaction.
+            </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="responseSize" type="xs:unsignedInt" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Size of the response content sent via the reply activity</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="WflDetails">
+    <xs:annotation>
+      <xs:documentation>Provides detailed information beyound the WflSummary for the run-time system.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="summary" type="WflDetailsSummary"/>
+      <xs:element name="receiveActivity" type="WflDetailsReceiveActivity"/>
+      <xs:element name="replyActivity" type="WflDetailsReplyActivity" minOccurs="0"/>
+      <xs:element name="invokeActivities" type="WflDetailsInvokeActivities" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="QosDetails">
+    <xs:annotation>
+      <xs:documentation>Provides qos information about each message processed by a qos policy.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="data" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation><![CDATA[
+
+  A list of name/value pairs from the invocation of the qos run-time.
+  This is not described by schema because we wanted a much flatter
+  structure to make it easier to query.
+
+  A built-in quantity like "aaaIdentity" is represented as:
+
+       <data name="aaaIdentity">smith</data>
+
+  Built-in names include (this is not an exhaustive list):
+                
+    general                   
+        policy
+        serviceLevel
+        userText
+        aaaPolicy
+
+    user id information
+        aaaIdentity
+        ipAddress
+
+    resource information
+        aaaResource
+        backendServiceInvocationUrl
+        etc.
+
+  A user-defined quantity like "purchase-order-value" is represented
+  as a name preceded with "_" (underscore).  The underscore distinguishes
+  the built-in name "aaaIdentity" from a user-defined name "aaaIdentity".
+
+      Example:
+
+         <data name="_purchase-order-value">12345.67</data>
+
+  Other data items describe the decisions made by the qos policy:
+
+    name               use
+    ====               ===
+
+    app                Application name.
+
+    policy             The name of the qos policy that is executing
+
+    serviceLevel       The name of the service level that was matched.
+                       Omitted if no service level was matched.
+
+    alertRule          The name of the (alert) rule of the service
+                       level that was matched. Omitted if no alert
+                       rule was matched. A service level may have
+                       one alert and one non-alert action
+
+    rule               The name of the (non-alert) rule of the service 
+                       level that was matched.  Omitted if no non-alert
+                       action was matched. A service level may have one
+                       alert and one non-alert action
+
+    action             If a non-alert action is selected, then the 
+                       type of action (or "none"):
+        
+                         "alert"
+                         "reject"
+                         "rateLimit"
+                         "throwWorkflowException"
+                         "defer"
+
+                       Do not confuse "action" with "status".  Action
+                       is the instruction specified in the rule. The
+	               "status" indicates what the rule actually did.
+
+                       For example, when action=rateLimit then the
+                       status may be "rejected" or "normal".  
+
+    threshold          If a rule is matched AND "rule effective
+                       until threshold" is specified, then the
+                       threshold value.  Otherwise omitted.
+
+    thresholdActive    If a rule is matched AND "rule effective
+                       is specified AND it is in effect then "1".
+                       Otherwise omitted.
+
+    deferPriority      If the action is defer AND the message is
+                       put on the defer queue, this number is the
+                       queue priority.
+
+    queueDepthExceeded If the action is defer AND the message
+                       queue is full, then "1".  Otherwise 
+                       omitted.
+
+    status             The result of the action.  See description
+                       of the status element (below).
+
+  An example of the output:
+
+    <data name="policy">standard</data>
+    <data name="aaaIdentity">smith</data>
+    <data name="soapAction">http://acme.com/stock-quote?symbol=intl</data>
+    <data name="_po-value">12345.67</data>
+    <data name="serviceLevel">gold</data>
+    <data name="rule"">cpu-utilization-exceeded</data>
+    <data name="action">reject</data>
+    <data name="status">rejected</data>
+
+  This information is not provided if the qos action fails for
+  other reasons (e.g. tracking record exhaustion).
+
+]]></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:string">
+              <xs:attribute name="name" type="xs:string" use="required"/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="policy" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+		The qos policy name.
+            </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="status" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[
+
+    This is a duplicate of the <data name="status" ... /> element
+    for use by the web interface.
+    
+    The result of the rule action (if any).  Possible values are:
+
+    "disabled"    The qos policy was disabled.
+
+    "normal"      No action was executed.
+
+    "rejected"    The message is rejected. This can occur for the following
+                  actions:
+
+			reject
+			rateLimit
+			throwWorkflowException
+			defer (if queue overflows)
+
+    "deferred"    Defer action executed.
+
+    "alert"       An alert action was executed.  This will not cause
+                  a new alert to appear if there was a previous alert
+		  from the same rule that is still "active".
+]]></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="WflDetailsSummary">
+    <xs:sequence>
+      <xs:element name="workflow">
+        <xs:annotation>
+          <xs:documentation>Identity the workflow that is running.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="appName" type="xs:string"/>
+            <xs:element name="appVersion" type="xs:string"/>
+            <xs:element name="program" type="Program" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="completionStatus" type="CompletionStatus"/>
+      <xs:element name="duration" type="Duration">
+        <xs:annotation>
+          <xs:documentation>Time in seconds from the workflow receving the message from the Input Server to the time the workflow finishes processing.  Does not include Input Server receive time or Input Server response time.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="WflDetailsReceiveActivity">
+    <xs:annotation>
+      <xs:documentation>Information about the received request.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="inputServer" type="xs:string"/>
+      <xs:element name="service" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="partnerLink" type="xs:string"/>
+            <xs:element name="operation" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="completionStatus" type="CompletionStatus"/>
+      <xs:element name="requestSize" type="xs:long"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="WflDetailsReplyActivity">
+    <xs:annotation>
+      <xs:documentation>Information about the reply activity.  Will be omitted when one-way request.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="completionStatus" type="CompletionStatus"/>
+      <xs:element name="responseSize" type="xs:long"/>
+      <xs:element name="latency" type="Duration"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="WflDetailsInvokeActivities">
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="invokeActivity"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="WflDetailsInvokeActivity">
+    <xs:annotation>
+      <xs:documentation>Information for each invoke operation.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="invocationAgent" type="xs:string" minOccurs="0"/>
+      <xs:element name="service" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="partnerLink" type="xs:string"/>
+            <xs:element name="operation" type="xs:string"/>
+            <xs:element name="endpointReference" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="completionStatus" type="CompletionStatus"/>
+      <xs:element name="requestSize" type="xs:long"/>
+      <xs:element name="responseSize" type="xs:long"/>
+      <xs:element name="latency" type="Duration">
+        <xs:annotation>
+          <xs:documentation>Time in seconds from the workflow passing the request to Invocation Agent to the time the workflow can resume processing.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <!-- Common header -->
+  <xs:complexType name="SubTransactionLogEntryHeader">
+    <xs:complexContent>
+      <xs:extension base="LogEntryHeader">
+        <xs:sequence>
+          <xs:annotation>
+            <xs:documentation>This sequence elements are restricted to sub-transaction log usage</xs:documentation>
+          </xs:annotation>
+          <!-- In addition to default log entry header, this log type should also include the following additional elements -->
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <!-- Added wrapper around the transaction. -->
+  <xs:complexType name="SubTransactionLogEntry">
+    <xs:annotation>
+      <xs:documentation>Sub-transaction Log entry</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="header" type="SubTransactionLogEntryHeader"/>
+      <xs:element name="body">
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="inputServerSummary" type="InputServerSummary"/>
+            <xs:element name="builtinSummary" type="BuiltinSummary"/>
+            <xs:element name="integrationAgentSummary" type="IntegrationAgentSummary"/>
+            <xs:element name="invocationAgentSummary" type="InvocationAgentSummary"/>
+            <xs:element name="wflSummary" type="WflSummary"/>
+            <xs:element name="wflDetails" type="WflDetails"/>
+            <xs:element name="qosDetails" type="QosDetails"/>
+            <xs:element name="aaaSummary" type="AuthenticationAuthorizationAuditSummary"/>
+            <xs:element name="piiSummary" type="PiiSummary"/>
+            <!-- should always br the last subentry -->
+            <xs:element name="wflStart" type="WflStart"/>
+            <xs:element name="aaaStart" type="AuthenticationAuthorizationAuditStart"/>
+            <xs:element name="piiStart" type="PiiStart"/>
+            <xs:element name="builtinStart" type="BuiltinStart"/>
+            <xs:element name="inputServerStart" type="InputServerStart"/>
+            <xs:element name="invocationAgentStart" type="InvocationAgentStart"/>
+            <xs:element name="integrationAgentStart" type="IntegrationAgentStart"/>
+            <!-- The following is a general xs:element that an application can send to the transaction log
+                                                        embedded within the transaction via XSLT extension functions, etc. 
+                                                -->
+            <xs:element name="user" type="User"/>
+            <xs:element name="transactionStart">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="time" type="xs:dateTime"/>
+                  <!-- A workflowName of UNSPECIFIED indicates classification to a workflow failed. -->
+                  <xs:element name="workflowName">
+                    <xs:simpleType>
+                      <xs:restriction base="xs:string">
+                        <xs:minLength value="1"/>
+                        <xs:maxLength value="256"/>
+                      </xs:restriction>
+                    </xs:simpleType>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <xs:complexType name="TransactionLogEntryHeader">
+    <xs:complexContent>
+      <xs:extension base="LogEntryHeader">
+        <xs:sequence>
+          <xs:annotation>
+            <xs:documentation>This sequence elements are restricted to sub-transaction log usage</xs:documentation>
+          </xs:annotation>
+          <!-- In addition to default log entry header, this log type should also include the following additional elements -->
+          <!-- uniquely identify each transaction -->
+          <!-- If for any reason a transaction log buffer must be flushed before it completion, 
+                 e.g., excessive size, then the TransId associated with the buffer being flushed should 
+                 be added to the continuation buffer with a continuation indicator.
+            -->
+          <xs:element name="transId" type="xs:unsignedLong">
+            <xs:annotation>
+              <xs:documentation>Uniquely identifies every transaction</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="clusterId" type="xs:string" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation>The soae name assigned to this cluster of nodes.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="node" type="xs:string" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation>Ths soae name assigned to this node of the cluster.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="continuationIndication" type="xs:boolean" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation>Indicate that this transaction log entry is a continuation of another earlier transaction log entry</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <!-- future hook for long running transactions that spans multiple independent exchanges 
+                 I assume that we would generate multiple transaction log entries that are bound together 
+                 with a CorrelationId that has the same value.
+            -->
+          <xs:element name="correlationId" type="xs:string" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation>Used to identify multiple transactions that have some correlation between them</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="TransactionLogEntry">
+    <xs:annotation>
+      <xs:documentation>Transaction Log entry</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="header" type="TransactionLogEntryHeader"/>
+      <xs:element name="body">
+        <xs:annotation>
+          <xs:documentation>Optional component generated entries related to this transaction</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="subEntry" type="SubTransactionLogEntry" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="completionTime" type="CompletionTime">
+        <xs:annotation>
+          <xs:documentation>Time that this transaction completed all processing</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="WflInstance">
+    <xs:restriction base="xs:token"/>
+  </xs:simpleType>
+  <xs:complexType name="Program">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="binding" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

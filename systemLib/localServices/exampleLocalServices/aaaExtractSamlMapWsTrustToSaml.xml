@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aaa:aaaPolicy xmlns:aaa="http://www.intel.com/soae/localService/aaaDefinition-2007a/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://www.intel.com/soae/localService/aaaDefinition-2007a/ ../aaa.xsd">
+  <identityProcessing>
+    <extractIdentity>
+      <nameFromSamlSubject>
+        <signatureInfo>
+          <signatureAcceptMethods><rsaWithSha384/><rsaWithSha1/><rsaWithSha256/><rsaWithSha512/></signatureAcceptMethods>
+          <digestAcceptMethod><sha1></sha1><sha256></sha256></digestAcceptMethod>
+          <canonicalAcceptMethod><C14N_exclusive></C14N_exclusive></canonicalAcceptMethod>
+          <authenticationPolicy>domain-A-authentication-policy</authenticationPolicy>
+        </signatureInfo>
+        <requiredSamlEntitiesAndValues>
+          <Issuer>Domain A STS</Issuer>
+          <SubjectConfirmationMethod>urn:oasis:names:tc:SAML:2.0:cm:holder-of-key</SubjectConfirmationMethod>
+          <expectedHolderOfKeyKeyInfo>X509Certificate</expectedHolderOfKeyKeyInfo>
+          <clientCredentialSource>bstFromVerifyOperation</clientCredentialSource>
+          <NotBeforeAndNotOnOrAfter>onlyCheckConditionsElement</NotBeforeAndNotOnOrAfter>
+        </requiredSamlEntitiesAndValues>
+      </nameFromSamlSubject>
+    </extractIdentity>
+    <mapIdentity removeExtractedIdentity="true">
+      <createTokenViaWsTrust>
+        <version>1.4</version>
+        <soapVersion>1.2</soapVersion>
+        <requestType>Issue</requestType>
+        <tokenType>SAML-v2.0</tokenType>
+        <rstFormat>RST</rstFormat>
+        <wsSecurityPolicyGroup>Domain-B-WsSecurity-Policy-Group</wsSecurityPolicyGroup>
+        <clientAuthenticationMethod>
+          <mechanism>Use_WS-Security_Policy_Group</mechanism>
+          <expectedTokenType>Saml_Assertion</expectedTokenType>
+          <source>
+            <samlAssertionFromWorkflow type="string">
+              <inputFromWorkflow>saml-assertion-from-preceding-AAA-action</inputFromWorkflow>
+            </samlAssertionFromWorkflow>
+          </source>
+        </clientAuthenticationMethod>
+        <toFieldPopulation>true</toFieldPopulation>
+      </createTokenViaWsTrust>
+    </mapIdentity>
+  </identityProcessing>
+  <resourceProcessing>
+    <authorizeResource>
+      <samlAssertionAuthorization>
+        <mustMatchAllNameValues>
+          <Authorization-Decision-Attrib>Permit</Authorization-Decision-Attrib>
+        </mustMatchAllNameValues>
+      </samlAssertionAuthorization>
+    </authorizeResource>
+  </resourceProcessing>
+</aaa:aaaPolicy>

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- edited with XMLSpy v2009 (http://www.altova.com) by douglas leduc (intel corporation) -->
+<xs:schema xmlns="http://www.intel.com/soae/localService/kerberosKDC-2009a/" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.intel.com/soae/localService/kerberosKDC-2009a/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="status">
+    <xs:complexType />
+  </xs:element>
+  <xs:simpleType name="ticket">
+    <xs:annotation>
+      <xs:documentation>The kerberos ticket.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="Certificate">
+    <xs:annotation>
+      <xs:documentation>The X509 Certificate.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="Principal">
+    <xs:annotation>
+      <xs:documentation>The Principal for the authentication.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="RealmName">
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:minLength value="1" />
+      <xs:maxLength value="256" />
+      <xs:pattern value="[-a-zA-Z0-9_\.]*" />
+      <!-- dash a-z A-Z 0-9 underscore period-->
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="kerberosKDCRequest">
+    <xs:annotation>
+      <xs:documentation>Comment describing your root element</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="credentials">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element minOccurs="0" name="principalPassword">
+                <xs:annotation>
+                  <xs:documentation>A principal and Password authentication credential.  Note the body of this element is the password.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute name="Principal" type="Principal" use="required" />
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+              <xs:element minOccurs="0" name="principalKeytab">
+                <xs:annotation>
+                  <xs:documentation>A principal and Keytab authentication credential.  Note the body of this element is the keytab</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute name="Principal" type="Principal" use="required" />
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+          <!-- constraint: this element only occurs for the request type 'simple' -->
+        </xs:element>
+        <xs:element minOccurs="0" name="realm" type="RealmName">
+          <xs:annotation>
+            <xs:documentation>The realm to find a KDC that this principal is to be authenticated.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element minOccurs="0" name="clientPrincipal" type="Principal">
+          <xs:annotation>
+            <xs:documentation>The principal of the client.</xs:documentation>
+          </xs:annotation>
+          <!-- constraint: This element only occurs for the request type 'S4U2self' -->
+        </xs:element>
+        <xs:element minOccurs="0" name="clientCertificate" type="Certificate">
+          <xs:annotation>
+            <xs:documentation>The X509 certificate of the client.</xs:documentation>
+          </xs:annotation>
+          <!-- constraint: This element only occurs for the request type 'S4U2self' -->
+        </xs:element>
+        <xs:element minOccurs="0" name="additionalTicket" type="ticket">
+          <xs:annotation>
+            <xs:documentation>The service ticket which has the client name and realm inforamtion.</xs:documentation>
+          </xs:annotation>
+          <!-- constraint: additionalTicket occurs only for the request type 'S4U2proxy' -->
+        </xs:element>
+        <xs:element minOccurs="0" name="kdcOptions">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element minOccurs="0" name="forwardable" />
+              <xs:element minOccurs="0" name="cnameInAddlTkt">
+                <xs:annotation>
+                  <xs:documentation>The kdc option 'cname-in-addl-tkt' which will be set in KRB_TGS_REQ message to request S4U2proxy functionality.</xs:documentation>
+                </xs:annotation>
+                <!-- constraint: cnameInAddlTkt occurs only for the request type 'S4U2proxy' -->
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element minOccurs="0" name="servicePrincipal" type="Principal">
+          <xs:annotation>
+            <xs:documentation>The principal of the service that the credential's prinical wants a kerberos service ticket from the KDC.</xs:documentation>
+          </xs:annotation>
+          <!-- constraint: servicePrincipal is required for the request type 'simple' and 'S4U2proxy' -->
+        </xs:element>
+        <xs:element default="600" name="serviceTicketDuration">
+          <xs:annotation>
+            <xs:documentation>The number of seconds that the service ticket will be valid.</xs:documentation>
+            <xs:appinfo>
+							<units>seconds</units>
+						</xs:appinfo>
+          </xs:annotation>
+          <xs:simpleType>
+            <xs:restriction base="xs:unsignedShort">
+              <xs:minInclusive value="1" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="type" use="optional">
+        <xs:annotation>
+          <xs:documentation>The Kerberos KDC reuqest type: simple, S4U2self (service for user to self) and S4U2proxy (service for user to proxy)</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="simple" />
+            <xs:enumeration value="S4U2self" />
+            <xs:enumeration value="S4U2proxy" />
+          </xs:restriction>
+        </xs:simpleType>
+        <!-- constraint: if the attribute doesn't occur, it assumes that the request type is 'simple' -->
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kerberosKDCResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ticket" type="ticket" />
+      </xs:sequence>
+      <xs:attribute name="responseCode" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="ok" />
+            <xs:enumeration value="error" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="message" type="xs:string" use="optional" />
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
